@@ -1,18 +1,52 @@
 # nextjs-expert
 
-Nòt referans rapid pou travay sou fwontyè Next.js pwojè a (App Router,
-TypeScript, Tailwind v4).
+Nòt referans pou travay sou fwontyè Next.js pwojè a (App Router, TypeScript
+strict, Tailwind v4). Konbine konvansyon pwojè a deja etabli ak bon pratik
+jeneral Next.js App Router.
+
+## ⚠️ Konfli ak dènye enstriksyon resevwa — pou revize ak itilizatè a
+
+Yon deskripsyon "Next.js 14+ expert" resevwa dènyèman mansyone kèk chwa ki
+**diferan** de sa pwojè a itilize kounye a. Yo pa aplike otomatikman — yo
+rete la kòm dwapo pou yon desizyon eksplisit:
+
+| Sijè | Pwojè a itilize kounye a | Sa dènye enstriksyon an mande |
+|---|---|---|
+| Vèsyon Next.js | **16.3.4** (gade `AGENTS.md` — API/konvansyon chanje, `proxy.ts` ranplase `middleware.ts`) | "14+" |
+| Sib aparèy | **Mobil-premye**, telefòn Android antre gam (gade `docs/DESIGN_SYSTEM.md`) | Tablet 10-pous, `1280x800` |
+| Konpozan UI | Tailwind sèl, pa gen shadcn/ui enstale | shadcn/ui |
+| PWA | Sèvis worker manyèl (`docs/PROMPTS/08-pwa.md` mansyone `next-pwa` kòm opsyon) | `next-pwa` |
+
+Si pwojè a dwe chanje pou vize tablet olye telefòn, oswa pou adopte
+shadcn/ui, se yon desizyon pwodwi/design ki merite konfimasyon eksplisit
+(li afekte `DESIGN_SYSTEM.md`, layout `(dashboard)/layout.tsx`, ak gwosè
+touch-target POS la) — pa yon swiv otomatik.
 
 ## Konvansyon pwojè a
 
 - Route groups: `(auth)` pou login/enskripsyon, `(dashboard)` pou aplikasyon
   prensipal la apre koneksyon (POS, pwodwi, kredi, rapò).
 - Kliyan Supabase: `src/lib/supabase/client.ts` (browser), `server.ts`
-  (Server Components / route handlers), `middleware.ts` (refresh sesyon).
+  (Server Components / route handlers), `middleware.ts` (helper refresh
+  sesyon, rele pa `src/proxy.ts` — fichye rasin Next.js 16 la, **pa**
+  `middleware.ts` nan rasin).
 - Tailwind v4 sèvi ak tokens CSS (`@theme` nan `src/app/globals.css`), pa
   gen `tailwind.config.ts` — ajoute nouvo koulè/font la.
-- Prefere Server Components pou lekti done; itilize Client Components
-  (`"use client"`) sèlman kote gen entèraksyon (POS cart, fòm) oswa Dexie.
+- Server Components pa default pou lekti done (Supabase dirèk, san
+  `useEffect`); Client Components (`"use client"`) sèlman kote gen
+  entèraksyon (POS cart, fòm, Dexie).
+
+## Bon pratik App Router pou swiv (toujou aplikab, kèlkeswa vèsyon/aparèy)
+
+- Chak route ki fè fetch done dwe gen yon `loading.tsx` (skeleton oswa
+  spinner) ak yon `error.tsx` (boundary) — okenn nan sa poko egziste nan
+  `(dashboard)/*` pwojè a; ajoute yo lè yon paj kòmanse fè vrè fetch
+  Supabase (`03-products.md` ale pi lwen, `06-reports.md`).
+- Route handlers (`src/app/api/*/route.ts`) pou operasyon sèvè-kote
+  (peman, envitasyon ekip) — jodi a poko gen okenn, y ap parèt nan
+  `07-payments.md`.
+- TypeScript strict mode deja aktive (`tsconfig.json` default create-next-app) —
+  pa febli l (`any`, `// @ts-ignore`) san yon rezon klè kòmante.
 
 ## Pyèj komen
 
@@ -23,6 +57,8 @@ TypeScript, Tailwind v4).
   yon hook.
 - Route handler ki rele API peman (MonCash/NatCash) toujou sèvè-kote — pa
   janm ekspoze kle sekrè yo nan yon Client Component.
+- Pa reyeskri `src/proxy.ts` tounen `middleware.ts` — Next.js 16 rejte ansyen
+  konvansyon an (gade `AGENTS.md` nan rasin pwojè a).
 
 ## Kòmand itil
 
