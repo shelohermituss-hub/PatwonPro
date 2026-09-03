@@ -1,0 +1,37 @@
+# moncash-natcash
+
+Nòt referans pou entegrasyon peman mobil Ayisyen yo.
+
+## MonCash (Digicel) — `src/lib/payments/moncash.ts`
+
+- OAuth2 client-credentials pou jwenn yon `access_token`, apre sa
+  `POST /v1/CreatePayment` ak `orderId` + `amount`, epi redirije kliyan an
+  bay paj peman MonCash (`Moncash-middleware/Payment/Redirect`).
+- Anviwònman: `sandbox.moncashbutton.digicelgroup.com` (tès) vs
+  `moncashbutton.digicelgroup.com` (pwodiksyon) — chwazi ak `MONCASH_ENV`.
+- Verifye estati yon peman apre redireksyon ak `GET /v1/RetrieveTransactionPayment`
+  (pa ankò enplemante — ajoute lè `07-payments.md` fèt).
+
+## NatCash (Natcom) — `src/lib/payments/natcash.ts`
+
+- API mwens dokimante piblikman pase MonCash; kliyan an entansyonèlman
+  senp e ap bezwen ajiste kont dokiman entegrasyon machann Natcom bay lè
+  yon kont machann disponib.
+- Egzije nimewo telefòn kliyan an (`customerPhone`) anplis `orderId` ak
+  `amount`.
+
+## Kle sekrè
+
+- `MONCASH_CLIENT_ID` / `MONCASH_CLIENT_SECRET` ak `NATCASH_CLIENT_ID` /
+  `NATCASH_CLIENT_SECRET` — sèlman nan `.env.local` (pa janm commit),
+  itilize sèlman nan kòd sèvè-kote (route handlers, pa Client Components).
+- Rejistre chak tantativ peman nan tab `payment_transactions` (gade
+  `docs/DATA_MODEL.md`) pou odit/rekonsilyasyon si yon webhook rate.
+
+## Flux tipik
+
+1. Kesye a chwazi `moncash`/`natcash` kòm mwayen peman nan POS la.
+2. Route handler kreye yon `payment_transactions` (`status = "pending"`),
+   rele API founisè a, epi retounen URL/referans peman an bay fwontyè a.
+3. Yon webhook (oswa yon verifikasyon manyèl) mete `status` ajou
+   (`success`/`failed`) epi, si siksè, mete `sales.payment_status = "paid"`.

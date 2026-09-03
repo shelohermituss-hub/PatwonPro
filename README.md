@@ -1,36 +1,39 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Jere Boutik Pro
 
-## Getting Started
+PWA pou ede ti boutik ak mwayen boutik an Ayiti jere envantè, vant (pwen
+vant), kredi kliyan, ak rapò — menm san entènèt.
 
-First, run the development server:
+## Estak
+
+Next.js (App Router) + TypeScript + Tailwind CSS · Dexie (offline-first) ·
+Supabase (Postgres, Auth, RLS) · MonCash & NatCash (peman mobil).
+
+## Kòmanse
 
 ```bash
+cp .env.local.example .env.local   # ranpli kle Supabase/MonCash/NatCash yo
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Louvri [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Dokimantasyon
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- [`docs/CLAUDE.md`](docs/CLAUDE.md) — pwen depa: kontèks pwojè a pou
+  travay ladan l ak yon asistan IA.
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — estrikti dosye, flux
+  senkronizasyon offline.
+- [`docs/DATA_MODEL.md`](docs/DATA_MODEL.md) — schema Supabase.
+- [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md) — palèt, tipografi,
+  konpozan.
+- [`docs/PROMPTS/`](docs/PROMPTS) — seri pwonpt (`01-setup` → `08-pwa`)
+  pou bati chak fonksyonalite etap pa etap.
 
-## Learn More
+## Kòmand
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run dev     # sèvè devlopman
+npm run build    # build pwodiksyon
+npm run lint      # ESLint
+```

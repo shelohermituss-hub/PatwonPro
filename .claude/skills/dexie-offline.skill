@@ -1,0 +1,33 @@
+# dexie-offline
+
+Nòt referans pou koòch offline-first la (Dexie / IndexedDB) ak
+senkronizasyon Supabase.
+
+## Estrikti
+
+- Schema Dexie: `src/lib/db/index.ts` (`JereBoutikDB`) — tab: `products`,
+  `categories`, `customers`, `sales`, `saleItems`, `creditPayments`.
+- Motè sync: `src/lib/sync/index.ts` — `syncPendingSales()` voye vant
+  `sync_status = "pending"` yo bay Supabase, ak `registerSyncListeners()`
+  ki koute evènman `online` nan navigatè a.
+
+## Prensip
+
+- **Sous verite lokal** pandan yon sesyon vant se Dexie; Supabase se sous
+  verite a long tèm. Chak `sale.id` se yon UUID **jenere lokalman**
+  (kliyan-kote) pou `upsert` sou Supabase toujou idanpotan (pa gen risk
+  double-anrejistreman si sync la eseye ankò).
+- `sync_status` egziste sèlman lokalman (Dexie) — kolòn sa a pa nan schema
+  Postgres, paske tout sa ki nan Supabase deja "synced" pa definisyon.
+- Aksyon ki afekte stòk (dekremante `stock_quantity`) dwe fèt kòm yon
+  operasyon atomik sou Supabase (RPC/fonksyon SQL `decrement`) pou evite
+  kondisyon kous ant plizyè aparèy k ap sync an menm tan.
+
+## Pyèj komen
+
+- Dexie sèvi ak `IndexedDB`, ki egziste sèlman nan navigatè a — pa jwenn
+  aksè `db` nan yon Server Component oswa route handler.
+- Toujou teste yon fonksyonalite POS nan mòd avyon (DevTools > Network >
+  Offline) anvan konsidere l fini.
+- Lè w ajoute yon nouvo tab Dexie, ogmante `this.version(n)` epi ekri yon
+  migrasyon pou done ki deja egziste lokalman sou aparèy itilizatè yo.
