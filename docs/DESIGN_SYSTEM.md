@@ -1,101 +1,178 @@
-# Sistèm Design — Jere Boutik
+# Design System — Jere Boutik
 
-Referans enplemantasyon pou UI/UX aplikasyon an. **`docs/CLAUDE.md`**
-("Tokens visuels", "Règles UI") se sous verite pou desizyon pwodwi/design
-— dosye sa a dekri kijan yo enplemante nan kòd la. Si yon ZIP design
-system (Figma export) ajoute nan `design-system/`, li ranplase/konplete
-detay enplemantasyon yo, pa règ yo.
+Référence d'implémentation pour l'UI de l'application. **`docs/CLAUDE.md`**
+("Tokens visuels", "Règles UI") reste la source de vérité produit/design —
+ce document formalise comment ces décisions sont (et doivent être)
+implémentées dans le code, en intégrant les enseignements de
+`docs/DESIGN_AUDIT.md` (analyse du kit visuel fourni). En cas de
+divergence, `docs/CLAUDE.md` gagne toujours.
 
-## Objektif design
+## Principes
 
-- **Tablèt-premye, peyizaj**: sib prensipal se yon tablèt Android 10 pous
-  an mòd peyizaj, rezolisyon `1280 × 800` — pa telefòn. Layout dashboard
-  la sèvi ak yon sidebar fiks (248px), pa yon tab bar anba.
-- **POS fintech premium, senp pou itilize**: parèt modèn/pro, men rete
-  fasil pou yon komèsan ki pa teknik — okenn mo teknik vizib, aksyon kle
-  yo eksplisit ("Konfime vant lan", "Anile", "Anrejistre").
-- **Kreyòl-premye**: tout tèks itilizatè-fasing an Kreyòl Ayisyen pa
-  default.
+- **Tablette d'abord, paysage** : cible 10 pouces, 1280×800. Le layout
+  dashboard utilise un sidebar fixe (248px), jamais une tab bar basse.
+- **POS fintech premium, simple d'usage** : moderne/pro à l'écran, mais
+  sans jargon technique visible, actions critiques explicites ("Konfime
+  vant lan", "Anile", "Anrejistre").
+- **Créole d'abord** : tout texte visible par le commerçant est en créole
+  haïtien par défaut (`docs/CLAUDE.md`).
+- **Le kit `design-system/` est une référence de layout, pas une source
+  de tokens** — voir `docs/DESIGN_AUDIT.md` §6 : ses couleurs/rayons sont
+  proches mais pas identiques à nos décisions déjà prises, et aucune
+  police n'est vérifiable depuis ses fichiers (texte vectorisé).
 
-## Tokens (enplemante nan `src/app/globals.css`)
+## Tokens — variables CSS (`src/app/globals.css`)
 
-| Rol | Chan CSS | Valè | Egzanp itilizasyon |
+Toutes les valeurs ci-dessous sont **déjà implémentées** dans `:root` /
+`.dark`. Ne pas les réinventer ailleurs dans le code — toujours passer
+par les classes Tailwind générées (`bg-primary`, `text-danger`, etc.).
+
+```css
+:root {
+  /* Marque */
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --warning: #f59e0b;
+  --success: #16a34a;
+  --danger: #dc2626;
+
+  /* Neutres produit (pas les neutres shadcn — voir plus bas) */
+  --surface: #ffffff;
+  --text-secondary: #64748b;
+  --background: #f8fafc;
+  --foreground: #0f172a;
+
+  /* Layout */
+  --sidebar-width: 248px;
+
+  /* shadcn/ui — scaffolding neutre, ne pas repointer vers la marque */
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --accent: oklch(0.97 0 0);           /* hover menu/select, PAS "warning" */
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: #dc2626;
+  --radius: 0.625rem;                   /* base — sm/xl/2xl.. dérivent de ça */
+}
+```
+
+| Token | Valeur | Rôle | Classe Tailwind |
 |---|---|---|---|
-| Fon app | `--background` | `#F8FAFC` | Fon paj |
-| Sifas/kat | `--surface` / `--card` | `#FFFFFF` | Kat, modal |
-| Prensipal | `--primary` | `#2563EB` (ble) | Boutonn aksyon, lyen aktif sidebar |
-| Prensipal hover | `--primary-hover` | `#1D4ED8` | Disponib kòm `--color-primary-hover` (Tailwind pa itilize l otomatikman — Button/varyant shadcn sèvi ak `hover:bg-primary/80` pa default) |
-| Siksè | `--success` | `#16A34A` | Vant konplete, peman resevwa |
-| Atansyon | `--warning` | `#F59E0B` | Alèt, badge stòk ba, sync annatant |
-| Danje | `--danger` | `#DC2626` | Sipresyon, dèt an reta |
-| Tèks prensipal | `--foreground` | `#0F172A` | |
-| Tèks segondè | `--text-secondary` | `#64748B` | |
-| Fwontyè | `--border` / `--input` | `#E2E8F0` | |
-| Rayon mwayen | `--radius-md` (`rounded-md`) | `12px` | |
-| Rayon gwo | `--radius-lg` (`rounded-lg`) | `16px` | |
-| Lajè sidebar | `--sidebar-width` (`w-sidebar`) | `248px` | |
-| Font | `--font-sans` | Plus Jakarta Sans | Chaje nan `src/app/layout.tsx` via `next/font/google` |
+| `--background` | `#F8FAFC` | Fond de page | `bg-background` |
+| `--surface` / `--card` | `#FFFFFF` | Cartes, modales | `bg-surface` / `bg-card` |
+| `--primary` | `#2563EB` | Boutons d'action, lien actif sidebar | `bg-primary` `text-primary` |
+| `--primary-hover` | `#1D4ED8` | Hover explicite (voir note ci-dessous) | `bg-primary-hover` |
+| `--success` | `#16A34A` | Vente complétée, paiement reçu | `bg-success` `text-success` |
+| `--warning` | `#F59E0B` | Alerte, badge stock bas, sync en attente | `bg-warning` `text-warning` |
+| `--danger` | `#DC2626` | Suppression, dette en retard | `bg-danger` `text-danger` |
+| `--foreground` | `#0F172A` | Texte principal | `text-foreground` |
+| `--text-secondary` | `#64748B` | Texte secondaire/label | `text-text-secondary` |
+| `--border` / `--input` | `#E2E8F0` | Bordures, contours de champs | `border-border` |
+| `--radius-md` | `12px` (littéral, pas dérivé de `--radius`) | Rayon "medium" | `rounded-md` |
+| `--radius-lg` | `16px` (littéral) | Rayon "large" | `rounded-lg` |
+| `--sidebar-width` | `248px` | Largeur du sidebar tablette | `w-sidebar` |
+| `--font-sans` | Plus Jakarta Sans | Police par défaut | `font-sans` (déjà appliqué sur `<html>`) |
 
-**⚠️ Atansyon `--accent`/`--accent-foreground`**: yo se tokens **NEYIT**
-propriyete shadcn/ui pou ilimine eleman entèraktif (hover sou
-`DropdownMenuItem`, `SelectItem`, elt.) — yo **PA** koulè "warning" a.
-Pa janm repoint yo bay `#F59E0B`, sa ta fè chak hover meni vin oranj vif.
-Koulè "warning" pwodwi a viv nan `--warning`/`--color-warning` separeman.
+**Note `--primary-hover`** : le token existe et est exposé
+(`--color-primary-hover` → `bg-primary-hover`/`hover:bg-primary-hover`),
+mais le composant `Button` shadcn par défaut utilise
+`hover:bg-primary/80` (opacité), pas ce token. Utiliser `--primary-hover`
+explicitement sur des composants **custom** (pas les composants shadcn
+générés) quand un hover exact `#1D4ED8` est requis.
 
-**⚠️ Chak `npx shadcn add`/`init` ka ekrase tokens sa yo** ak defo gri
-preset la. Verifye `git diff src/app/globals.css` apre chak kòmand
-shadcn epi restore valè tablo anwo a si sa rive (gen yon kòmantè nan tèt
-`:root` nan fichye a ki make sa).
+**⚠️ `--accent`/`--accent-foreground` ne sont PAS la couleur "warning".**
+Ce sont des tokens neutres shadcn/ui pour l'état hover/highlight des
+menus (`DropdownMenuItem`, `SelectItem`, `CommandItem`). Les repointer
+vers `#F59E0B` mettrait tous les survols de menu en orange vif. La
+couleur "warning" produit vit exclusivement dans `--warning`.
 
-Mòd fonse jere pa klas `.dark` sou `<html>` (konvansyon shadcn), pa
-`prefers-color-scheme` otomatik — pa gen bouton pou chanje mòd toujou;
-ajoute yon "theme toggle" si mòd fonse dwe aksesib itilizatè.
+**⚠️ `npx shadcn add`/`init` peut écraser ces tokens** avec les gris par
+défaut du preset Nova (déjà arrivé une fois lors de l'init). Toujours
+vérifier `git diff src/app/globals.css` après une commande shadcn et
+restaurer le tableau ci-dessus si nécessaire.
 
-## Konpozan (shadcn/ui)
+## Recommandations Tailwind
 
-`npx shadcn@latest init --defaults` deja kouri — Base UI (pa Radix),
-preset Nova, `components.json` nan rasin pwojè a. Yon gwo seri konpozan
-deja ajoute (`button`, `card`, `input`, `label`, `form`, `dialog`,
-`sheet`, `dropdown-menu`, `select`, `tabs`, `table`, `badge`, `tooltip`,
+- **Espacement** : pas d'échelle custom — utiliser l'échelle Tailwind
+  par défaut (base 4px : `p-1`=4px … `p-6`=24px). C'est déjà la
+  convention utilisée dans le code existant (`p-4`, `gap-3`, `px-2.5`).
+  L'audit visuel du kit (`DESIGN_AUDIT.md` §3) est cohérent avec ces
+  ordres de grandeur (padding carte ~24px = `p-6`, gouttière ~16–24px =
+  `gap-4`/`gap-6`).
+- **Rayons** : `rounded-sm`/`rounded-md`(12px)/`rounded-lg`(16px)/`rounded-xl`+
+  — ne pas utiliser de valeurs arbitraires (`rounded-[10px]`), toujours
+  passer par l'échelle nommée pour rester cohérent si les tokens changent.
+- **Couleurs** : jamais de couleur brute (`bg-blue-600`, `text-[#2563eb]`)
+  dans le code produit — toujours les tokens sémantiques (`bg-primary`,
+  `text-danger`). Les couleurs brutes Tailwind restent acceptables
+  uniquement dans les illustrations/graphiques Recharts si un dégradé
+  categorical est nécessaire.
+- **Taille tactile** : `size-12` (48px) minimum sur toute cible tactile
+  (`docs/CLAUDE.md` — 48×48px minimum), y compris les icônes cliquables
+  isolées (pas seulement les boutons avec texte).
+- **Dark mode** : piloté par la classe `.dark` sur `<html>` (convention
+  shadcn), **pas** par `prefers-color-scheme` automatique — pas de
+  bouton pour changer de mode pour l'instant ; ajouter un "theme toggle"
+  (`next-themes`, déjà une dépendance transitive via `sonner`/`calendar`)
+  si le mode sombre doit devenir accessible à l'utilisateur.
+
+## Composants (shadcn/ui)
+
+`npx shadcn@latest init --defaults` déjà exécuté — Base UI (pas Radix),
+preset Nova, `components.json` à la racine. Composants déjà ajoutés :
+`button`, `card`, `input`, `label`, `form`, `dialog`, `sheet`,
+`dropdown-menu`, `select`, `tabs`, `table`, `badge`, `tooltip`,
 `separator`, `avatar`, `command`, `popover`, `skeleton`, `alert-dialog`,
 `calendar`, `switch`, `checkbox`, `scroll-area`, `progress`, `sonner`,
-`textarea`, `input-group`) — gade `src/components/ui/`. Sèvi ak `npx
-shadcn@latest add <component>` pou ajoute lòt, olye ekri markup HTML
-brit — gade skill `shadcn` (`.claude/skills/shadcn`) pou règ konpozisyon.
+`textarea`, `input-group` — voir `src/components/ui/`. Utiliser `npx
+shadcn@latest add <component>` pour en ajouter d'autres plutôt que
+d'écrire du markup brut — voir le skill `shadcn`
+(`.claude/skills/shadcn`) pour les règles de composition, et
+`docs/UI_COMPONENT_INVENTORY.md` pour la liste des composants restant à
+construire/adapter pour Jere Boutik spécifiquement.
 
-Tout ikòn se **Lucide React** (`lucide-react`, deja enstale) — pa janm
-emoji kòm ikòn entèfas.
+Toutes les icônes sont **Lucide React** (`lucide-react`, déjà installé)
+— jamais d'emoji comme icône d'interface.
 
-## Konpozan kle
-
-- **Boutonn gwo aksyon** (`Konfime vant lan`, `Ajoute nan panye`) — plen koulè `primary`, sib tach >= 48×48px.
-- **Kat pwodwi** (grid POS) — imaj + non + pri, tap pou ajoute nan panye.
-- **Badge estati** — `Peye` (vèt), `Kredi` (`warning`), `Anreta` (wouj).
-- **Endikatè sync** — `SyncStatusBadge` (`src/components/SyncStatusBadge.tsx`), monte nan sidebar la, montre `Anliy · Tout bagay senkwonize` / `Ap senkwonize · N aksyon` / `Offline · N aksyon annatant`.
-- **Sheet, pa modal, pou tach long**: `AlertDialog`/`Dialog` pou konfimasyon kout; `Sheet` (panno lateral) pou fòm/detay ki pran plis espas sou tablèt.
-- Chak ekran done dwe gen 4 eta: loading, vid (empty), erè, ak offline.
+**Écart assumé vs le kit `design-system/`** : le kit utilise des champs
+en soulignement simple (voir `DESIGN_AUDIT.md` §4) ; on garde les inputs
+encadrés par défaut de shadcn — meilleure affordance tactile et état
+focus plus visible sur tablette.
 
 ## Layout
 
-- **Sidebar tablèt fiks** (`(dashboard)/layout.tsx`): `w-sidebar` (248px),
-  lojo + lis modil (Tablo Bò, Pwen Vant, Pwodwi, Antre Stòk, Kredi, Rapò,
-  Abònman, Paramèt) chak ak yon ikòn Lucide, `SyncStatusBadge` anba l.
-  Lyen aktif la make ak `bg-primary`.
-- **`(admin)` separe**: wòl `platform_admin` pa gen `store_id`, donk li
-  pa antre nan `(dashboard)` la (ki toujou sipoze yon boutik) — li gen
-  pwòp seksyon (`(admin)/admin`) pou jesyon abònman/aparèy/sipò atravè
-  tout boutik.
+- **Sidebar tablette fixe** (`(dashboard)/layout.tsx`) : `w-sidebar`
+  (248px), logo + liste de modules (Tablo Bò, Pwen Vant, Pwodwi, Antre
+  Stòk, Kredi, Rapò, Abònman, Paramèt) chacun avec une icône Lucide,
+  `SyncStatusBadge` en bas. Le lien actif est marqué par `bg-primary`.
+  **Écart assumé vs le kit** : celui-ci utilise un rail icône-seule
+  (~72–84px) ; on garde le sidebar labellisé (248px), plus lisible pour
+  des commerçants non-techniques — voir `DESIGN_AUDIT.md` §6.
+- **`(admin)` séparé** : le rôle `platform_admin` n'a pas de `store_id`,
+  donc il n'entre pas dans `(dashboard)` (toujours scopé à une boutique)
+  — il a sa propre section (`(admin)/admin`) pour la gestion
+  abonnement/appareils/support à travers toutes les boutiques.
 
-## Aksesibilite
+## Accessibilité
 
-- Kontras minimòm AA (WCAG) ant tèks ak fon.
-- Tout ikòn aksyon dwe gen yon `aria-label` an Kreyòl.
-- Navigasyon klavye ak eta `focus-visible` sou tout eleman entèraktif.
+- Contraste minimum AA (WCAG) entre texte et fond.
+- Toute icône d'action doit avoir un `aria-label` en créole.
+- Navigation clavier avec état `focus-visible` sur tout élément
+  interactif.
+- Voir `docs/UI_RULES.md` pour les règles détaillées (tablette,
+  responsive, offline).
 
 ## `design-system/`
 
-Lè yon ekspò Figma (tokens, konpozan, ikòn) disponib, dekonprese l nan `design-system/` epi:
-1. Mete tokens koulè/tipografi yo nan blòk `@theme`/`:root` nan
-   `src/app/globals.css` (Tailwind v4 — pa gen `tailwind.config.ts`).
-2. Enpòte ikòn/asset SVG yo nan `src/components/icons/` (oswa itilize Lucide dirèkteman si ekspò a matche).
-3. Aliyen dosye sa a ak `docs/CLAUDE.md` si vre valè yo diferan de pwen depa anwo a.
+Le contenu actuel est un kit UI SaaS générique (voir
+`docs/DESIGN_AUDIT.md`) — à utiliser comme référence de layout/patterns,
+pas comme source de tokens exacts. Si un nouvel export plus ciblé
+Jere Boutik est ajouté :
+1. Le décompresser directement dans `design-system/` (aplatir tout
+   dossier intermédiaire sans nom venant du zip).
+2. S'il contient de vrais tokens (JSON/CSS), les reporter dans
+   `src/app/globals.css` (`:root`/`@theme`) — **vérifier d'abord contre
+   `docs/CLAUDE.md`**, qui reste la source de vérité produit.
+3. Reporter les icônes/assets SVG utiles dans `src/components/icons/`
+   (ou utiliser Lucide directement si l'export correspond).
+4. Mettre à jour ce document et `docs/DESIGN_AUDIT.md` si les vraies
+   valeurs diffèrent de ce qui précède.
