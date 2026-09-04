@@ -1,41 +1,131 @@
-# Gid pou Claude — Jere Boutik Pro
+# Jere Boutik — Instructions de projet
 
-Dokiman sa a bay Claude (oswa nenpòt asistan IA) kontèks pou travay sou pwojè a. Li li ansanm ak `ARCHITECTURE.md`, `DATA_MODEL.md`, `DESIGN_SYSTEM.md`, ak `PROMPTS/`.
+## Produit
 
-## Kisa pwojè a ye
+Jere Boutik est une application PWA premium de gestion de ventes, stock, crédits clients et paiements mobile money pour petites boutiques en Haïti.
 
-**Jere Boutik Pro** se yon PWA pou ti boutik ak mwayen boutik an Ayiti jere envantè yo, fè vant (POS), swiv kredi kliyan, ak wè rapò — menm san entènèt.
+L'application est principalement utilisée sur une tablette Android 10 pouces en mode paysage, résolution cible 1280 × 800.
 
-## Lang
+L'interface doit paraître comme un POS fintech moderne et premium, mais rester très facile à utiliser par des commerçants non techniques.
 
-- Tout kontni itilizatè-fasing (UI, mesaj erè, non chan) an **Kreyòl Ayisyen**.
-- Kòd (non varyab, fonksyon, tab, kòmantè kòd) an **Anglè**, konvansyon estanda endistri a.
-- Dokiman entèn (`docs/`) an Kreyòl, pou ekip lokal la ka kontribye fasil.
+## Utilisateurs
 
-## Fason pou travay sou pwojè a
+- owner : propriétaire de boutique, accès complet.
+- employee : vendeur, accès limité aux ventes et crédits.
+- platform_admin : équipe Jere Boutik, gère abonnements, appareils, support et comptes.
 
-1. **Swiv `PROMPTS/`** — chak dosye (`01-setup.md` → `08-pwa.md`) reprezante yon etap bati aplikasyon an. Fè yo nan lòd, chak youn depann sou sa ki anvan an.
-2. **Respekte `ARCHITECTURE.md`** pou estrikti dosye ak flux offline-sync.
-3. **Respekte `DATA_MODEL.md`** pou non tab/chan lè w ap ekri migrasyon SQL oswa tip TypeScript.
-4. **Respekte `DESIGN_SYSTEM.md`** pou koulè, konpozan, ak layout — sof si `design-system/` gen yon vèsyon plis presi (Figma export).
+## Stack obligatoire
 
-## Règ jeneral
+- Next.js avec App Router.
+- TypeScript en strict mode.
+- Tailwind CSS.
+- shadcn/ui.
+- Lucide React pour toutes les icônes.
+- Supabase PostgreSQL, Auth, Storage et Row Level Security.
+- React Hook Form + Zod pour tous les formulaires.
+- Dexie.js + IndexedDB pour les données offline.
+- Recharts pour les graphiques.
+- PWA avec manifest et service worker.
 
-- Pa janm ekspoze kle sekrè (Supabase service role, kle API MonCash/NatCash) nan kòd fwontyè oswa nan repo a — sèvi ak varyab anviwònman (`.env.local`, sekrè Vercel/Supabase).
-- Tout tab Supabase ki gen `store_id` DWE gen yon politik RLS anvan yo itilize an pwodiksyon.
-- Nenpòt fonksyonalite POS dwe teste nan mòd offline (koupe rezo, verifye done yo rete disponib e yo senkronize apre).
-- Sèvi ak `numeric(12,2)` pou tout kolòn lajan; pa janm itilize `float`.
-- Kòmantè kòd sèlman lè yon rezon ki pa evidan bezwen eksplike (yon workaround, yon kontrent API peman, elt.) — pa dekri sa kòd la fè deja klèman.
+## Skills
 
-## Kòmand itil
+Toujours utiliser les skills disponibles quand ils correspondent au travail :
 
-```bash
-npm run dev        # Sèvè devlopman lokal
-npm run build       # Build pwodiksyon
-npm run lint         # ESLint
-npx supabase db push # Aplike migrasyon sou pwojè Supabase ki konfigire a
-```
+- ui-ux-pro-max : pour toute décision UI, UX, wireframe, design system, palette, typographie, flows ou responsive design.
+- frontend-design : pour créer ou améliorer les écrans et composants frontend.
+- shadcn : pour installer, sélectionner ou personnaliser un composant shadcn/ui.
+- improve : pour auditer et améliorer une page ou un composant existant (installé depuis `shadcn/improve`).
 
-## Pwochen etap
+Avant toute nouvelle interface importante :
+1. Lire `/design-system/`.
+2. Inspecter les composants existants.
+3. Réutiliser les tokens, patterns et composants avant d'en créer de nouveaux.
+4. Présenter un bref plan de fichiers à modifier.
+5. Implémenter seulement après validation du plan si le changement est important.
 
-Gade `docs/PROMPTS/01-setup.md` pou detay konfigirasyon inisyal, epi kontinye ak `02-auth.md`, `03-products.md`, elatriye.
+## Règles UI
+
+- Langue par défaut : créole haïtien.
+- Devise principale : HTG, format `12 500 HTG`.
+- Aucun mot technique visible au commerçant.
+- Cibles tactiles : minimum 48 × 48 px.
+- Les boutons d'action critique doivent être explicites : "Konfime vant lan", "Anile", "Anrejistre".
+- Ne jamais utiliser d'emoji comme icônes d'interface ; utiliser Lucide React.
+- Ne jamais employer un dashboard générique ou des gradients excessifs.
+- Ne pas surcharger les écrans : priorité aux actions et chiffres importants.
+- Éviter les modales pour les tâches longues ; utiliser un `Sheet` latéral sur tablette.
+- Inclure les états loading, empty, error et offline pour chaque écran de données.
+- Accessibilité : contrastes lisibles, labels, focus states et navigation clavier.
+
+## Tokens visuels
+
+- App background : `#F8FAFC`.
+- Surface/card : `#FFFFFF`.
+- Primary : `#2563EB`.
+- Primary hover : `#1D4ED8`.
+- Success : `#16A34A`.
+- Warning : `#F59E0B`.
+- Danger : `#DC2626`.
+- Main text : `#0F172A`.
+- Muted text : `#64748B`.
+- Border : `#E2E8F0`.
+- Radius large : 16px.
+- Radius medium : 12px.
+- Sidebar tablette : 248px.
+- Font : Inter ou Plus Jakarta Sans.
+
+## Modules produit
+
+1. Tableau de bord.
+2. Point de vente : ventes cash, MonCash, NatCash, crédit.
+3. Produits et stock.
+4. Entrées de stock et ajustements.
+5. Crédits clients et remboursements.
+6. Rapports.
+7. Paramètres de boutique et employés.
+8. Abonnement, tablettes et support.
+9. Synchronisation offline-first.
+
+## Architecture offline
+
+- Toute action métier doit d'abord être persistée dans IndexedDB.
+- Ajouter ensuite une opération à la sync queue.
+- Synchroniser avec Supabase au retour du réseau.
+- Les ventes cash doivent fonctionner entièrement hors ligne.
+- Les paiements MonCash et NatCash ne doivent être confirmés qu'après webhook serveur validé.
+- Afficher constamment l'état réseau et sync :
+  - Online · Synced il y a X min.
+  - Offline · X actions en attente.
+  - Syncing · X actions en cours.
+
+## Paiements
+
+- Ne jamais marquer un paiement MonCash ou NatCash comme payé à partir du frontend seul.
+- Les confirmations viennent d'un webhook signé et vérifié côté serveur.
+- Stocker le provider, le transaction ID, le montant, le statut, les timestamps et l'événement brut sécurisé.
+- Prévoir les états `pending`, `paid`, `failed`, `cancelled`, `expired`.
+
+## Convention de code
+
+- Composants : PascalCase.
+- Hooks : `useXxx`.
+- Schémas Zod : `xxxSchema`.
+- Tables Supabase : snake_case.
+- Routes API : kebab-case.
+- Toutes les dates sont stockées UTC, puis affichées dans le fuseau local.
+- Ajouter des commentaires uniquement pour documenter une décision complexe.
+- Écrire des composants petits et réutilisables.
+- Ne pas utiliser `any`.
+- Exécuter lint et typecheck avant de considérer une tâche terminée.
+
+## Définition of done
+
+Une tâche est terminée seulement si :
+1. Elle respecte le design system ZIP.
+2. Les états loading, error et empty existent.
+3. Les formulaires valident avec Zod.
+4. Les types TypeScript sont corrects.
+5. `npm run lint` passe.
+6. `npm run typecheck` passe.
+7. Le comportement tablette 1280 × 800 a été vérifié.
+8. Les textes sont en créole haïtien.
