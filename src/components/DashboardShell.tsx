@@ -14,6 +14,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { SyncStatusBadge } from "@/components/SyncStatusBadge";
+import { InstallPrompt } from "@/components/InstallPrompt";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import type { Profile } from "@/types";
@@ -106,7 +107,10 @@ export function DashboardShell({
           <SyncStatusBadge />
         </div>
       </aside>
-      <main className="min-h-0 flex-1 overflow-y-auto">{children}</main>
+      <div className="flex min-h-0 flex-1 flex-col">
+        <InstallPrompt />
+        <main className="min-h-0 flex-1 overflow-y-auto">{children}</main>
+      </div>
     </div>
   );
 }
