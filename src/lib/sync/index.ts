@@ -1,13 +1,19 @@
 import { syncPendingSales } from "./sales";
 import { syncPendingProducts } from "./products";
+import { syncPendingCreditPayments } from "./creditPayments";
 import { BACKGROUND_INTERVAL_MS } from "./backoff";
 
 export { syncPendingSales } from "./sales";
 export { syncPendingProducts, pullProducts } from "./products";
 export { pullCustomers } from "./customers";
+export { syncPendingCreditPayments, pullCreditPayments } from "./creditPayments";
 
 async function syncAllPending() {
-  await Promise.all([syncPendingSales(), syncPendingProducts()]);
+  await Promise.all([
+    syncPendingSales(),
+    syncPendingProducts(),
+    syncPendingCreditPayments(),
+  ]);
 }
 
 /**

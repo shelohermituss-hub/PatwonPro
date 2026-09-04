@@ -40,6 +40,13 @@ export class JereBoutikDB extends Dexie {
     this.version(2).stores({
       products: "id, store_id, category_id, name, sku, is_active, sync_status",
     });
+
+    // v3: repayments (docs/PROMPTS/05-credits.md) are recorded offline and
+    // pushed the same way as sales/products — indexed sync_status so the
+    // sync engine can find pending rows.
+    this.version(3).stores({
+      creditPayments: "id, store_id, customer_id, sale_id, created_at, sync_status",
+    });
   }
 }
 

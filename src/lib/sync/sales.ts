@@ -26,9 +26,10 @@ export async function syncPendingSales() {
     const { sync_status, sync_attempts, next_sync_at, ...saleRecord } = sale;
 
     const { error: saleError } = await supabase.from("sales").upsert(saleRecord);
-    const { error: itemsError } = saleError
-      ? { error: saleError }
-      : await supabase.from("sale_items").upsert(items);
+    const { error: itemsError } =
+      saleError || items.length === 0
+        ? { error: saleError }
+        : await supabase.from("sale_items").upsert(items);
 
     if (saleError || itemsError) {
       failed += 1;
