@@ -15,6 +15,7 @@ const QUEUE_LABELS = [
   { key: "sales", label: "Vant" },
   { key: "products", label: "Pwodwi" },
   { key: "creditPayments", label: "Peman kredi" },
+  { key: "stockEntries", label: "Antre stòk" },
 ] as const;
 
 /**

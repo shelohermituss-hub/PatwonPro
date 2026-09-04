@@ -6,6 +6,7 @@ import type {
   Product,
   Sale,
   SaleItem,
+  StockEntry,
 } from "@/types";
 
 /**
@@ -21,6 +22,7 @@ export class JereBoutikDB extends Dexie {
   sales!: EntityTable<Sale, "id">;
   saleItems!: EntityTable<SaleItem, "id">;
   creditPayments!: EntityTable<CreditPayment, "id">;
+  stockEntries!: EntityTable<StockEntry, "id">;
 
   constructor() {
     super("patwonpro");
@@ -46,6 +48,13 @@ export class JereBoutikDB extends Dexie {
     // sync engine can find pending rows.
     this.version(3).stores({
       creditPayments: "id, store_id, customer_id, sale_id, created_at, sync_status",
+    });
+
+    // v4: Antre Stòk (docs/CLAUDE.md modil #4) — restock/correction/
+    // adjustment entries, recorded offline the same way credit payments
+    // are (docs/PROMPTS/05-credits.md pattern reused here).
+    this.version(4).stores({
+      stockEntries: "id, store_id, product_id, sync_status, created_at",
     });
   }
 }

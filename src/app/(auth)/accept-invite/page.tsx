@@ -1,8 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoaderCircle } from "lucide-react";
@@ -12,54 +11,58 @@ import {
   Field,
   FieldGroup,
   FieldLabel,
+  FieldDescription,
   FieldError,
 } from "@/components/ui/field";
 import { createClient } from "@/lib/supabase/client";
-import { loginSchema, type LoginInput } from "@/lib/validations/auth";
+import { acceptInviteSchema, type AcceptInviteInput } from "@/lib/validations/auth";
 
-export default function LoginPage() {
+export default function AcceptInvitePage() {
   return (
     <Suspense>
-      <LoginForm />
+      <AcceptInviteForm />
     </Suspense>
   );
 }
 
-function LoginForm() {
+function AcceptInviteForm() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [formError, setFormError] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<LoginInput>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
+  } = useForm<AcceptInviteInput>({
+    resolver: zodResolver(acceptInviteSchema),
+    defaultValues: { fullName: "", password: "" },
   });
 
-  async function onSubmit(values: LoginInput) {
+  async function onSubmit(values: AcceptInviteInput) {
     setFormError(null);
     const supabase = createClient();
-    const { data, error } = await supabase.auth.signInWithPassword(values);
 
-    if (error || !data.user) {
-      setFormError("Imèl oswa modpas la pa kòrèk.");
+    const { error: passwordError } = await supabase.auth.updateUser({
+      password: values.password,
+    });
+
+    if (passwordError) {
+      setFormError("Nou pa t ka konfigire modpas la. Eseye ankò.");
       return;
     }
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", data.user.id)
-      .maybeSingle();
+    const { error: rpcError } = await supabase.rpc("accept_employee_invite", {
+      employee_full_name: values.fullName,
+    });
 
-    const next =
-      profile?.role === "platform_admin"
-        ? "/admin"
-        : searchParams.get("next") || "/dashboard";
-    router.push(next);
+    if (rpcError) {
+      setFormError(
+        "Envitasyon sa a pa valid, oswa li ekspire. Kontakte owner boutik ou.",
+      );
+      return;
+    }
+
+    router.push("/dashboard");
     router.refresh();
   }
 
@@ -67,34 +70,36 @@ function LoginForm() {
     <form onSubmit={handleSubmit(onSubmit)} noValidate>
       <FieldGroup>
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-extrabold text-foreground">Konekte</h1>
+          <h1 className="text-2xl font-extrabold text-foreground">
+            Byenveni!
+          </h1>
           <p className="text-sm text-text-secondary">
-            Antre nan kont boutik ou.
+            Fini konfigirasyon kont ou pou kòmanse travay.
           </p>
         </div>
 
-        <Field data-invalid={!!errors.email || undefined}>
-          <FieldLabel htmlFor="email">Imèl</FieldLabel>
+        <Field data-invalid={!!errors.fullName || undefined}>
+          <FieldLabel htmlFor="fullName">Non ou</FieldLabel>
           <Input
-            id="email"
-            type="email"
-            autoComplete="email"
-            placeholder="ou@boutikou.com"
-            aria-invalid={!!errors.email}
-            {...register("email")}
+            id="fullName"
+            autoComplete="name"
+            placeholder="Marie Joseph"
+            aria-invalid={!!errors.fullName}
+            {...register("fullName")}
           />
-          <FieldError errors={[errors.email]} />
+          <FieldError errors={[errors.fullName]} />
         </Field>
 
         <Field data-invalid={!!errors.password || undefined}>
-          <FieldLabel htmlFor="password">Modpas</FieldLabel>
+          <FieldLabel htmlFor="password">Chwazi yon modpas</FieldLabel>
           <Input
             id="password"
             type="password"
-            autoComplete="current-password"
+            autoComplete="new-password"
             aria-invalid={!!errors.password}
             {...register("password")}
           />
+          <FieldDescription>Omwen 8 karaktè.</FieldDescription>
           <FieldError errors={[errors.password]} />
         </Field>
 
@@ -112,15 +117,8 @@ function LoginForm() {
               aria-hidden
             />
           )}
-          Konekte
+          Kòmanse
         </Button>
-
-        <p className="text-center text-sm text-text-secondary">
-          Ou pa gen kont?{" "}
-          <Link href="/register" className="font-medium text-primary hover:underline">
-            Kreye yon boutik
-          </Link>
-        </p>
       </FieldGroup>
     </form>
   );

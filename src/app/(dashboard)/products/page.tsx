@@ -7,6 +7,7 @@ import { Plus, Search, PackageX, TriangleAlert, MoreVertical } from "lucide-reac
 import { db } from "@/lib/db";
 import { pullProducts } from "@/lib/sync/products";
 import { useCurrentProfile } from "@/hooks/useCurrentProfile";
+import { isOwner } from "@/lib/auth/roles";
 import { formatCurrency } from "@/lib/format";
 import { StockBadge } from "@/components/StockBadge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -78,10 +79,20 @@ export default function ProductsPage() {
           <h1 className="text-2xl font-extrabold text-foreground">Pwodwi</h1>
           <p className="text-text-secondary">Jere envantè boutik ou.</p>
         </div>
-        <Link href="/products/new" className={cn(buttonVariants(), "min-h-12")}>
-          <Plus data-icon="inline-start" aria-hidden />
-          Ajoute Pwodwi
-        </Link>
+        {isOwner(profile) && (
+          <div className="flex items-center gap-2">
+            <Link
+              href="/products/categories"
+              className={cn(buttonVariants({ variant: "outline" }), "min-h-12")}
+            >
+              Kategori
+            </Link>
+            <Link href="/products/new" className={cn(buttonVariants(), "min-h-12")}>
+              <Plus data-icon="inline-start" aria-hidden />
+              Ajoute Pwodwi
+            </Link>
+          </div>
+        )}
       </div>
 
       {pullError && (
@@ -164,7 +175,7 @@ export default function ProductsPage() {
                 : "Ajoute premye pwodwi ou pou kòmanse vann."}
             </p>
           </div>
-          {(!products || products.length === 0) && (
+          {isOwner(profile) && (!products || products.length === 0) && (
             <Link
               href="/products/new"
               className={cn(buttonVariants(), "mt-2 min-h-12")}
@@ -216,29 +227,31 @@ export default function ProductsPage() {
                     />
                   </TableCell>
                   <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger
-                        render={
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            aria-label={`Aksyon pou ${product.name}`}
-                          />
-                        }
-                      >
-                        <MoreVertical className="size-4" aria-hidden />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuGroup>
-                          <DropdownMenuItem
-                            render={<Link href={`/products/${product.id}/edit`} />}
-                          >
-                            Modifye
-                          </DropdownMenuItem>
-                        </DropdownMenuGroup>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    {isOwner(profile) && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger
+                          render={
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              aria-label={`Aksyon pou ${product.name}`}
+                            />
+                          }
+                        >
+                          <MoreVertical className="size-4" aria-hidden />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuGroup>
+                            <DropdownMenuItem
+                              render={<Link href={`/products/${product.id}/edit`} />}
+                            >
+                              Modifye
+                            </DropdownMenuItem>
+                          </DropdownMenuGroup>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}

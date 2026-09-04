@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/supabase/profile";
 import { isOwner } from "@/lib/auth/roles";
-import { ProductForm } from "@/components/ProductForm";
+import { CategoriesManager } from "@/components/CategoriesManager";
 
-export default async function NewProductPage() {
+export default async function CategoriesPage() {
   const profile = await getCurrentProfile();
 
   if (!isOwner(profile)) {
@@ -13,16 +13,13 @@ export default async function NewProductPage() {
   return (
     <div className="flex flex-col gap-6 p-6">
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-extrabold text-foreground">
-          Ajoute Pwodwi
-        </h1>
+        <h1 className="text-2xl font-extrabold text-foreground">Kategori</h1>
         <p className="text-text-secondary">
-          Antre detay pwodwi a. Li ap disponib nan POS la imedyatman, menm
-          san entènèt.
+          Jere kategori pwodwi boutik ou.
         </p>
       </div>
 
-      <ProductForm />
+      <CategoriesManager />
     </div>
   );
 }

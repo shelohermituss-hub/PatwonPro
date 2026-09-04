@@ -8,9 +8,16 @@ export interface PendingSyncSummary {
   sales: number;
   products: number;
   creditPayments: number;
+  stockEntries: number;
 }
 
-const EMPTY: PendingSyncSummary = { total: 0, sales: 0, products: 0, creditPayments: 0 };
+const EMPTY: PendingSyncSummary = {
+  total: 0,
+  sales: 0,
+  products: 0,
+  creditPayments: 0,
+  stockEntries: 0,
+};
 
 /**
  * Breakdown of locally-recorded rows that haven't reached Supabase yet,
@@ -20,12 +27,19 @@ const EMPTY: PendingSyncSummary = { total: 0, sales: 0, products: 0, creditPayme
 export function usePendingSyncSummary(): PendingSyncSummary {
   return (
     useLiveQuery(async () => {
-      const [sales, products, creditPayments] = await Promise.all([
+      const [sales, products, creditPayments, stockEntries] = await Promise.all([
         db.sales.where("sync_status").equals("pending").count(),
         db.products.where("sync_status").equals("pending").count(),
         db.creditPayments.where("sync_status").equals("pending").count(),
+        db.stockEntries.where("sync_status").equals("pending").count(),
       ]);
-      return { total: sales + products + creditPayments, sales, products, creditPayments };
+      return {
+        total: sales + products + creditPayments + stockEntries,
+        sales,
+        products,
+        creditPayments,
+        stockEntries,
+      };
     }, []) ?? EMPTY
   );
 }

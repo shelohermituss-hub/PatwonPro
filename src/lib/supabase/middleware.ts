@@ -49,6 +49,13 @@ export async function updateSession(request: NextRequest) {
     return response;
   }
 
+  // /auth/callback exchanges an invite/magic-link code for a session —
+  // there's no session yet when the request arrives, so it must stay
+  // reachable even though every other non-public path requires one.
+  if (pathname.startsWith("/auth/")) {
+    return response;
+  }
+
   if (!user && !PUBLIC_PATHS.has(pathname)) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";

@@ -16,6 +16,8 @@ export type SupportTicketStatus = "open" | "in_progress" | "resolved" | "closed"
 
 export type SyncStatus = "pending" | "synced";
 
+export type StockEntryType = "restock" | "correction" | "adjustment";
+
 export interface Store {
   id: string;
   name: string;
@@ -117,6 +119,24 @@ export interface CreditPayment {
   /** Dexie-only bookkeeping for retry backoff — stripped before upload. */
   sync_attempts?: number;
   /** Dexie-only: ISO timestamp; sync engine skips this payment until then. */
+  next_sync_at?: string | null;
+  created_at: string;
+}
+
+export interface StockEntry {
+  id: string;
+  store_id: string;
+  product_id: string;
+  employee_id: string;
+  entry_type: StockEntryType;
+  quantity_delta: number;
+  stock_before: number;
+  stock_after: number;
+  reason: string | null;
+  sync_status: SyncStatus;
+  /** Dexie-only bookkeeping for retry backoff — stripped before upload. */
+  sync_attempts?: number;
+  /** Dexie-only: ISO timestamp; sync engine skips this entry until then. */
   next_sync_at?: string | null;
   created_at: string;
 }

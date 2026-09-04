@@ -17,3 +17,10 @@ export const registerSchema = z.object({
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;
+
+export const acceptInviteSchema = z.object({
+  fullName: z.string().trim().min(2, "Non ou twò kout."),
+  password: z.string().min(8, "Modpas la dwe gen omwen 8 karaktè."),
+});
+
+export type AcceptInviteInput = z.infer<typeof acceptInviteSchema>;

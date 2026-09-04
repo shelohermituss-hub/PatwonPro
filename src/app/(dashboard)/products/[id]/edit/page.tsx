@@ -1,11 +1,14 @@
 "use client";
 
-import { use } from "react";
+import { use, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
 import { PackageX } from "lucide-react";
 import { db } from "@/lib/db";
 import { ProductForm } from "@/components/ProductForm";
+import { useCurrentProfile } from "@/hooks/useCurrentProfile";
+import { isOwner } from "@/lib/auth/roles";
 import { Skeleton } from "@/components/ui/skeleton";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -16,6 +19,15 @@ export default function EditProductPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const router = useRouter();
+  const { profile, isLoading: isProfileLoading } = useCurrentProfile();
+
+  useEffect(() => {
+    if (!isProfileLoading && !isOwner(profile)) {
+      router.replace("/products");
+    }
+  }, [isProfileLoading, profile, router]);
+
   // Dexie's .get() resolves to `undefined` both while the query hasn't run
   // yet AND when the id truly doesn't exist — wrapping the result is what
   // makes those two cases distinguishable below.
@@ -24,7 +36,7 @@ export default function EditProductPage({
     return { found: !!product, product };
   }, [id]);
 
-  if (result === undefined) {
+  if (isProfileLoading || !isOwner(profile) || result === undefined) {
     return (
       <div className="flex flex-col gap-6 p-6">
         <Skeleton className="h-8 w-64" />

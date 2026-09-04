@@ -1,18 +1,17 @@
 import { redirect } from "next/navigation";
-import { DashboardShell } from "@/components/DashboardShell";
 import { getCurrentProfile } from "@/lib/supabase/profile";
 import { isPlatformAdmin } from "@/lib/auth/roles";
 
-export default async function DashboardLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const profile = await getCurrentProfile();
 
-  if (isPlatformAdmin(profile)) {
-    redirect("/admin");
+  if (!isPlatformAdmin(profile)) {
+    redirect("/dashboard");
   }
 
-  return <DashboardShell profile={profile}>{children}</DashboardShell>;
+  return <>{children}</>;
 }
