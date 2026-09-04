@@ -1,87 +1,164 @@
+import Link from "next/link";
 import {
   Wallet,
-  TriangleAlert,
+  PiggyBank,
   PackageX,
+  HandCoins,
+  TrendingUp,
+  TrendingDown,
+  CircleCheck,
+  TriangleAlert,
   Users,
+  ShoppingCart,
+  PackagePlus,
+  ArrowRight,
 } from "lucide-react";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
+import { getCurrentProfile } from "@/lib/supabase/profile";
+import { fetchDashboardData } from "@/lib/dashboard/queries";
+import { formatCurrencyHTG } from "@/lib/format";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { KpiCard, type KpiTrend } from "@/components/dashboard/KpiCard";
+import { RecentSalesPanel } from "@/components/dashboard/RecentSalesPanel";
+import { SalesTrendChart } from "@/components/reports/SalesTrendChart";
+import { LowStockPanel } from "@/components/reports/LowStockPanel";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-const kpis = [
-  {
-    label: "Vant jodi a",
-    value: "—",
-    hint: "Total vant depi maten an",
-    icon: Wallet,
-  },
-  {
-    label: "Kredi an reta",
-    value: "—",
-    hint: "Kliyan ki gen dèt an reta",
-    icon: TriangleAlert,
-  },
-  {
-    label: "Stòk ba",
-    value: "—",
-    hint: "Pwodwi anba sèy alèt la",
-    icon: PackageX,
-  },
-  {
-    label: "Kliyan aktif",
-    value: "—",
-    hint: "Kliyan ak yon achte resan",
-    icon: Users,
-  },
+const QUICK_ACTIONS = [
+  { href: "/sales/new", label: "Nouvo Vant", icon: ShoppingCart },
+  { href: "/products/new", label: "Ajoute Pwodwi", icon: PackagePlus },
+  { href: "/credits/new", label: "Nouvo Kredi", icon: HandCoins },
 ];
 
-export default function DashboardPage() {
+/** Real day-over-day % — never fabricated where there's no baseline to compare. */
+function pctChange(current: number, previous: number): number | null {
+  if (previous === 0) return current === 0 ? 0 : null;
+  return ((current - previous) / previous) * 100;
+}
+
+function moneyTrend(current: number, previous: number, noBaselineLabel: string): KpiTrend {
+  if (current === 0 && previous === 0) {
+    return { tone: "neutral", icon: TrendingUp, label: noBaselineLabel };
+  }
+  const pct = pctChange(current, previous);
+  if (pct === null) {
+    return { tone: "positive", icon: TrendingUp, label: "Premye a depi ayè" };
+  }
+  const rounded = Math.round(pct);
+  if (rounded === 0) return { tone: "neutral", icon: TrendingUp, label: "Menm nivo ak ayè" };
+  return rounded > 0
+    ? { tone: "positive", icon: TrendingUp, label: `+${rounded}% pase ayè` }
+    : { tone: "negative", icon: TrendingDown, label: `${rounded}% pase ayè` };
+}
+
+export default async function DashboardPage() {
+  const profile = await getCurrentProfile();
+
+  if (!profile?.store_id) {
+    return (
+      <div className="flex flex-col gap-4 p-6">
+        <h1 className="text-2xl font-extrabold text-foreground">Tablo Bò</h1>
+        <p className="text-text-secondary">
+          Nou pa t ka jwenn boutik ou. Rekonekte epi eseye ankò.
+        </p>
+      </div>
+    );
+  }
+
+  let data;
+  try {
+    data = await fetchDashboardData(profile.store_id);
+  } catch {
+    return (
+      <div className="flex flex-col gap-4 p-6">
+        <h1 className="text-2xl font-extrabold text-foreground">Tablo Bò</h1>
+        <p className="text-text-secondary">
+          Nou pa t ka chaje tablo bò a. Verifye koneksyon ou epi eseye ankò.
+        </p>
+        <Link
+          href="/dashboard"
+          className={cn(buttonVariants({ variant: "outline" }), "w-fit min-h-11")}
+        >
+          Eseye ankò
+        </Link>
+      </div>
+    );
+  }
+
+  const lowStockCount = data.lowStockProducts.length;
+
+  const stockTrend: KpiTrend =
+    data.outOfStockCount > 0
+      ? { tone: "negative", icon: TriangleAlert, label: `${data.outOfStockCount} san stòk nèt` }
+      : lowStockCount > 0
+        ? { tone: "neutral", icon: TriangleAlert, label: "Bezwen reapwovizyone" }
+        : { tone: "positive", icon: CircleCheck, label: "Tout pwodwi ok" };
+
+  const creditTrend: KpiTrend =
+    data.creditCustomersCount > 0
+      ? { tone: "neutral", icon: Users, label: `${data.creditCustomersCount} kliyan gen dèt` }
+      : { tone: "positive", icon: CircleCheck, label: "Pa gen dèt kliyan" };
+
   return (
     <div className="flex flex-col gap-6 p-6">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-extrabold text-foreground">Tablo Bò</h1>
-        <p className="text-text-secondary">Rezime jodi a pou boutik ou.</p>
+      <DashboardHeader profile={profile} storeName={data.storeName} />
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <KpiCard
+          label="Vant jodi a"
+          value={formatCurrencyHTG(data.todaySales)}
+          icon={Wallet}
+          trend={moneyTrend(data.todaySales, data.yesterdaySales, "Pa gen vant jodi a")}
+          detail={`${data.todayTransactionCount} vant`}
+        />
+        <KpiCard
+          label="Benefis estime"
+          value={formatCurrencyHTG(data.todayProfit)}
+          icon={PiggyBank}
+          trend={moneyTrend(data.todayProfit, data.yesterdayProfit, "Pa gen benefis jodi a")}
+          detail="Estimasyon apati pri achte"
+        />
+        <KpiCard
+          label="Pwodwi ki gen stòk ba"
+          value={String(lowStockCount)}
+          icon={PackageX}
+          trend={stockTrend}
+          detail="Anba sèy alèt la"
+        />
+        <KpiCard
+          label="Kredi kliyan pou resevwa"
+          value={formatCurrencyHTG(data.creditReceivable)}
+          icon={HandCoins}
+          trend={creditTrend}
+          detail="Total dèt kliyan poko peye"
+        />
       </div>
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {kpis.map(({ label, value, hint, icon: Icon }) => (
-          <Card key={label}>
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <CardTitle className="text-sm font-medium text-text-secondary">
-                  {label}
-                </CardTitle>
-                <div className="flex size-9 items-center justify-center rounded-md bg-primary/10 text-primary">
-                  <Icon className="size-5" aria-hidden />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-extrabold text-foreground">{value}</p>
-              <CardDescription>{hint}</CardDescription>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="flex flex-col gap-3">
+        <h2 className="text-lg font-semibold text-foreground">Aksyon Rapid</h2>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {QUICK_ACTIONS.map(({ href, label, icon: Icon }) => (
+            <Link
+              key={href}
+              href={href}
+              className="flex min-h-14 items-center gap-3 rounded-lg border border-border bg-surface px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:border-primary/40 hover:bg-primary/5"
+            >
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                <Icon className="size-5" aria-hidden />
+              </span>
+              {label}
+              <ArrowRight className="ml-auto size-4 text-text-secondary" aria-hidden />
+            </Link>
+          ))}
+        </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Vant resan</CardTitle>
-          <CardDescription>
-            Done reyèl ap parèt isit la lè POS la konekte ak Dexie/Supabase
-            (`docs/PROMPTS/04-pos.md`, `06-reports.md`).
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-text-secondary">
-            Poko gen okenn vant anrejistre.
-          </p>
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[2fr_1fr]">
+        <SalesTrendChart trend={data.trend} bucket="day" />
+        <LowStockPanel products={data.lowStockProducts} />
+      </div>
+
+      <RecentSalesPanel sales={data.recentSales} />
     </div>
   );
 }
