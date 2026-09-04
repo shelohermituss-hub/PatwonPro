@@ -8,8 +8,32 @@ senkronizasyon Supabase.
 - Schema Dexie: `src/lib/db/index.ts` (`JereBoutikDB`) — tab: `products`,
   `categories`, `customers`, `sales`, `saleItems`, `creditPayments`.
 - Motè sync: `src/lib/sync/index.ts` — `syncPendingSales()` voye vant
-  `sync_status = "pending"` yo bay Supabase, ak `registerSyncListeners()`
-  ki koute evènman `online` nan navigatè a.
+  `sync_status = "pending"` yo bay Supabase ak **backoff eksponansyèl**
+  (`sync_attempts`/`next_sync_at` sou `Sale`, kap a 5 minit, ak jitter).
+  `registerSyncListeners()` deklanche l sou evènman `online` **epi** sou yon
+  boukle background chak 20s (paske yon sèl evènman `online` pa sifi pou
+  fè plizyè eseye backoff yo rive).
+- Endikatè itilizatè: `src/hooks/useOnlineStatus.ts`,
+  `src/hooks/usePendingSyncCount.ts`, ak
+  `src/components/SyncStatusBadge.tsx` (monte nan
+  `(dashboard)/layout.tsx`) — montre `Online`/`Sync annatant (N)`/`Offline`
+  an tan reyèl.
+
+## Desizyon design — poukisa PA gen yon "sync queue" jenerik ak op-types
+
+Yon apwòch klasik offline-first se yon "operation log" jenerik (`{ type:
+"create"|"update"|"delete", table, payload }`) ki rejwe nenpòt operasyon.
+Pwojè sa a **pa** itilize sa entansyonèlman: chak `sale` se yon evènman
+**kreyasyon sèlman** (yon vant pa janm modifye/efase offline apre l kreye),
+donk yon senp chan `sync_status` pa `sale` + `sale_items` ki mache avè l
+ase — pa gen bezwen pou rejwe/anile operasyon.
+
+Si yon pwochen etap mande modifikasyon done offline ki **modifyab** apre
+kreyasyon (egzanp: yon `credit_payment` ki ka anile, oswa yon pwodwi ki
+modifye pandan aparèy la offline), **repwodwi menm modèl `sync_status` +
+`sync_attempts` + `next_sync_at`** sou tab sa a olye bati yon queue
+jenerik — se yon desizyon k ap merite konfimasyon si li vin parèt vrèman
+nesesè, paske li chanje achitekti sync la nèt.
 
 ## Prensip
 
@@ -17,11 +41,19 @@ senkronizasyon Supabase.
   verite a long tèm. Chak `sale.id` se yon UUID **jenere lokalman**
   (kliyan-kote) pou `upsert` sou Supabase toujou idanpotan (pa gen risk
   double-anrejistreman si sync la eseye ankò).
-- `sync_status` egziste sèlman lokalman (Dexie) — kolòn sa a pa nan schema
-  Postgres, paske tout sa ki nan Supabase deja "synced" pa definisyon.
+- Rezolisyon konfli: **last-write-wins pa chan** (pa pa ranje antye) —
+  gade `docs/ARCHITECTURE.md`. Sa evite yon aparèy ki senkwonize an reta
+  ekrase yon chanjman ki fèt sou yon lòt aparèy sou yon chan diferan.
+- `sync_status`/`sync_attempts`/`next_sync_at` egziste sèlman lokalman
+  (Dexie) — yo pa nan schema Postgres. `src/lib/sync/index.ts` retire yo
+  eksplisitteman anvan `upsert` (gade destructuring `const { sync_status,
+  sync_attempts, next_sync_at, ...saleRecord } = sale`).
 - Aksyon ki afekte stòk (dekremante `stock_quantity`) dwe fèt kòm yon
   operasyon atomik sou Supabase (RPC/fonksyon SQL `decrement`) pou evite
   kondisyon kous ant plizyè aparèy k ap sync an menm tan.
+- **Pa janm bloke yon aksyon itilizatè paske aparèy la offline** — POS la
+  ekri lokalman imedyatman (optimistic) e kite sync lan fèt an background;
+  UI a pa dwe janm "tann" yon rezo pou konfime yon vant fèt.
 
 ## Pyèj komen
 
@@ -31,3 +63,14 @@ senkronizasyon Supabase.
   Offline) anvan konsidere l fini.
 - Lè w ajoute yon nouvo tab Dexie, ogmante `this.version(n)` epi ekri yon
   migrasyon pou done ki deja egziste lokalman sou aparèy itilizatè yo.
+- `registerSyncListeners()` idanpotan (yon `module`-level flag anpeche
+  boukle background la double-demare) — rele l san danje nan plizyè
+  konpozan, men pa bezwen rele l plis pase yon fwa pa aplikasyon.
+
+## Service worker / PWA (planifye pou `08-pwa.md`)
+
+- Cache asset estatik yo (JS/CSS/font) ak App Shell la (`/pos`,
+  `/products`, `/credits`, `/reports`) pou yo louvri san rezo — **pa**
+  cache repons API ki gen done sansib; kite Dexie jere pèsistans done,
+  service worker la jere sèlman asset/shell.
+- Manifest PWA deja egziste (`public/manifest.json`) — icons poko jenere.

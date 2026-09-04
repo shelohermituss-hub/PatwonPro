@@ -66,6 +66,10 @@ export interface Sale {
   payment_method: PaymentMethod;
   payment_status: PaymentStatus;
   sync_status: SyncStatus;
+  /** Dexie-only bookkeeping for retry backoff — stripped before upload. */
+  sync_attempts?: number;
+  /** Dexie-only: ISO timestamp; sync engine skips this sale until then. */
+  next_sync_at?: string | null;
   created_at: string;
 }
 

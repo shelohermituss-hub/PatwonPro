@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SyncStatusBadge } from "@/components/SyncStatusBadge";
 
 const tabs = [
   { href: "/pos", label: "POS" },
@@ -14,6 +15,9 @@ export default function DashboardLayout({
 }) {
   return (
     <div className="flex flex-1 flex-col">
+      <header className="flex justify-end p-2">
+        <SyncStatusBadge />
+      </header>
       <main className="flex-1 pb-20">{children}</main>
       <nav className="fixed inset-x-0 bottom-0 flex border-t border-black/10 bg-surface">
         {tabs.map(({ href, label }) => (

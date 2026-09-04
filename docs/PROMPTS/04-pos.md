@@ -35,9 +35,11 @@ Etap sa a depann de `03-products.md` (pwodwi disponib lokalman nan Dexie).
    - Deklanche `syncPendingSales()` (`src/lib/sync`) san bloke UI a (fire
      and forget) — si li echwe, vant lan rete "pending" pou pwochen eseye.
 
-5. **Endikatè sync/offline**
-   - Ti badge nan header dashboard la (`Online`/`Sync annatant`/`Offline`)
-     ki reflete `navigator.onLine` + kantite vant "pending" nan Dexie.
+5. **Endikatè sync/offline** — deja fèt kòm enfrastrikti debaz
+   (`src/components/SyncStatusBadge.tsx`, `src/hooks/useOnlineStatus.ts`,
+   `src/hooks/usePendingSyncCount.ts`), monte nan
+   `(dashboard)/layout.tsx`. Pa rekreye l — sèvi avè l, ajiste plasman/style
+   si POS la bezwen yon lòt kote pou li parèt.
 
 6. **Resi**
    - Apre yon vant konplete, montre yon rezime senp (li ka enprime oswa
