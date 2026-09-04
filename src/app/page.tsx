@@ -2,7 +2,7 @@ import Link from "next/link";
 
 const links = [
   { href: "/dashboard", label: "Tablo Bò" },
-  { href: "/pos", label: "Pwen Vant (POS)" },
+  { href: "/sales/new", label: "Pwen Vant (POS)" },
   { href: "/products", label: "Pwodwi" },
   { href: "/stock-entries", label: "Antre Stòk" },
   { href: "/credits", label: "Kredi kliyan" },

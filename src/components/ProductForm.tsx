@@ -124,7 +124,11 @@ export function ProductForm({ product }: { product?: Product }) {
                   onValueChange={(value) => field.onChange(value ?? undefined)}
                 >
                   <SelectTrigger id="categoryId" className="min-h-12 w-full">
-                    <SelectValue placeholder="San kategori" />
+                    <SelectValue placeholder="San kategori">
+                      {(value: string) =>
+                        (categories ?? []).find((c) => c.id === value)?.name ?? "San kategori"
+                      }
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>

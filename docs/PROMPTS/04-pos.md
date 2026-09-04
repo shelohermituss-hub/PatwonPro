@@ -13,11 +13,14 @@ Etap sa a depann de `03-products.md` (pwodwi disponib lokalman nan Dexie).
 ## Sa pou fè
 
 1. **Grid pwodwi**
-   - `(dashboard)/pos/page.tsx` li pwodwi yo dirèkteman nan Dexie (via
-     `dexie-react-hooks` `useLiveQuery`), pa Supabase — POS la pa dwe
-     depann de yon apèl rezo pou afiche pwodwi.
-   - Tap sou yon kat pwodwi ajoute l nan panye a (React state lokal, oswa
-     yon ti store Zustand/Context si kont pwojè a mande l).
+   - `(dashboard)/sales/new/page.tsx` (chanje de `/pos` — gade Phase 3) li
+     pwodwi yo dirèkteman nan Dexie (via `dexie-react-hooks`
+     `useLiveQuery`), pa Supabase — POS la pa dwe depann de yon apèl rezo
+     pou afiche pwodwi. `(dashboard)/sales/page.tsx` (istorik vant, ak
+     filtè) ak `(dashboard)/sales/[id]/page.tsx` (detay yon vant) konplete
+     modil la.
+   - Tap sou yon kat pwodwi ajoute l nan panye a — jere pa `useCart`
+     (`src/hooks/useCart.ts`), React state lokal.
 
 2. **Panye ak total**
    - Konpozan `Cart` ki montre atik yo, kantite (+/-), soustotal, rabè

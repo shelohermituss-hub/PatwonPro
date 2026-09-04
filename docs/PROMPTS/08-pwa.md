@@ -21,9 +21,10 @@ Etap sa a se dènye a — li depann de tout lòt yo, sitou `04-pos.md`
    - Ajoute `next-pwa` (oswa ekri yon service worker manyèl senp) ki:
      - Cache assets estatik yo (JS/CSS/font) — estrateji "stale-while-
        revalidate" oswa "cache-first".
-     - Cache paj App Shell la (`/dashboard`, `/pos`, `/products`,
-       `/stock-entries`, `/credits`, `/reports`, `/subscription`,
-       `/settings`) pou yo louvri menm si rezo a pa disponib ditou.
+     - Cache paj App Shell la (`/dashboard`, `/sales/new`, `/sales`,
+       `/products`, `/stock-entries`, `/credits`, `/reports`,
+       `/subscription`, `/settings`) pou yo louvri menm si rezo a pa
+       disponib ditou.
      - PA cache repons API ki gen done sansib san estrateji klè (pito kite
        Dexie jere pèsistans done, service worker jere sèlman asset/shell).
 

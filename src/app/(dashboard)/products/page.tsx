@@ -7,9 +7,11 @@ import { Plus, Search, PackageX, TriangleAlert, MoreVertical } from "lucide-reac
 import { db } from "@/lib/db";
 import { pullProducts } from "@/lib/sync/products";
 import { useCurrentProfile } from "@/hooks/useCurrentProfile";
+import { formatCurrency } from "@/lib/format";
 import { StockBadge } from "@/components/StockBadge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
@@ -34,12 +36,6 @@ import {
   DropdownMenuGroup,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-const CURRENCY = new Intl.NumberFormat("fr-HT", {
-  style: "currency",
-  currency: "HTG",
-  maximumFractionDigits: 0,
-});
 
 export default function ProductsPage() {
   const [search, setSearch] = useState("");
@@ -82,10 +78,10 @@ export default function ProductsPage() {
           <h1 className="text-2xl font-extrabold text-foreground">Pwodwi</h1>
           <p className="text-text-secondary">Jere envantè boutik ou.</p>
         </div>
-        <Button render={<Link href="/products/new" />} className="min-h-12">
+        <Link href="/products/new" className={cn(buttonVariants(), "min-h-12")}>
           <Plus data-icon="inline-start" aria-hidden />
           Ajoute Pwodwi
-        </Button>
+        </Link>
       </div>
 
       {pullError && (
@@ -118,7 +114,11 @@ export default function ProductsPage() {
           onValueChange={(value) => setCategoryId(value ?? "all")}
         >
           <SelectTrigger className="min-h-12 w-48" aria-label="Filtre pa kategori">
-            <SelectValue placeholder="Tout kategori" />
+            <SelectValue placeholder="Tout kategori">
+              {(value: string) =>
+                value === "all" ? "Tout kategori" : categoryNameById.get(value) ?? "Tout kategori"
+              }
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
@@ -165,10 +165,13 @@ export default function ProductsPage() {
             </p>
           </div>
           {(!products || products.length === 0) && (
-            <Button render={<Link href="/products/new" />} className="mt-2 min-h-12">
+            <Link
+              href="/products/new"
+              className={cn(buttonVariants(), "mt-2 min-h-12")}
+            >
               <Plus data-icon="inline-start" aria-hidden />
               Ajoute premye pwodwi ou
-            </Button>
+            </Link>
           )}
         </div>
       ) : (
@@ -205,7 +208,7 @@ export default function ProductsPage() {
                       ? categoryNameById.get(product.category_id) ?? "—"
                       : "—"}
                   </TableCell>
-                  <TableCell>{CURRENCY.format(product.sale_price)}</TableCell>
+                  <TableCell>{formatCurrency(product.sale_price)}</TableCell>
                   <TableCell>
                     <StockBadge
                       stockQuantity={product.stock_quantity}

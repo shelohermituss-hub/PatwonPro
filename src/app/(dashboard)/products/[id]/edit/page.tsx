@@ -7,7 +7,8 @@ import { PackageX } from "lucide-react";
 import { db } from "@/lib/db";
 import { ProductForm } from "@/components/ProductForm";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export default function EditProductPage({
   params,
@@ -46,9 +47,9 @@ export default function EditProductPage({
         <p className="text-sm text-text-secondary">
           Li ka efase, oswa li poko senkwonize sou aparèy sa a.
         </p>
-        <Button render={<Link href="/products" />} className="mt-2 min-h-12">
+        <Link href="/products" className={cn(buttonVariants(), "mt-2 min-h-12")}>
           Tounen nan Pwodwi
-        </Button>
+        </Link>
       </div>
     );
   }

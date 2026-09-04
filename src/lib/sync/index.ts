@@ -4,6 +4,7 @@ import { BACKGROUND_INTERVAL_MS } from "./backoff";
 
 export { syncPendingSales } from "./sales";
 export { syncPendingProducts, pullProducts } from "./products";
+export { pullCustomers } from "./customers";
 
 async function syncAllPending() {
   await Promise.all([syncPendingSales(), syncPendingProducts()]);

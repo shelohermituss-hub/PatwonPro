@@ -20,7 +20,7 @@ import type { Profile } from "@/types";
 
 const navItems = [
   { href: "/dashboard", label: "Tablo Bò", icon: LayoutDashboard },
-  { href: "/pos", label: "Pwen Vant", icon: ShoppingCart },
+  { href: "/sales/new", matchPrefix: "/sales", label: "Pwen Vant", icon: ShoppingCart },
   { href: "/products", label: "Pwodwi", icon: Package },
   { href: "/stock-entries", label: "Antre Stòk", icon: PackagePlus },
   { href: "/credits", label: "Kredi", icon: HandCoins },
@@ -53,14 +53,15 @@ export function DashboardShell({
   }
 
   return (
-    <div className="flex flex-1">
+    <div className="flex h-dvh overflow-hidden">
       <aside className="flex w-sidebar shrink-0 flex-col border-r border-border bg-surface">
         <div className="px-4 py-5">
           <span className="text-lg font-semibold text-foreground">Jere Boutik</span>
         </div>
         <nav className="flex flex-1 flex-col gap-1 px-2">
-          {navItems.map(({ href, label, icon: Icon }) => {
-            const isActive = pathname === href || pathname.startsWith(`${href}/`);
+          {navItems.map(({ href, matchPrefix, label, icon: Icon }) => {
+            const prefix = matchPrefix ?? href;
+            const isActive = pathname === prefix || pathname.startsWith(`${prefix}/`);
             return (
               <Link
                 key={href}
@@ -105,7 +106,7 @@ export function DashboardShell({
           <SyncStatusBadge />
         </div>
       </aside>
-      <main className="flex-1 overflow-y-auto">{children}</main>
+      <main className="min-h-0 flex-1 overflow-y-auto">{children}</main>
     </div>
   );
 }
