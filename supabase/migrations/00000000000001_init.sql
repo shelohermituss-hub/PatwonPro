@@ -4,6 +4,21 @@
 create extension if not exists "pgcrypto";
 
 -- =========================================================================
+-- Fonksyon itil
+-- =========================================================================
+
+-- Mete `updated_at` ajou otomatikman sou chak `update` (gade trigger yo pi ba).
+create function set_updated_at()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+-- =========================================================================
 -- Tabs
 -- =========================================================================
 
@@ -14,7 +29,8 @@ create table stores (
   currency text not null default 'HTG',
   address text,
   phone text,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
 );
 
 create table profiles (
@@ -22,13 +38,16 @@ create table profiles (
   store_id uuid not null references stores (id) on delete cascade,
   full_name text not null,
   role text not null default 'cashier' check (role in ('owner', 'manager', 'cashier')),
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
 );
 
 create table categories (
   id uuid primary key default gen_random_uuid(),
   store_id uuid not null references stores (id) on delete cascade,
-  name text not null
+  name text not null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
 );
 
 create table products (
@@ -43,6 +62,7 @@ create table products (
   stock_quantity numeric(12, 2) not null default 0,
   low_stock_threshold numeric(12, 2) not null default 0,
   is_active boolean not null default true,
+  created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
 
@@ -53,7 +73,8 @@ create table customers (
   phone text,
   credit_limit numeric(12, 2) not null default 0,
   credit_balance numeric(12, 2) not null default 0,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
 );
 
 create table sales (
@@ -66,7 +87,8 @@ create table sales (
   total numeric(12, 2) not null default 0,
   payment_method text not null check (payment_method in ('cash', 'moncash', 'natcash', 'credit')),
   payment_status text not null default 'paid' check (payment_status in ('paid', 'partial', 'credit')),
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
 );
 
 create table sale_items (
@@ -75,7 +97,8 @@ create table sale_items (
   product_id uuid not null references products (id),
   quantity numeric(12, 2) not null,
   unit_price numeric(12, 2) not null,
-  line_total numeric(12, 2) not null
+  line_total numeric(12, 2) not null,
+  created_at timestamptz not null default now()
 );
 
 create table credit_payments (
@@ -96,19 +119,54 @@ create table payment_transactions (
   provider_reference text,
   amount numeric(12, 2) not null,
   status text not null default 'pending' check (status in ('pending', 'success', 'failed')),
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
 );
+
+-- =========================================================================
+-- Trigger `updated_at`
+-- =========================================================================
+
+create trigger stores_set_updated_at before update on stores
+  for each row execute function set_updated_at();
+
+create trigger profiles_set_updated_at before update on profiles
+  for each row execute function set_updated_at();
+
+create trigger categories_set_updated_at before update on categories
+  for each row execute function set_updated_at();
+
+create trigger products_set_updated_at before update on products
+  for each row execute function set_updated_at();
+
+create trigger customers_set_updated_at before update on customers
+  for each row execute function set_updated_at();
+
+create trigger sales_set_updated_at before update on sales
+  for each row execute function set_updated_at();
+
+create trigger payment_transactions_set_updated_at before update on payment_transactions
+  for each row execute function set_updated_at();
 
 -- =========================================================================
 -- Endèks
 -- =========================================================================
 
+create index profiles_store_id_idx on profiles (store_id);
+create index categories_store_id_idx on categories (store_id);
 create index products_store_id_idx on products (store_id);
+create index products_category_id_idx on products (category_id);
 create index customers_store_id_idx on customers (store_id);
 create index sales_store_id_idx on sales (store_id);
 create index sales_customer_id_idx on sales (customer_id);
+create index sales_cashier_id_idx on sales (cashier_id);
 create index sale_items_sale_id_idx on sale_items (sale_id);
+create index sale_items_product_id_idx on sale_items (product_id);
+create index credit_payments_store_id_idx on credit_payments (store_id);
 create index credit_payments_customer_id_idx on credit_payments (customer_id);
+create index credit_payments_sale_id_idx on credit_payments (sale_id);
+create index payment_transactions_store_id_idx on payment_transactions (store_id);
+create index payment_transactions_sale_id_idx on payment_transactions (sale_id);
 
 -- =========================================================================
 -- Row Level Security

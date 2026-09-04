@@ -5,11 +5,28 @@ Nòt referans pou travay sou Supabase (Postgres + Auth + RLS) nan pwojè a.
 ## Estrikti
 
 - Migrasyon SQL viv nan `supabase/migrations/`, nimewote nan lòd
-  kwonolojik. Gade `docs/DATA_MODEL.md` pou schema konplè.
+  kwonolojik, toujou an SQL brit (pa gen ORM). Gade `docs/DATA_MODEL.md`
+  pou schema konplè.
 - Chak tab metye (`products`, `customers`, `sales`, ...) gen yon kolòn
   `store_id` e DWE gen yon politik RLS `store_isolation` ki filtre pa
   `profiles` itilizatè aktyèl la — gade `00000000000001_init.sql` pou
   modèl.
+
+## Konvansyon obligatwa pou chak nouvo tab
+
+- **UUID kòm PK**: `id uuid primary key default gen_random_uuid()`
+  (`sales`/`sale_items` yo jenere UUID kliyan-kote pito, pou idanpotans
+  offline — gade `docs/DATA_MODEL.md`).
+- **`created_at`** sou tout tab (`timestamptz not null default now()`).
+- **`updated_at`** sou tab ki ka modifye apre kreyasyon — pa jere l
+  manyèlman nan kòd aplikasyon an, tache yon trigger
+  `set_updated_at()` (fonksyon reyitilizab deja defini nan migrasyon
+  inisyal la) sou tab la.
+- **Endèks sou chak FK** ak kolòn souvan filtre/triye (`store_id`,
+  `category_id`, `customer_id`, `sale_id`, `product_id`).
+- **Politik RLS pou chak tab**, san eksepsyon, anvan itilizasyon an
+  pwodiksyon — `alter table ... enable row level security;` + omwen yon
+  `create policy`.
 
 ## Wòl
 
@@ -18,7 +35,26 @@ Nòt referans pou travay sou Supabase (Postgres + Auth + RLS) nan pwojè a.
   sou `products`/`customers`.
 - Enplemante distenksyon sa a ak politik RLS adisyonèl pa wòl lè
   `02-auth.md` fèt (pa gen politik pa-wòl nan migrasyon inisyal la
-  toujou).
+  toujou — jodi a se izolasyon pa-boutik sèlman).
+
+## Otantifikasyon (Supabase Auth)
+
+- Email/modpas + sesyon JWT via `@supabase/ssr` — kliyan browser
+  (`src/lib/supabase/client.ts`), kliyan sèvè (`server.ts`), ak
+  `src/proxy.ts` (Next.js 16 — ranplase `middleware.ts`) ki rafrechi
+  sesyon an sou chak rekèt.
+- `profiles.id` egal `auth.users.id` (pa yon FK separe ak yon `user_id`
+  diferan) — sa senplifye tout politik RLS ki fè `profiles.id = auth.uid()`.
+
+## Realtime & Edge Functions — kilè pou itilize yo
+
+- **Realtime subscriptions**: opsyon pou `03-products.md` (senkwonize
+  chanjman pwodwi/kategori bay Dexie san yon "pull" konplè) — pa yon
+  bezwen debaz, itilize l sèlman si polling/pull senp pa ase.
+- **Edge Functions**: opsyon pou webhook peman (`07-payments.md`) kòm
+  altènativ a Next.js route handlers — chwazi Edge Functions si webhook
+  la bezwen kouri pi pre baz done a (latans) oswa si Vercel pa dwe wè
+  kle sekrè founisè peman an ditou; otreman, yon route handler senp sifi.
 
 ## Règ
 

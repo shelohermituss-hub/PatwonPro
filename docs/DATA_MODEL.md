@@ -15,6 +15,7 @@ Boutik la (tenant).
 | address | text | |
 | phone | text | |
 | created_at | timestamptz | |
+| updated_at | timestamptz | Ajou otomatikman pa trigger |
 
 ### `profiles`
 Ekstansyon `auth.users` pou jere wòl.
@@ -25,6 +26,7 @@ Ekstansyon `auth.users` pou jere wòl.
 | full_name | text | |
 | role | text | `owner` \| `manager` \| `cashier` |
 | created_at | timestamptz | |
+| updated_at | timestamptz | Ajou otomatikman pa trigger |
 
 ### `categories`
 | Chan | Tip |
@@ -32,6 +34,8 @@ Ekstansyon `auth.users` pou jere wòl.
 | id | uuid PK |
 | store_id | uuid FK |
 | name | text |
+| created_at | timestamptz |
+| updated_at | timestamptz |
 
 ### `products`
 | Chan | Tip | Deskripsyon |
@@ -47,7 +51,8 @@ Ekstansyon `auth.users` pou jere wòl.
 | stock_quantity | numeric | Kantite an stòk |
 | low_stock_threshold | numeric | Alèt stòk ba |
 | is_active | boolean | |
-| updated_at | timestamptz | |
+| created_at | timestamptz | |
+| updated_at | timestamptz | Ajou otomatikman pa trigger |
 
 ### `customers`
 | Chan | Tip | Deskripsyon |
@@ -59,6 +64,7 @@ Ekstansyon `auth.users` pou jere wòl.
 | credit_limit | numeric | Limit kredi otorize |
 | credit_balance | numeric | Total yo dwe kounye a |
 | created_at | timestamptz | |
+| updated_at | timestamptz | Ajou otomatikman pa trigger |
 
 ### `sales`
 | Chan | Tip | Deskripsyon |
@@ -74,6 +80,7 @@ Ekstansyon `auth.users` pou jere wòl.
 | payment_status | text | `paid` \| `partial` \| `credit` |
 | sync_status | text | `pending` \| `synced` (jere lokalman, pa nesesèman kolòn DB) |
 | created_at | timestamptz | |
+| updated_at | timestamptz | Ajou otomatikman pa trigger |
 
 ### `sale_items`
 | Chan | Tip |
@@ -84,6 +91,7 @@ Ekstansyon `auth.users` pou jere wòl.
 | quantity | numeric |
 | unit_price | numeric |
 | line_total | numeric |
+| created_at | timestamptz |
 
 ### `credit_payments`
 Kliyan k ap peye yon dèt kredi pa vèsman.
@@ -109,6 +117,7 @@ Rejis apèl API MonCash/NatCash (pou odit ak rekonsilyasyon).
 | amount | numeric |
 | status | text | `pending` \| `success` \| `failed` |
 | created_at | timestamptz |
+| updated_at | timestamptz | Ajou otomatikman pa trigger |
 
 ## Relasyon kle
 
@@ -138,3 +147,11 @@ Wòl `cashier` limite ekriti sou `sales`/`sale_items`/`credit_payments` sèlman;
 - Tout kolòn lajan se `numeric(12,2)`, lajan an se HTG (goud) pa default.
 - Tout id se `uuid` jenere pa kliyan lè sa posib (pou sipòte kreyasyon offline).
 - Chan `sync_status` la viv sèlman nan Dexie (lokal), pa nan Postgres — Supabase se toujou "synced" pa definisyon.
+- Chak tab gen `created_at`; tab ki ka modifye apre kreyasyon (`stores`,
+  `profiles`, `categories`, `products`, `customers`, `sales`,
+  `payment_transactions`) gen anplis yon `updated_at` mete ajou
+  otomatikman pa yon trigger (`set_updated_at()`, gade migrasyon inisyal
+  la) — pa janm mete `updated_at` ajou manyèlman nan kòd aplikasyon an.
+- Chak kolòn FK (`store_id`, `category_id`, `customer_id`, `sale_id`,
+  `product_id`, `cashier_id`) gen yon endèks — gade seksyon "Endèks" nan
+  migrasyon an anvan w ajoute yon nouvo tab.
