@@ -57,6 +57,11 @@ export interface Product {
   stock_quantity: number;
   low_stock_threshold: number;
   is_active: boolean;
+  sync_status: SyncStatus;
+  /** Dexie-only bookkeeping for retry backoff — stripped before upload. */
+  sync_attempts?: number;
+  /** Dexie-only: ISO timestamp; sync engine skips this product until then. */
+  next_sync_at?: string | null;
   created_at: string;
   updated_at: string;
 }
