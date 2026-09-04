@@ -40,6 +40,15 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
+  // API routes handle their own auth (returning JSON 401s, not HTML
+  // redirects) and must stay reachable with no session at all for
+  // provider-to-server calls that can never carry our cookies — MonCash/
+  // NatCash's webhook deliveries (docs/PROMPTS/07-payments.md) chief
+  // among them.
+  if (pathname.startsWith("/api/")) {
+    return response;
+  }
+
   if (!user && !PUBLIC_PATHS.has(pathname)) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";

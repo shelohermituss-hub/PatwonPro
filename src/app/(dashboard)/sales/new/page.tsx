@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
 import { History } from "lucide-react";
@@ -11,8 +11,10 @@ import { pullCustomers } from "@/lib/sync/customers";
 import { checkoutSale } from "@/lib/pos/checkout";
 import { useCurrentProfile } from "@/hooks/useCurrentProfile";
 import { useCart } from "@/hooks/useCart";
+import { useMonCashPayment } from "@/hooks/useMonCashPayment";
 import { ProductGrid } from "@/components/pos/ProductGrid";
 import { CartPanel } from "@/components/pos/CartPanel";
+import { MonCashPaymentDialog } from "@/components/pos/MonCashPaymentDialog";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -30,6 +32,7 @@ export default function NewSalePage() {
   const { profile } = useCurrentProfile();
   const cart = useCart();
   const customers = useLiveQuery(() => db.customers.toArray(), []);
+  const moncash = useMonCashPayment();
 
   const [discount, setDiscount] = useState(0);
   const [customerId, setCustomerId] = useState<string | null>(null);
@@ -46,7 +49,7 @@ export default function NewSalePage() {
     void pullCustomers(profile.store_id);
   }, [profile?.store_id]);
 
-  async function handleCheckout() {
+  async function completeSale(method: PaymentMethod, linkTransactionId?: string) {
     if (!profile?.store_id) {
       toast.error("Nou pa t ka jwenn boutik ou. Rekonekte epi eseye ankò.");
       return;
@@ -55,8 +58,7 @@ export default function NewSalePage() {
     setIsSubmitting(true);
     try {
       const total = Math.max(cart.subtotal - discount, 0);
-      const change =
-        paymentMethod === "cash" ? Number(cashReceived) - total : null;
+      const change = method === "cash" ? Number(cashReceived) - total : null;
 
       const sale = await checkoutSale({
         storeId: profile.store_id,
@@ -64,8 +66,12 @@ export default function NewSalePage() {
         customerId,
         lines: cart.lines,
         discount,
-        paymentMethod,
+        paymentMethod: method,
       });
+
+      if (linkTransactionId) {
+        void moncash.linkSale(linkTransactionId, sale.id);
+      }
 
       setCompletedSale({ ...sale, change });
       cart.clear();
@@ -73,12 +79,38 @@ export default function NewSalePage() {
       setCustomerId(null);
       setCashReceived("");
       setPaymentMethod("cash");
+      moncash.reset();
     } catch {
       toast.error("Nou pa t ka kompete vant lan. Eseye ankò.");
     } finally {
       setIsSubmitting(false);
     }
   }
+
+  async function handleCheckout() {
+    if (paymentMethod === "moncash") {
+      const total = Math.max(cart.subtotal - discount, 0);
+      void moncash.start(total);
+      return;
+    }
+    await completeSale(paymentMethod);
+  }
+
+  // MonCash has no webhook (docs/PROMPTS/07-payments.md) — confirmation
+  // arrives via useMonCashPayment's polling, surfaced here as a state
+  // transition rather than a direct callback. The processed-id guard
+  // keeps a re-render from re-running checkoutSale for the same payment.
+  const processedTransactionRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (
+      moncash.state.status === "confirmed" &&
+      processedTransactionRef.current !== moncash.state.transactionId
+    ) {
+      processedTransactionRef.current = moncash.state.transactionId;
+      void completeSale("moncash", moncash.state.transactionId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- completeSale intentionally reads current state at call time, not effect-tracked
+  }, [moncash.state]);
 
   return (
     <div className="grid h-full grid-cols-[1fr_400px] overflow-hidden">
@@ -111,6 +143,15 @@ export default function NewSalePage() {
         onCashReceivedChange={setCashReceived}
         onCheckout={handleCheckout}
         isSubmitting={isSubmitting}
+      />
+
+      <MonCashPaymentDialog
+        state={moncash.state}
+        amount={Math.max(cart.subtotal - discount, 0)}
+        onManualCheck={moncash.manualCheck}
+        onCancel={() => void moncash.cancel()}
+        onRetry={() => void moncash.start(Math.max(cart.subtotal - discount, 0))}
+        onClose={moncash.reset}
       />
 
       <Dialog

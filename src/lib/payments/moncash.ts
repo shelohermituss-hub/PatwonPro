@@ -3,11 +3,16 @@
  * server-side (route handler / server action) — never bundle
  * MONCASH_CLIENT_SECRET into client code.
  *
- * Endpoint shapes below (`payment_token.token`, `RetrieveOrderPayment`,
- * `RetrieveTransactionPayment`) are confirmed against a public MonCash SDK
- * (github.com/allyourdate-team/moncash-node.js) since MonCash's own docs
- * site returned 404 when this was last checked — re-verify against the
- * current sandbox before going live, in case the API has moved since.
+ * Endpoint shapes below are verified directly against Digicel's own
+ * official PDF ("Rest API MonCash Documentation", © 2019 Digicel),
+ * fetched from sandbox.moncashbutton.digicelgroup.com/Moncash-business/
+ * resources/doc/RestAPI_MonCash_doc.pdf during Phase 6 (docs/PROMPTS/07-payments.md).
+ * That document has **no webhook/IPN/callback section** — MonCash's only
+ * documented confirmation mechanisms are (1) a redirect back to a
+ * merchant-configured return URL, and (2) polling
+ * RetrieveOrderPayment/RetrieveTransactionPayment. The sync engine here
+ * treats polling as the primary confirmation path accordingly; see
+ * src/app/api/webhooks/moncash/route.ts for why that route exists anyway.
  */
 
 const MONCASH_BASE_URL =
@@ -101,23 +106,35 @@ export interface MonCashPaymentStatus {
   reference: string;
   transactionId: string | null;
   cost: number;
-  message: string | null;
   /**
-   * Raw status text as returned by MonCash — do NOT infer "paid" from a
-   * successful HTTP call alone. Exact status strings aren't confirmed
-   * against live docs; treat anything other than an explicit success
-   * marker as unresolved, and prefer the webhook (`07-payments.md`) as
-   * the source of truth. This is the manual-recheck fallback described
-   * there, not a replacement for it.
+   * The actual payment outcome field per Digicel's docs — confirmed
+   * example value is `"successful"`. Everything else (other strings, or
+   * this lookup returning a 404 because MonCash has no record of the
+   * order yet) means the payment is not confirmed; the doc doesn't
+   * enumerate a full vocabulary (no documented "pending"/"failed"
+   * strings for this endpoint specifically), so `mapMonCashStatus`
+   * below only asserts "paid" vs "not confirmed yet", never "failed".
    */
-  rawStatus: string;
+  message: string | null;
+}
+
+export type MonCashPaymentOutcome = "paid" | "unresolved";
+
+/** Only `message === "successful"` (the one value Digicel's docs confirm) counts as paid. */
+export function mapMonCashStatus(message: string | null): MonCashPaymentOutcome {
+  return message === "successful" ? "paid" : "unresolved";
 }
 
 /**
  * Looks up a payment by the `orderId` passed to `createMonCashPayment`.
- * Used for the manual "verifye estati peman" fallback in
- * `docs/PROMPTS/07-payments.md` when a webhook hasn't arrived — never as
- * the sole basis for marking a sale paid.
+ * This is the primary confirmation path (see file header — MonCash's
+ * docs don't offer a webhook), used both for the POS's status-polling
+ * and for manual "verifye estati peman" reconciliation.
+ *
+ * Throws on a non-2xx response (including 404 "no such order yet",
+ * which is expected while a payment is still in flight) — callers
+ * should treat a thrown error the same as `mapMonCashStatus` returning
+ * `"unresolved"`, not as a hard failure.
  */
 export async function getMonCashPaymentStatus(orderId: string): Promise<MonCashPaymentStatus> {
   const accessToken = await getAccessToken();
@@ -142,7 +159,7 @@ export async function getMonCashPaymentStatus(orderId: string): Promise<MonCashP
       cost: number;
       message: string | null;
     };
-    status: string;
+    status: number;
   };
 
   return {
@@ -150,6 +167,5 @@ export async function getMonCashPaymentStatus(orderId: string): Promise<MonCashP
     transactionId: data.payment.transaction_id,
     cost: data.payment.cost,
     message: data.payment.message,
-    rawStatus: data.status,
   };
 }

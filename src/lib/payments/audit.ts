@@ -44,6 +44,7 @@ export async function updatePaymentTransactionStatus(
   id: string,
   status: PaymentTransaction["status"],
   providerReference?: string | null,
+  rawEvent?: Record<string, unknown>,
 ) {
   const admin = createAdminClient();
 
@@ -52,10 +53,37 @@ export async function updatePaymentTransactionStatus(
     .update({
       status,
       ...(providerReference !== undefined ? { provider_reference: providerReference } : {}),
+      ...(rawEvent !== undefined ? { raw_event: rawEvent } : {}),
     })
     .eq("id", id);
 
   if (error) {
     throw new Error(`Pa t ka mete payment_transactions ajou: ${error.message}`);
   }
+}
+
+export async function linkPaymentTransactionToSale(id: string, saleId: string) {
+  const admin = createAdminClient();
+
+  const { error } = await admin.from("payment_transactions").update({ sale_id: saleId }).eq("id", id);
+
+  if (error) {
+    throw new Error(`Pa t ka mare payment_transactions ak vant lan: ${error.message}`);
+  }
+}
+
+export async function getPaymentTransaction(id: string): Promise<PaymentTransaction | null> {
+  const admin = createAdminClient();
+
+  const { data, error } = await admin
+    .from("payment_transactions")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Pa t ka jwenn payment_transactions: ${error.message}`);
+  }
+
+  return data as PaymentTransaction | null;
 }

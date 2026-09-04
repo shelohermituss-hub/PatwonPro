@@ -65,6 +65,7 @@ export function CartPanel({
   const canCheckout =
     lines.length > 0 &&
     !isSubmitting &&
+    paymentMethod !== "natcash" &&
     (paymentMethod !== "cash" || cashReceivedNumber >= total) &&
     (paymentMethod !== "credit" || customerId !== null);
 
@@ -223,6 +224,13 @@ export function CartPanel({
                 </p>
               )}
             </Field>
+          )}
+
+          {paymentMethod === "natcash" && (
+            <p className="text-sm text-warning">
+              NatCash pa disponib pou kounye a — n ap travay sou entegrasyon
+              sa a. Chwazi yon lòt mwayen peman.
+            </p>
           )}
 
           {paymentMethod === "credit" && (
