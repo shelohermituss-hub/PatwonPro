@@ -14,13 +14,21 @@ rete la kòm dwapo pou yon desizyon eksplisit:
 |---|---|---|
 | Vèsyon Next.js | **16.3.4** (gade `AGENTS.md` — API/konvansyon chanje, `proxy.ts` ranplase `middleware.ts`) | "14+" |
 | Sib aparèy | **Mobil-premye**, telefòn Android antre gam (gade `docs/DESIGN_SYSTEM.md`) | Tablet 10-pous, `1280x800` |
-| Konpozan UI | Tailwind sèl, pa gen shadcn/ui enstale | shadcn/ui |
 | PWA | Sèvis worker manyèl (`docs/PROMPTS/08-pwa.md` mansyone `next-pwa` kòm opsyon) | `next-pwa` |
 
-Si pwojè a dwe chanje pou vize tablet olye telefòn, oswa pou adopte
-shadcn/ui, se yon desizyon pwodwi/design ki merite konfimasyon eksplisit
-(li afekte `DESIGN_SYSTEM.md`, layout `(dashboard)/layout.tsx`, ak gwosè
-touch-target POS la) — pa yon swiv otomatik.
+Si pwojè a dwe chanje pou vize tablet olye telefòn, se yon desizyon
+pwodwi/design ki merite konfimasyon eksplisit (li afekte
+`DESIGN_SYSTEM.md`, layout `(dashboard)/layout.tsx`, ak gwosè touch-target
+POS la) — pa yon swiv otomatik.
+
+**shadcn/ui ranje** — `npx shadcn@latest init --defaults` te kouri (Base
+UI, preset Nova), `components.json` egziste. **⚠️ Enpòtan**: pwosesis
+`init`/`add` la ekri sou pwòp `--primary`/`--accent`/`--background`/
+`--foreground` pwojè a nan `src/app/globals.css` — li deja fè sa yon fwa
+(ranplase koulè mak yo ak defo gri Nova a). Chak fwa w rele `npx shadcn
+add`, **verifye `git diff src/app/globals.css`** anvan w commit, epi
+restore valè mak yo (`docs/DESIGN_SYSTEM.md`) si CLI a ekrase yo ankò —
+gade kòmantè nan tèt blòk `:root`/`.dark` nan fichye a.
 
 ## Konvansyon pwojè a
 

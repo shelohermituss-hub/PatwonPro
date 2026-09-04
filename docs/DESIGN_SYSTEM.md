@@ -27,6 +27,24 @@ Referans rapid pou UI/UX aplikasyon an. Si yon ZIP design system (Figma export, 
 - Echèl: `text-xs` (12) → `text-3xl` (30) selon konvansyon Tailwind default.
 - Boutonn ak chan fòm dwe gen omwen `44px` wotè pou touch-target sou mobil.
 
+## Konpozan (shadcn/ui)
+
+`npx shadcn@latest init --defaults` deja kouri — Base UI (pa Radix), preset
+Nova, `components.json` nan rasin pwojè a. Sèvi ak `npx shadcn@latest add
+<component>` pou ajoute nouvo konpozan (`Button` deja la,
+`src/components/ui/`) olye ekri markup HTML brit — gade skill `shadcn`
+(`.claude/skills/shadcn`) pou règ konpozisyon.
+
+**⚠️ Chak `npx shadcn add`/`init` ka ekrase koulè mak yo** (`--primary`,
+`--accent`, `--background`, `--foreground`) nan `src/app/globals.css` ak
+defo gri preset Nova a — verifye `git diff src/app/globals.css` apre chak
+kòmand shadcn epi restore valè tablo anba a si sa rive (deja gen yon
+kòmantè nan fichye a ki make sa).
+
+Mòd fonse kounye a **jere pa klas `.dark`** sou `<html>` (konvansyon
+shadcn), pa `prefers-color-scheme` otomatik — pa gen bouton pou chanje
+mòd toujou; ajoute yon "theme toggle" si mòd fonse dwe aksesib itilizatè.
+
 ## Konpozan kle
 
 - **Boutonn gwo aksyon** (`Peye`, `Ajoute nan panye`) — plen koulè `primary`, wotè >= 48px.
@@ -49,6 +67,7 @@ Referans rapid pou UI/UX aplikasyon an. Si yon ZIP design system (Figma export, 
 ## `design-system/`
 
 Lè yon ekspò Figma (tokens, konpozan, ikòn) disponib, dekonprese l nan `design-system/` epi:
-1. Mete tokens koulè/tipografi yo nan `tailwind.config.ts` (`theme.extend`).
+1. Mete tokens koulè/tipografi yo nan blòk `@theme`/`:root` nan
+   `src/app/globals.css` (Tailwind v4 — pa gen `tailwind.config.ts`).
 2. Enpòte ikòn/asset SVG yo nan `src/components/icons/`.
 3. Aliyen dosye sa a ak vre valè yo si yo diferan de pwen depa anwo a.
