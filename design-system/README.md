@@ -6,7 +6,7 @@ Yon ekspò (Calendar, Contacts, Dashboard, Help Center, Invoices,
 Messages, Notifications, Products, Reports, Task/Tasks, Ui, Sign
 In/Sign Up/Recover/Finish/Details) dekonprese isit la. Se yon UI kit
 SaaS **jeneral** (ekran ak non an Anglè, pa Kreyòl, modil ki pa toujou
-matche modil Jere Boutik yo egzakteman — "Invoices"/"Messages" pa
+matche modil PatwonPro yo egzakteman — "Invoices"/"Messages" pa
 egziste kòm modil nan `docs/CLAUDE.md`) — sèvi avè l kòm **referans
 enspirasyon/layout**, pa kòm yon spec egzat pou koupe-kole.
 

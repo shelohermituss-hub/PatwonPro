@@ -1,8 +1,8 @@
-# Jere Boutik — Instructions de projet
+# PatwonPro — Instructions de projet
 
 ## Produit
 
-Jere Boutik est une application PWA premium de gestion de ventes, stock, crédits clients et paiements mobile money pour petites boutiques en Haïti.
+PatwonPro est une application PWA premium de gestion de ventes, stock, crédits clients et paiements mobile money pour petites boutiques en Haïti.
 
 L'application est principalement utilisée sur une tablette Android 10 pouces en mode paysage, résolution cible 1280 × 800.
 
@@ -12,7 +12,7 @@ L'interface doit paraître comme un POS fintech moderne et premium, mais rester 
 
 - owner : propriétaire de boutique, accès complet.
 - employee : vendeur, accès limité aux ventes et crédits.
-- platform_admin : équipe Jere Boutik, gère abonnements, appareils, support et comptes.
+- platform_admin : équipe PatwonPro, gère abonnements, appareils, support et comptes.
 
 ## Stack obligatoire
 
@@ -61,8 +61,8 @@ Avant toute nouvelle interface importante :
 
 - App background : `#F8FAFC`.
 - Surface/card : `#FFFFFF`.
-- Primary : `#2563EB`.
-- Primary hover : `#1D4ED8`.
+- Primary : `#4F46E5` (indigo — départ du dégradé de marque PatwonPro).
+- Primary hover : `#4338CA`.
 - Success : `#16A34A`.
 - Warning : `#F59E0B`.
 - Danger : `#DC2626`.
@@ -73,6 +73,9 @@ Avant toute nouvelle interface importante :
 - Radius medium : 12px.
 - Sidebar tablette : 248px.
 - Font : Inter ou Plus Jakarta Sans.
+- Dégradé de marque (usage réservé — logo, panneau héro auth, jamais un
+  fond de composant par défaut) : `#4F46E5` → `#7C3AED` → `#06B6D4`.
+- Point d'accent de marque (très ponctuel) : `#FACC15`.
 
 ## Modules produit
 

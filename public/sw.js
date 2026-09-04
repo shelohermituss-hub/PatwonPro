@@ -6,7 +6,7 @@
 // still *opens* offline. It never touches Supabase/API responses — Dexie
 // (src/lib/db) is the source of truth for offline data, this worker only
 // makes sure the UI that reads Dexie can load with no network at all.
-const CACHE_VERSION = "jere-boutik-v1";
+const CACHE_VERSION = "patwonpro-v1";
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const ASSET_CACHE = `${CACHE_VERSION}-assets`;
 
@@ -28,7 +28,7 @@ self.addEventListener("activate", (event) => {
       .then((keys) =>
         Promise.all(
           keys
-            .filter((key) => key.startsWith("jere-boutik-") && key !== SHELL_CACHE && key !== ASSET_CACHE)
+            .filter((key) => key.startsWith("patwonpro-") && key !== SHELL_CACHE && key !== ASSET_CACHE)
             .map((key) => caches.delete(key)),
         ),
       )

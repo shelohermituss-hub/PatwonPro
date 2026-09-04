@@ -78,7 +78,7 @@ n'a pas été installé. À corriger dès le premier écran avec formulaire
 `tabs` (sections Compte/Boutique/Anplwaye), `field`+`radio-group` (à installer), `switch` (existant, préférences), `avatar` (existant, photo profil).
 
 ### Auth (login/register)
-Layout split-screen custom, `field`+`input` (à installer/existant), `button` (existant) — inspiré structurellement de `design-system/Sign In.svg`/`Sign Up.svg` (illustration à refaire, pas réutiliser celle du kit qui n'est pas à la marque Jere Boutik).
+Layout split-screen custom, `field`+`input` (à installer/existant), `button` (existant) — inspiré structurellement de `design-system/Sign In.svg`/`Sign Up.svg` (illustration à refaire, pas réutiliser celle du kit qui n'est pas à la marque PatwonPro).
 
 ### `(admin)` — platform_admin
 `table` (liste boutiques/abonnements/appareils à travers toutes les boutiques), `badge`, `DataTable`.

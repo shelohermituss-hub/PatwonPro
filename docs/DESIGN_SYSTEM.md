@@ -1,4 +1,4 @@
-# Design System — Jere Boutik
+# Design System — PatwonPro
 
 Référence d'implémentation pour l'UI de l'application. **`docs/CLAUDE.md`**
 ("Tokens visuels", "Règles UI") reste la source de vérité produit/design —
@@ -30,11 +30,18 @@ par les classes Tailwind générées (`bg-primary`, `text-danger`, etc.).
 ```css
 :root {
   /* Marque */
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
   --warning: #f59e0b;
   --success: #16a34a;
   --danger: #dc2626;
+
+  /* Dégradé de marque (logo, panneau héro auth — jamais un fond de
+     composant par défaut, voir la note plus bas) + point d'accent */
+  --brand-gradient-start: #4f46e5;
+  --brand-gradient-via: #7c3aed;
+  --brand-gradient-end: #06b6d4;
+  --brand-accent: #facc15;
 
   /* Neutres produit (pas les neutres shadcn — voir plus bas) */
   --surface: #ffffff;
@@ -59,14 +66,16 @@ par les classes Tailwind générées (`bg-primary`, `text-danger`, etc.).
 |---|---|---|---|
 | `--background` | `#F8FAFC` | Fond de page | `bg-background` |
 | `--surface` / `--card` | `#FFFFFF` | Cartes, modales | `bg-surface` / `bg-card` |
-| `--primary` | `#2563EB` | Boutons d'action, lien actif sidebar | `bg-primary` `text-primary` |
-| `--primary-hover` | `#1D4ED8` | Hover explicite (voir note ci-dessous) | `bg-primary-hover` |
+| `--primary` | `#4F46E5` | Boutons d'action, lien actif sidebar | `bg-primary` `text-primary` |
+| `--primary-hover` | `#4338CA` | Hover explicite (voir note ci-dessous) | `bg-primary-hover` |
 | `--success` | `#16A34A` | Vente complétée, paiement reçu | `bg-success` `text-success` |
 | `--warning` | `#F59E0B` | Alerte, badge stock bas, sync en attente | `bg-warning` `text-warning` |
 | `--danger` | `#DC2626` | Suppression, dette en retard | `bg-danger` `text-danger` |
 | `--foreground` | `#0F172A` | Texte principal | `text-foreground` |
 | `--text-secondary` | `#64748B` | Texte secondaire/label | `text-text-secondary` |
 | `--border` / `--input` | `#E2E8F0` | Bordures, contours de champs | `border-border` |
+| `--brand-gradient-start/via/end` | `#4F46E5`/`#7C3AED`/`#06B6D4` | Dégradé de marque — logo (`Logo.tsx`), panneau héro `(auth)` | `from-brand-gradient-start via-brand-gradient-via to-brand-gradient-end` |
+| `--brand-accent` | `#FACC15` | Point d'accent de marque, usage très ponctuel | `bg-brand-accent` |
 | `--radius-md` | `12px` (littéral, pas dérivé de `--radius`) | Rayon "medium" | `rounded-md` |
 | `--radius-lg` | `16px` (littéral) | Rayon "large" | `rounded-lg` |
 | `--sidebar-width` | `248px` | Largeur du sidebar tablette | `w-sidebar` |
@@ -77,7 +86,13 @@ par les classes Tailwind générées (`bg-primary`, `text-danger`, etc.).
 mais le composant `Button` shadcn par défaut utilise
 `hover:bg-primary/80` (opacité), pas ce token. Utiliser `--primary-hover`
 explicitement sur des composants **custom** (pas les composants shadcn
-générés) quand un hover exact `#1D4ED8` est requis.
+générés) quand un hover exact `#4338CA` est requis.
+
+**⚠️ Le dégradé de marque n'est pas un fond de composant par défaut.**
+Il est réservé aux moments de marque délibérés — le logo (`Logo.tsx`) et
+le panneau héro de `(auth)/layout.tsx` — jamais les boutons, cartes,
+badges ou l'état actif du sidebar, qui restent `--primary` en aplat
+(`docs/CLAUDE.md` : "pas de gradients excessifs").
 
 **⚠️ `--accent`/`--accent-foreground` ne sont PAS la couleur "warning".**
 Ce sont des tokens neutres shadcn/ui pour l'état hover/highlight des
@@ -101,7 +116,7 @@ restaurer le tableau ci-dessus si nécessaire.
 - **Rayons** : `rounded-sm`/`rounded-md`(12px)/`rounded-lg`(16px)/`rounded-xl`+
   — ne pas utiliser de valeurs arbitraires (`rounded-[10px]`), toujours
   passer par l'échelle nommée pour rester cohérent si les tokens changent.
-- **Couleurs** : jamais de couleur brute (`bg-blue-600`, `text-[#2563eb]`)
+- **Couleurs** : jamais de couleur brute (`bg-blue-600`, `text-[#4f46e5]`)
   dans le code produit — toujours les tokens sémantiques (`bg-primary`,
   `text-danger`). Les couleurs brutes Tailwind restent acceptables
   uniquement dans les illustrations/graphiques Recharts si un dégradé
@@ -128,7 +143,7 @@ shadcn@latest add <component>` pour en ajouter d'autres plutôt que
 d'écrire du markup brut — voir le skill `shadcn`
 (`.claude/skills/shadcn`) pour les règles de composition, et
 `docs/UI_COMPONENT_INVENTORY.md` pour la liste des composants restant à
-construire/adapter pour Jere Boutik spécifiquement.
+construire/adapter pour PatwonPro spécifiquement.
 
 Toutes les icônes sont **Lucide React** (`lucide-react`, déjà installé)
 — jamais d'emoji comme icône d'interface.
@@ -166,7 +181,7 @@ focus plus visible sur tablette.
 Le contenu actuel est un kit UI SaaS générique (voir
 `docs/DESIGN_AUDIT.md`) — à utiliser comme référence de layout/patterns,
 pas comme source de tokens exacts. Si un nouvel export plus ciblé
-Jere Boutik est ajouté :
+PatwonPro est ajouté :
 1. Le décompresser directement dans `design-system/` (aplatir tout
    dossier intermédiaire sans nom venant du zip).
 2. S'il contient de vrais tokens (JSON/CSS), les reporter dans

@@ -42,7 +42,7 @@ Etap sa a depann de `01-setup.md` (kliyan Supabase, migrasyon inisyal).
      `src/lib/supabase/admin.ts`) epi kreye yon `profiles` ki gen bon
      `store_id`/`role` lè envite a aksepte.
    - Envitasyon `platform_admin` pa fèt pa yon `owner` — se yon aksyon
-     entèn ekip Jere Boutik la (pa nan pòte etap sa a).
+     entèn ekip PatwonPro la (pa nan pòte etap sa a).
 
 5. **Politik RLS pa wòl**
    - Ajoute migrasyon ki restriksyon ekriti sou `products`/`customers` bay

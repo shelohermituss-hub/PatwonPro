@@ -6,7 +6,7 @@ export default function SubscriptionPage() {
         Vi abònman boutik la, aparèy anrejistre yo, ak tikè sipò — tab
         `subscriptions`/`devices`/`support_tickets` deja egziste (gade{" "}
         <code>docs/DATA_MODEL.md</code>). Boutik la wè sèlman done pa li;
-        chanjman abònman/aparèy jere pa ekip Jere Boutik (`platform_admin`).
+        chanjman abònman/aparèy jere pa ekip PatwonPro (`platform_admin`).
       </p>
     </div>
   );

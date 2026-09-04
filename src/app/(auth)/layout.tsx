@@ -1,10 +1,12 @@
-import { Store } from "lucide-react";
+import { Logo } from "@/components/Logo";
 
 /**
  * Split-screen shell for /login and /register. Deliberately not a copy
- * of design-system/'s illustration (generic SaaS kit, not Jere Boutik —
- * see docs/DESIGN_AUDIT.md §5/§6): flat brand-blue panel with a single
- * geometric accent, no gradient wash.
+ * of design-system/'s illustration (generic SaaS kit, not PatwonPro —
+ * see docs/DESIGN_AUDIT.md §5/§6). The hero panel is the one place the
+ * brand gradient (public/brand/) gets used at full strength — everywhere
+ * else in the app stays solid --primary, per docs/CLAUDE.md's "pas de
+ * gradients excessifs".
  */
 export default function AuthLayout({
   children,
@@ -17,19 +19,19 @@ export default function AuthLayout({
         <div className="w-full max-w-sm">{children}</div>
       </div>
 
-      <div className="relative hidden w-[42%] shrink-0 overflow-hidden bg-primary md:flex md:flex-col md:justify-between md:p-12">
+      <div className="relative hidden w-[42%] shrink-0 overflow-hidden bg-gradient-to-br from-brand-gradient-start via-brand-gradient-via to-brand-gradient-end md:flex md:flex-col md:justify-between md:p-12">
         <div
-          className="absolute -right-24 -top-24 size-96 rounded-full bg-primary-hover"
+          className="absolute -right-24 -top-24 size-96 rounded-full bg-white/10"
           aria-hidden
         />
         <div
-          className="absolute -bottom-32 -left-16 size-72 rounded-full bg-primary-hover/60"
+          className="absolute -bottom-32 -left-16 size-72 rounded-full bg-white/10"
           aria-hidden
         />
 
         <div className="relative flex items-center gap-2 text-white">
-          <Store className="size-6" aria-hidden />
-          <span className="text-lg font-bold">Jere Boutik</span>
+          <Logo size={28} className="shrink-0 rounded-md" />
+          <span className="text-lg font-bold">PatwonPro</span>
         </div>
 
         <div className="relative flex flex-col gap-2 text-white">

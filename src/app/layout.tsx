@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Jere Boutik",
+  title: "PatwonPro",
   description: "Jere envantè, vant, ak kredi boutik ou — menm san entènèt.",
   manifest: "/manifest.json",
   icons: {
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    title: "Jere Boutik",
+    title: "PatwonPro",
     statusBarStyle: "default",
   },
 };
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#2563EB",
+  themeColor: "#4F46E5",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

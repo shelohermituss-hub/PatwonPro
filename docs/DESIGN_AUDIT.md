@@ -4,13 +4,13 @@ Analyse du contenu réel de `design-system/` (112 fichiers, ~21 Mo — 19 SVG, 1
 
 ## 1. Nature du kit
 
-C'est un **kit UI SaaS générique** ("CRAFTUI LLC" visible dans l'en-tête des captures), pas une maquette Jere Boutik. Les écrans couvrent : Calendar, Contacts, Dashboard, Help Center, Invoices, Messages, Notifications, Products, Reports, Task/Tasks, Ui (Forms), plus un flow d'authentification (Sign In/Sign Up/Recover/Finish/Details). Aucun logo, aucune police embarquée, aucune icône de marque Jere Boutik.
+C'est un **kit UI SaaS générique** ("CRAFTUI LLC" visible dans l'en-tête des captures), pas une maquette PatwonPro. Les écrans couvrent : Calendar, Contacts, Dashboard, Help Center, Invoices, Messages, Notifications, Products, Reports, Task/Tasks, Ui (Forms), plus un flow d'authentification (Sign In/Sign Up/Recover/Finish/Details). Aucun logo, aucune police embarquée, aucune icône de marque PatwonPro.
 
 ## 2. Assets disponibles
 
 | Type | Présent ? | Détail |
 |---|---|---|
-| Logo Jere Boutik | ❌ | Le seul logo visible est celui du kit ("C" bleu, "CRAFTUI LLC") — à ignorer, pas réutilisable |
+| Logo PatwonPro | ❌ | Le seul logo visible est celui du kit ("C" bleu, "CRAFTUI LLC") — à ignorer, pas réutilisable |
 | Icônes | ⚠️ | Icônes vectorisées **intégrées aux SVG des écrans** (sidebar, boutons) — pas de bibliothèque d'icônes séparée exportée. Aucune icône exploitable isolément sans découpage manuel |
 | Illustrations | ✅ | Personnages plats géométriques (Help Center, écrans "Empty") — palette dédiée non-UI (voir §5) |
 | Polices | ❌ | Tout le texte est **vectorisé en tracés** (`grep -c "<text"` = 0 sur les 19 SVG) — aucun nom de police, taille ou graisse n'est extractible programmatiquement |
@@ -86,9 +86,9 @@ Pas d'export de grille/spacing scale. Estimation visuelle uniquement (Products/L
 | États vides dédiés | `Contacts/Empty [Mobile].svg`, `Dashboard/Empty.svg`, `Tasks/Empty.svg`, `Tasks/Empty [Mobile].svg`, `Invoices/Empty.png`, `Messages/Empty.png` | Confirme que le kit prévoit systématiquement un état vide illustré par écran |
 | Auth split-screen | Sign In.svg (grep structurel) | Formulaire d'un côté, panneau illustration bleu plein de l'autre |
 
-## 5. Mapping vers les écrans Jere Boutik — et ce qui manque
+## 5. Mapping vers les écrans PatwonPro — et ce qui manque
 
-| Module Jere Boutik | Analogue le plus proche dans le kit | Écart |
+| Module PatwonPro | Analogue le plus proche dans le kit | Écart |
 |---|---|---|
 | Tablo Bò (Dashboard) | Calendar.png, Dashboard/04.svg | Bon analogue structurel (sidebar + cartes KPI + graphique) |
 | Pwodwi (Produits/Stock) | Products/List/01.png | **Correspondance directe** — tableau produits quasi 1:1 réutilisable comme référence de layout |
@@ -100,7 +100,7 @@ Pas d'export de grille/spacing scale. Estimation visuelle uniquement (Products/L
 | Paramèt | Contacts/Settings/*.svg | Bon analogue générique (sections Accounts/Billing/General/Notifications/Security) |
 | Auth (login/register) | Sign In.svg, Sign Up.svg, Recover.svg | Directement exploitable comme structure (split-screen) |
 
-**Aucun écran ne montre un point de vente tactile, un panier, un clavier numérique de saisie de montant, ou un flux de paiement MonCash/NatCash.** Ce sont les écrans qui comptent le plus pour Jere Boutik et le kit n'en fournit aucun — le POS devra être conçu sans référence dans ces assets.
+**Aucun écran ne montre un point de vente tactile, un panier, un clavier numérique de saisie de montant, ou un flux de paiement MonCash/NatCash.** Ce sont les écrans qui comptent le plus pour PatwonPro et le kit n'en fournit aucun — le POS devra être conçu sans référence dans ces assets.
 
 ## 6. Incohérences et éléments à trancher
 
@@ -110,7 +110,7 @@ Pas d'export de grille/spacing scale. Estimation visuelle uniquement (Products/L
 4. **Typographie non vérifiable.** Voir §3 — aucune police ne peut être confirmée depuis ces fichiers. Plus Jakarta Sans (déjà en place) reste la référence.
 5. **Sidebar icône-seule vs sidebar 248px avec labels.** Le kit utilise un rail étroit sans texte ; `docs/CLAUDE.md` exige un sidebar de 248px **avec labels** (déjà implémenté dans `(dashboard)/layout.tsx`) — plus adapté à des commerçants non-techniques que des icônes seules. Recommandation : garder le sidebar labellisé déjà construit ; le rail icône-seule peut inspirer un état "réduit" futur, pas le pattern principal.
 6. **Champs en soulignement vs champs encadrés shadcn.** Le kit utilise des inputs à simple soulignement ; shadcn/ui (déjà installé, déjà utilisé) utilise des inputs encadrés (bordure complète). Recommandation : garder le style shadcn encadré — meilleure affordance tactile et état focus plus visible sur tablette, ce qui compte plus que fidélité au kit.
-7. **Nommage de fichiers incohérent dans le kit lui-même** : mélange de suffixe `[Mobile]` et de sous-dossiers, dossier `Task/` (singulier, 2 fichiers) coexistant avec `Tasks/` (pluriel, 6 fichiers) — signe que le kit source lui-même n'est pas parfaitement organisé ; sans impact sur Jere Boutik, juste une note pour ne pas chercher une logique qui n'existe pas.
+7. **Nommage de fichiers incohérent dans le kit lui-même** : mélange de suffixe `[Mobile]` et de sous-dossiers, dossier `Task/` (singulier, 2 fichiers) coexistant avec `Tasks/` (pluriel, 6 fichiers) — signe que le kit source lui-même n'est pas parfaitement organisé ; sans impact sur PatwonPro, juste une note pour ne pas chercher une logique qui n'existe pas.
 8. **Aucune annotation d'accessibilité** (contraste, ordre de focus, ARIA) n'est visible sur les captures — normal pour des exports visuels, mais ça veut dire qu'aucune garantie AA ne peut être héritée du kit ; les règles d'accessibilité de `docs/UI_RULES.md` doivent être définies indépendamment.
 9. **Pas de mode sombre** dans le kit — cohérent avec l'état actuel du projet (mode sombre non prioritaire, déjà noté dans `docs/DESIGN_SYSTEM.md`).
 

@@ -11,11 +11,19 @@
      hover-highlight tokens (dropdown/select item hover etc.) — do NOT
      repoint them to the brand "warning" orange, that would turn every
      menu-item hover bright orange. Warning lives in --warning instead. */
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
   --warning: #f59e0b;
   --success: #16a34a;
   --danger: #dc2626;
+  /* PatwonPro brand mark gradient + accent dot (public/brand/) — reserved
+     for deliberate brand moments (logo, auth hero panel), never a default
+     component background. Everyday UI (buttons, active nav, cards) stays
+     solid --primary, per docs/CLAUDE.md's "pas de gradients excessifs". */
+  --brand-gradient-start: #4f46e5;
+  --brand-gradient-via: #7c3aed;
+  --brand-gradient-end: #06b6d4;
+  --brand-accent: #facc15;
   --surface: #ffffff;
   --text-secondary: #64748b;
   --background: #f8fafc;
@@ -61,6 +69,10 @@
   --color-warning: var(--warning);
   --color-success: var(--success);
   --color-danger: var(--danger);
+  --color-brand-gradient-start: var(--brand-gradient-start);
+  --color-brand-gradient-via: var(--brand-gradient-via);
+  --color-brand-gradient-end: var(--brand-gradient-end);
+  --color-brand-accent: var(--brand-accent);
   --color-surface: var(--surface);
   --color-text-secondary: var(--text-secondary);
   --width-sidebar: var(--sidebar-width);
@@ -115,8 +127,8 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
   --warning: #f59e0b;
   --primary-foreground: #ffffff;
   --secondary: oklch(0.269 0 0);

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { SyncStatusBadge } from "@/components/SyncStatusBadge";
 import { InstallPrompt } from "@/components/InstallPrompt";
+import { Logo } from "@/components/Logo";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import type { Profile } from "@/types";
@@ -56,8 +57,9 @@ export function DashboardShell({
   return (
     <div className="flex h-dvh overflow-hidden">
       <aside className="flex w-sidebar shrink-0 flex-col border-r border-border bg-surface">
-        <div className="px-4 py-5">
-          <span className="text-lg font-semibold text-foreground">Jere Boutik</span>
+        <div className="flex items-center gap-2 px-4 py-5">
+          <Logo size={28} className="shrink-0 rounded-md" />
+          <span className="text-lg font-semibold text-foreground">PatwonPro</span>
         </div>
         <nav className="flex flex-1 flex-col gap-1 px-2">
           {navItems.map(({ href, matchPrefix, label, icon: Icon }) => {

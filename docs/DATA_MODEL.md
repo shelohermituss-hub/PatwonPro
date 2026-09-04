@@ -1,4 +1,4 @@
-# Modèl Done — Jere Boutik
+# Modèl Done — PatwonPro
 
 Tout tab yo viv nan Postgres (Supabase) e gen yon miwa lokal nan Dexie pou tab ki nesesè pou POS offline (`products`, `customers`, `sales`, `sale_items`, `credit_payments`).
 
@@ -31,7 +31,7 @@ Ekstansyon `auth.users` pou jere wòl.
 **Wòl yo**:
 - `owner` — pwopriyetè boutik la, aksè total sou pwòp boutik li.
 - `employee` — anplwaye/vandè, aksè limite a vant ak kredi.
-- `platform_admin` — ekip Jere Boutik la, jere abònman/tablèt/sipò/kont
+- `platform_admin` — ekip PatwonPro la, jere abònman/tablèt/sipò/kont
   **atravè tout boutik** (gade `stores_all_platform_admin` ak politik
   RLS parèy nan migrasyon an — chak politik izolasyon-pa-boutik gen yon
   `or is_platform_admin()` ki bay wòl sa a aksè global).

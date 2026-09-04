@@ -15,7 +15,7 @@ export default function Home() {
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-8 px-6 py-16 text-center">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-semibold tracking-tight">Jere Boutik</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">PatwonPro</h1>
         <p className="max-w-md text-text-secondary">
           Jere envantè, vant, ak kredi boutik ou — menm san entènèt.
         </p>

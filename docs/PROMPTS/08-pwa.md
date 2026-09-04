@@ -2,7 +2,7 @@
 
 ## Objektif
 
-Fè Jere Boutik enstalab kòm yon app sou tablèt/òdinatè (sib prensipal:
+Fè PatwonPro enstalab kòm yon app sou tablèt/òdinatè (sib prensipal:
 tablèt Android 10 pous, peyizaj), ak yon service worker ki kenbe POS la
 itilizab menm san entènèt ditou (premye chajman enkli).
 
@@ -105,7 +105,7 @@ ajoute yon konparezon eksplisit san migrasyon.
       pwodiksyon mande pou verifye enstalabilite a nèt).
 - [x] **Service worker verifye kont yon vrè `next start` (pwodiksyon)**:
       anrejistreman konfime (`navigator.serviceWorker.controller`), de
-      cache yo kreye (`jere-boutik-v1-shell`, `-assets`), e yon reload
+      cache yo kreye (`patwonpro-v1-shell`, `-assets`), e yon reload
       `/login` apre `context.setOffline(true)` chaje paj la nèt (fòm
       konekte a vizib) san erè navigatè — kapti nan
       `sw-01-offline-login.png`.

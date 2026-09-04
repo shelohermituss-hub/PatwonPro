@@ -23,7 +23,7 @@ export class JereBoutikDB extends Dexie {
   creditPayments!: EntityTable<CreditPayment, "id">;
 
   constructor() {
-    super("jere-boutik");
+    super("patwonpro");
 
     this.version(1).stores({
       products: "id, store_id, category_id, name, sku, is_active",

@@ -1,14 +1,14 @@
-# Achitekti — Jere Boutik
+# Achitekti — PatwonPro
 
 ## Apèsi
 
-Jere Boutik se yon PWA (Progressive Web App) premium pou ede ti boutik ak mwayen boutik an Ayiti jere:
+PatwonPro se yon PWA (Progressive Web App) premium pou ede ti boutik ak mwayen boutik an Ayiti jere:
 - Envantè / pwodwi, antre stòk ak ajisteman
 - Vant nan pwen vant (POS)
 - Kredi kliyan (vant a kredi, "fè kredi")
 - Rapò vant ak envantè
 - Peman (kach, MonCash, NatCash)
-- Abònman, tablèt (aparèy), ak sipò — jere pa ekip Jere Boutik la
+- Abònman, tablèt (aparèy), ak sipò — jere pa ekip PatwonPro la
 
 Aplikasyon an fèt pou mache **offline-first**: yon boutik ka pa gen entènèt tout tan, donk POS la dwe fonksyone san koneksyon epi senkronize done yo lè koneksyon an retabli. Sib prensipal la se yon **tablèt Android 10 pous an mòd peyizaj** (1280×800) — gade `docs/CLAUDE.md` pou detay pwodwi/design konplè.
 
@@ -30,7 +30,7 @@ Aplikasyon an fèt pou mache **offline-first**: yon boutik ka pa gen entènèt t
 1. **Offline-first** — tout ekran POS ak lekti pwodwi dwe travay san entènèt. Dexie se sous verite lokal la; Supabase se sous verite a long tèm.
 2. **Sync ki idanpotan (idempotent)** — chak vant kreye lokalman gen yon UUID kliyan-jenere pou evite double-anrejistreman lè l' senkronize.
 3. **Multi-tenant** — chak boutik se yon `store` separe ak Row Level Security sou Supabase pou izole done ant boutik.
-4. **Wòl itilizatè** — `owner` (pwopriyetè, aksè total sou pwòp boutik), `employee` (anplwaye, limite a vant/kredi), `platform_admin` (ekip Jere Boutik, jere abònman/tablèt/sipò/kont atravè **tout** boutik — pa gen `store_id`).
+4. **Wòl itilizatè** — `owner` (pwopriyetè, aksè total sou pwòp boutik), `employee` (anplwaye, limite a vant/kredi), `platform_admin` (ekip PatwonPro, jere abònman/tablèt/sipò/kont atravè **tout** boutik — pa gen `store_id`).
 5. **Tablèt-premye, peyizaj** — sib prensipal se yon tablèt Android 10 pous an mòd peyizaj (1280×800); UI a dwe rapid, klè, e santre sou aksyon/chif enpòtan.
 
 ## Estrikti dosye

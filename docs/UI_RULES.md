@@ -1,10 +1,10 @@
 # Règles UI — Tablette, Responsive, Accessibilité, Offline
 
-Règles opérationnelles pour tout écran Jere Boutik. Complète
+Règles opérationnelles pour tout écran PatwonPro. Complète
 `docs/CLAUDE.md` ("Règles UI") et `docs/DESIGN_SYSTEM.md`. Le kit
 `design-system/` ne couvre aucun breakpoint tablette (voir
 `docs/DESIGN_AUDIT.md` §3) — les règles ci-dessous sont donc définies
-pour Jere Boutik, pas extraites du kit.
+pour PatwonPro, pas extraites du kit.
 
 ## 1. Tablette 10 pouces, paysage (cible principale — 1280×800)
 

@@ -1,4 +1,4 @@
--- Jere Boutik — schema inisyal
+-- PatwonPro — schema inisyal
 -- Gade docs/DATA_MODEL.md pou deskripsyon chak tab.
 
 create extension if not exists "pgcrypto";
@@ -33,7 +33,7 @@ create table stores (
   updated_at timestamptz not null default now()
 );
 
--- `platform_admin` se ekip Jere Boutik la (jesyon abònman/aparèy/sipò/kont
+-- `platform_admin` se ekip PatwonPro la (jesyon abònman/aparèy/sipò/kont
 -- atravè TOUT boutik) — li pa gen yon sèl boutik, donk `store_id` nul pou
 -- wòl sa a sèlman. Chak lòt wòl DWE gen yon `store_id`.
 create table profiles (
