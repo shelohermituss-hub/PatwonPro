@@ -1,9 +1,14 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+const PUBLIC_PATHS = new Set(["/", "/login", "/register"]);
+const AUTH_ONLY_PATHS = new Set(["/login", "/register"]);
+
 /**
- * Refreshes the Supabase auth session on every request. Wire this into
- * middleware.ts so Server Components always see a valid session.
+ * Refreshes the Supabase auth session on every request and gates access:
+ * unauthenticated users are redirected to /login for anything outside
+ * PUBLIC_PATHS; authenticated users hitting /login or /register are sent
+ * straight to /dashboard.
  */
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -29,7 +34,25 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { pathname } = request.nextUrl;
+
+  if (!user && !PUBLIC_PATHS.has(pathname)) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    url.searchParams.set("next", pathname);
+    return NextResponse.redirect(url);
+  }
+
+  if (user && AUTH_ONLY_PATHS.has(pathname)) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/dashboard";
+    url.search = "";
+    return NextResponse.redirect(url);
+  }
 
   return response;
 }

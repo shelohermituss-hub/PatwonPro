@@ -1,70 +1,12 @@
-"use client";
+import { DashboardShell } from "@/components/DashboardShell";
+import { getCurrentProfile } from "@/lib/supabase/profile";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  ShoppingCart,
-  Package,
-  PackagePlus,
-  HandCoins,
-  BarChart3,
-  Settings,
-  CreditCard,
-} from "lucide-react";
-import { SyncStatusBadge } from "@/components/SyncStatusBadge";
-import { cn } from "@/lib/utils";
-
-const navItems = [
-  { href: "/dashboard", label: "Tablo Bò", icon: LayoutDashboard },
-  { href: "/pos", label: "Pwen Vant", icon: ShoppingCart },
-  { href: "/products", label: "Pwodwi", icon: Package },
-  { href: "/stock-entries", label: "Antre Stòk", icon: PackagePlus },
-  { href: "/credits", label: "Kredi", icon: HandCoins },
-  { href: "/reports", label: "Rapò", icon: BarChart3 },
-  { href: "/subscription", label: "Abònman", icon: CreditCard },
-  { href: "/settings", label: "Paramèt", icon: Settings },
-];
-
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
+  const profile = await getCurrentProfile();
 
-  return (
-    <div className="flex flex-1">
-      <aside className="flex w-sidebar shrink-0 flex-col border-r border-border bg-surface">
-        <div className="px-4 py-5">
-          <span className="text-lg font-semibold text-foreground">Jere Boutik</span>
-        </div>
-        <nav className="flex flex-1 flex-col gap-1 px-2">
-          {navItems.map(({ href, label, icon: Icon }) => {
-            const isActive = pathname === href || pathname.startsWith(`${href}/`);
-            return (
-              <Link
-                key={href}
-                href={href}
-                aria-current={isActive ? "page" : undefined}
-                className={cn(
-                  "flex min-h-12 items-center gap-3 rounded-md px-3 text-sm font-medium transition-colors",
-                  isActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-text-secondary hover:bg-muted hover:text-foreground",
-                )}
-              >
-                <Icon className="size-5 shrink-0" aria-hidden />
-                {label}
-              </Link>
-            );
-          })}
-        </nav>
-        <div className="border-t border-border p-3">
-          <SyncStatusBadge />
-        </div>
-      </aside>
-      <main className="flex-1 overflow-y-auto">{children}</main>
-    </div>
-  );
+  return <DashboardShell profile={profile}>{children}</DashboardShell>;
 }
