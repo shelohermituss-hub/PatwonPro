@@ -14,15 +14,28 @@ Etap sa a depann de `04-pos.md` (POS la deja gen `payment_method` kòm chwa).
 1. **Konfigirasyon**
    - Ranpli `MONCASH_CLIENT_ID/SECRET` ak `NATCASH_CLIENT_ID/SECRET` nan
      `.env.local` (soti nan pòtal machann chak founisè).
-   - Konplete `src/lib/payments/moncash.ts` ak `natcash.ts` (deja gen yon
-     eskèlèt) — ajoute verifikasyon estati tranzaksyon.
+   - `src/lib/payments/moncash.ts` deja konplè (`createMonCashPayment`,
+     `getMonCashPaymentStatus`), vre-verifye kont yon SDK piblik paske sit
+     dokiman MonCash a te retounen 404. **Verifye kont sandbox lan** anvan
+     pwodiksyon — mapin `rawStatus` → `paid`/`failed` poko fèt (chan sa a
+     brit entansyonèlman, gade kòmantè nan fichye a).
+   - `src/lib/payments/natcash.ts` rete yon **plasholder ke pa verifye**
+     (pa gen dokiman piblik NatCash) — mete ajou non chan/wout yo kont
+     dokiman machann reyèl la anvan w konte sou li.
+   - `src/lib/supabase/admin.ts` (kliyan service-role) ak
+     `src/lib/payments/audit.ts` (`recordPaymentTransaction`,
+     `updatePaymentTransactionStatus`) deja egziste — sèvi ak yo pito
+     pase ekri SQL dirèk nan route handlers yo.
 
 2. **Route handlers**
-   - `src/app/api/payments/moncash/route.ts` — kreye yon peman
-     (`createMonCashPayment`) epi retounen URL redireksyon an bay fwontyè a.
+   - `src/app/api/payments/moncash/route.ts` — rele
+     `createMonCashPayment`, epi `recordPaymentTransaction` (`status:
+     "pending"`) anvan retounen URL redireksyon an bay fwontyè a.
    - `src/app/api/payments/moncash/webhook/route.ts` — resevwa notifikasyon
-     MonCash, verifye siyati/otantisite, mete `payment_transactions` ak
-     `sales.payment_status` ajou.
+     MonCash, verifye siyati/otantisite (**pa gen kòd egzanp pou sa nan
+     pwojè a — mekanis siyati MonCash pa konfime, chèche l nan dokiman
+     machann ou resevwa lè kont lan aktive**), epi rele
+     `updatePaymentTransactionStatus` ak mete `sales.payment_status` ajou.
    - Menm bagay la pou NatCash (`/api/payments/natcash/...`).
 
 3. **Flux nan POS**
