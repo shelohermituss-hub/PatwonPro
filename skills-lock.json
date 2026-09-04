@@ -25,6 +25,18 @@
       "skillPath": ".claude/skills/design-system/SKILL.md",
       "computedHash": "c50a1a77394e988b2593ed97f95ae28b5167eb8a826385b5996d67e398d15b6a"
     },
+    "migrate-radix-to-base": {
+      "source": "shadcn-ui/ui",
+      "sourceType": "github",
+      "skillPath": "skills/migrate-radix-to-base/SKILL.md",
+      "computedHash": "e1f2030ee5059be3dff0812ca0e4b995ee9fa3132176f049ebe6c90346a6755e"
+    },
+    "shadcn": {
+      "source": "shadcn-ui/ui",
+      "sourceType": "github",
+      "skillPath": "skills/shadcn/SKILL.md",
+      "computedHash": "a86630dd9b32722a4ea6846abc6756d5da8f06bdc2343dbc625923cc5c7a758b"
+    },
     "slides": {
       "source": "nextlevelbuilder/ui-ux-pro-max-skill",
       "sourceType": "github",
