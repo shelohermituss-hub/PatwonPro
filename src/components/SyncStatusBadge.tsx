@@ -20,12 +20,12 @@ export function SyncStatusBadge() {
   }, []);
 
   const label = !isOnline
-    ? "Offline"
+    ? `Offline · ${pendingCount} aksyon annatant`
     : pendingCount > 0
-      ? `Sync annatant (${pendingCount})`
-      : "Online";
+      ? `Ap senkwonize · ${pendingCount} aksyon`
+      : "Anliy · Tout bagay senkwonize";
 
-  const dotColor = !isOnline ? "bg-danger" : pendingCount > 0 ? "bg-accent" : "bg-success";
+  const dotColor = !isOnline ? "bg-danger" : pendingCount > 0 ? "bg-warning" : "bg-success";
 
   return (
     <div className="flex items-center gap-1.5 rounded-full bg-surface px-2.5 py-1 text-xs text-text-secondary">

@@ -1,8 +1,18 @@
-export type UserRole = "owner" | "manager" | "cashier";
+export type UserRole = "owner" | "employee" | "platform_admin";
 
 export type PaymentMethod = "cash" | "moncash" | "natcash" | "credit";
 
 export type PaymentStatus = "paid" | "partial" | "credit";
+
+export type PaymentTransactionStatus = "pending" | "paid" | "failed" | "cancelled" | "expired";
+
+export type SubscriptionPlan = "starter" | "pro" | "enterprise";
+
+export type SubscriptionStatus = "trialing" | "active" | "past_due" | "canceled" | "expired";
+
+export type DeviceStatus = "active" | "inactive" | "blocked";
+
+export type SupportTicketStatus = "open" | "in_progress" | "resolved" | "closed";
 
 export type SyncStatus = "pending" | "synced";
 
@@ -14,20 +24,25 @@ export interface Store {
   address: string | null;
   phone: string | null;
   created_at: string;
+  updated_at: string;
 }
 
 export interface Profile {
   id: string;
-  store_id: string;
+  /** Null only for `platform_admin` — that role isn't scoped to one store. */
+  store_id: string | null;
   full_name: string;
   role: UserRole;
   created_at: string;
+  updated_at: string;
 }
 
 export interface Category {
   id: string;
   store_id: string;
   name: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Product {
@@ -42,6 +57,7 @@ export interface Product {
   stock_quantity: number;
   low_stock_threshold: number;
   is_active: boolean;
+  created_at: string;
   updated_at: string;
 }
 
@@ -53,12 +69,13 @@ export interface Customer {
   credit_limit: number;
   credit_balance: number;
   created_at: string;
+  updated_at: string;
 }
 
 export interface Sale {
   id: string;
   store_id: string;
-  cashier_id: string;
+  employee_id: string;
   customer_id: string | null;
   subtotal: number;
   discount: number;
@@ -71,6 +88,7 @@ export interface Sale {
   /** Dexie-only: ISO timestamp; sync engine skips this sale until then. */
   next_sync_at?: string | null;
   created_at: string;
+  updated_at: string;
 }
 
 export interface SaleItem {
@@ -80,6 +98,7 @@ export interface SaleItem {
   quantity: number;
   unit_price: number;
   line_total: number;
+  created_at: string;
 }
 
 export interface CreditPayment {
@@ -99,6 +118,43 @@ export interface PaymentTransaction {
   provider: "moncash" | "natcash";
   provider_reference: string | null;
   amount: number;
-  status: "pending" | "success" | "failed";
+  status: PaymentTransactionStatus;
+  /** Raw webhook payload for audit/debugging — never a secret/signature value. */
+  raw_event: Record<string, unknown> | null;
   created_at: string;
+  updated_at: string;
+}
+
+export interface Subscription {
+  id: string;
+  store_id: string;
+  plan: SubscriptionPlan;
+  status: SubscriptionStatus;
+  current_period_start: string | null;
+  current_period_end: string | null;
+  price_htg: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Device {
+  id: string;
+  store_id: string;
+  name: string;
+  device_identifier: string | null;
+  status: DeviceStatus;
+  last_seen_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SupportTicket {
+  id: string;
+  store_id: string;
+  created_by: string;
+  subject: string;
+  message: string;
+  status: SupportTicketStatus;
+  created_at: string;
+  updated_at: string;
 }

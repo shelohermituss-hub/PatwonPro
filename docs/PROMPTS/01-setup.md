@@ -11,7 +11,7 @@ Mete kanpe eskèlèt pwojè a: Next.js (TypeScript + Tailwind + App Router), kon
    - Konfime `npm run dev` mache san erè.
 
 2. **Estrikti dosye**
-   - Kreye `src/app/(auth)/`, `src/app/(dashboard)/{pos,products,credits,reports}/`.
+   - Kreye `src/app/(auth)/`, `src/app/(dashboard)/{dashboard,pos,products,stock-entries,credits,reports,subscription,settings}/`, `src/app/(admin)/admin/`.
    - Kreye `src/components/`, `src/lib/{supabase,db,sync,payments}/`, `src/hooks/`, `src/types/`.
 
 3. **Varyab anviwònman**
@@ -55,4 +55,4 @@ Mete kanpe eskèlèt pwojè a: Next.js (TypeScript + Tailwind + App Router), kon
 
 ## Pwochen etap
 
-Kontinye ak `02-auth.md` pou mete kanpe otantifikasyon ak jesyon wòl (owner/manager/cashier).
+Kontinye ak `02-auth.md` pou mete kanpe otantifikasyon ak jesyon wòl (owner/employee/platform_admin).

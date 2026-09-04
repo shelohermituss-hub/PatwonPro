@@ -2,7 +2,7 @@
 
 ## Objektif
 
-Bay `owner`/`manager` yon fason pou jere kategori ak pwodwi (kreye, modifye,
+Bay `owner` yon fason pou jere kategori ak pwodwi (kreye, modifye,
 dezaktive, swiv stòk), e fè done sa yo disponib offline pou POS la.
 
 ## Depandans
@@ -24,15 +24,15 @@ Etap sa a depann de `02-auth.md` (wòl itilizatè).
    - Kreye `src/lib/sync/pullProducts.ts` ki senkronize `products` ak
      `categories` soti Supabase pou rive Dexie.
 4. **Alèt stòk ba**
-   - Sou paj pwodwi a, mete badge (`accent`) pou pwodwi kote
+   - Sou paj pwodwi a, mete badge (`warning`) pou pwodwi kote
      `stock_quantity <= low_stock_threshold`.
 
 ## Kritè pou konsidere etap la fini
 
-- [ ] `owner`/`manager` ka kreye/modifye/dezaktive yon pwodwi.
+- [ ] `owner` ka kreye/modifye/dezaktive yon pwodwi.
 - [ ] Lis pwodwi disponib nan Dexie apre yon premye chajman (teste offline).
 - [ ] Alèt stòk ba parèt kòrèkteman.
-- [ ] `cashier` ka wè pwodwi yo men pa ka modifye yo (RLS + UI).
+- [ ] `employee` ka wè pwodwi yo men pa ka modifye yo (RLS + UI).
 
 ## Pwochen etap
 

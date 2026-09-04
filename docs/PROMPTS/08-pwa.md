@@ -2,9 +2,9 @@
 
 ## Objektif
 
-Fè Jere Boutik Pro enstalab kòm yon app sou telefòn/òdinatè, ak yon service
-worker ki kenbe POS la itilizab menm san entènèt ditou (premye chajman
-enkli).
+Fè Jere Boutik enstalab kòm yon app sou tablèt/òdinatè (sib prensipal:
+tablèt Android 10 pous, peyizaj), ak yon service worker ki kenbe POS la
+itilizab menm san entènèt ditou (premye chajman enkli).
 
 ## Depandans
 
@@ -21,15 +21,17 @@ Etap sa a se dènye a — li depann de tout lòt yo, sitou `04-pos.md`
    - Ajoute `next-pwa` (oswa ekri yon service worker manyèl senp) ki:
      - Cache assets estatik yo (JS/CSS/font) — estrateji "stale-while-
        revalidate" oswa "cache-first".
-     - Cache paj App Shell la (`/pos`, `/products`, `/credits`, `/reports`)
-       pou yo louvri menm si rezo a pa disponib ditou.
+     - Cache paj App Shell la (`/dashboard`, `/pos`, `/products`,
+       `/stock-entries`, `/credits`, `/reports`, `/subscription`,
+       `/settings`) pou yo louvri menm si rezo a pa disponib ditou.
      - PA cache repons API ki gen done sansib san estrateji klè (pito kite
        Dexie jere pèsistans done, service worker jere sèlman asset/shell).
 
-3. **Estati koneksyon global**
-   - Yon `Context`/hook `useOnlineStatus()` ki itilize nan tout dashboard
-     la pou montre eta koneksyon + kantite operasyon "pending" (sales,
-     credit_payments) k ap tann sync.
+3. **Estati koneksyon global** — deja fèt (`src/hooks/useOnlineStatus.ts`,
+   `src/hooks/usePendingSyncCount.ts`, `src/components/SyncStatusBadge.tsx`,
+   monte nan sidebar `(dashboard)/layout.tsx`). Pa rekreye l; elaji l pou
+   kouvri `credit_payments` si etap `05-credits.md` ajoute yon sync pou tab
+   sa a tou.
 
 4. **Enstalasyon**
    - Bouton/bannyè "Enstale Jere Boutik sou aparèy ou" ki itilize evènman

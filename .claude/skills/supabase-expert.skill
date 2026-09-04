@@ -30,12 +30,19 @@ Nòt referans pou travay sou Supabase (Postgres + Auth + RLS) nan pwojè a.
 
 ## Wòl
 
-- `owner` / `manager`: aksè total sou `products`, `customers`, rapò.
-- `cashier`: kreye `sales`/`sale_items`/`credit_payments`, lekti sèlman
+- `owner`: aksè total sou `products`, `customers`, rapò, pwòp boutik li.
+- `employee`: kreye `sales`/`sale_items`/`credit_payments`, lekti sèlman
   sou `products`/`customers`.
-- Enplemante distenksyon sa a ak politik RLS adisyonèl pa wòl lè
-  `02-auth.md` fèt (pa gen politik pa-wòl nan migrasyon inisyal la
-  toujou — jodi a se izolasyon pa-boutik sèlman).
+- `platform_admin`: **pa gen `store_id`** (`profiles.store_id` nul pou
+  wòl sa a sèlman, gade `docs/DATA_MODEL.md`) — aksè global atravè tout
+  boutik, verifye pa fonksyon `is_platform_admin()` (`security definer`,
+  evite rekiziyon RLS) itilize nan **chak** politik `_store_isolation`
+  nan migrasyon an. Ekri sou `subscriptions`/`devices` rezève sèlman a
+  wòl sa a (li rete louvri a manm boutik la) — yon boutik pa dwe kapab
+  chanje pwòp bòday fakti oswa pwovizyone pwòp tablèt li.
+- Distenksyon `owner`/`employee` (aksè total vs limite) poko enplemante
+  kòm politik RLS pa-wòl nan migrasyon inisyal la — sa vin fèt nan
+  `02-auth.md` (jodi a se izolasyon pa-boutik + `platform_admin` sèlman).
 
 ## Otantifikasyon (Supabase Auth)
 
@@ -59,7 +66,9 @@ Nòt referans pou travay sou Supabase (Postgres + Auth + RLS) nan pwojè a.
 ## Règ
 
 - Pa janm ekspoze `SUPABASE_SERVICE_ROLE_KEY` nan kòd fwontyè — sèvi ak li
-  sèlman nan route handlers / Edge Functions sèvè-kote.
+  sèlman atravè `src/lib/supabase/admin.ts` (`createAdminClient()`) nan
+  route handlers / Edge Functions sèvè-kote (webhook peman, pa egzanp,
+  paske yo pa gen sesyon itilizatè pou RLS nòmal la aplike).
 - Tout nouvo tab ki gen `store_id` dwe gen `alter table ... enable row
   level security;` ak omwen yon politik anvan yo itilize an pwodiksyon.
 - Sèvi ak `numeric(12,2)` pou lajan, `uuid` (default `gen_random_uuid()`)

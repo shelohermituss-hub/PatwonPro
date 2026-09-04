@@ -1,12 +1,12 @@
 {
-  "name": "Jere Boutik Pro",
+  "name": "Jere Boutik",
   "short_name": "Jere Boutik",
   "description": "Jere envantè, vant, ak kredi boutik ou — menm san entènèt.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f8fafc",
-  "theme_color": "#0f766e",
-  "orientation": "portrait",
+  "theme_color": "#2563eb",
+  "orientation": "landscape",
   "icons": [
     {
       "src": "/icons/icon-192.png",

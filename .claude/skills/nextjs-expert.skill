@@ -4,36 +4,38 @@ Nòt referans pou travay sou fwontyè Next.js pwojè a (App Router, TypeScript
 strict, Tailwind v4). Konbine konvansyon pwojè a deja etabli ak bon pratik
 jeneral Next.js App Router.
 
-## ⚠️ Konfli ak dènye enstriksyon resevwa — pou revize ak itilizatè a
+## Rezoud: sib aparèy se tablèt, pa telefòn
 
-Yon deskripsyon "Next.js 14+ expert" resevwa dènyèman mansyone kèk chwa ki
-**diferan** de sa pwojè a itilize kounye a. Yo pa aplike otomatikman — yo
-rete la kòm dwapo pou yon desizyon eksplisit:
+**Rezoud pa `docs/CLAUDE.md`** (enstriksyon pwojè a): sib prensipal se yon
+**tablèt Android 10 pous an mòd peyizaj, 1280×800** — pa mobil-premye kòm
+premye vèsyon `DESIGN_SYSTEM.md` la te di. Layout `(dashboard)/layout.tsx`
+kounye a se yon sidebar fiks (`w-sidebar`, 248px), pa yon tab bar anba.
+Si yon lòt enstriksyon mansyone "mobil-premye" oswa yon tab bar mobil pou
+`(dashboard)`, se li ki depase, pa `docs/CLAUDE.md`.
 
-| Sijè | Pwojè a itilize kounye a | Sa dènye enstriksyon an mande |
-|---|---|---|
-| Vèsyon Next.js | **16.3.4** (gade `AGENTS.md` — API/konvansyon chanje, `proxy.ts` ranplase `middleware.ts`) | "14+" |
-| Sib aparèy | **Mobil-premye**, telefòn Android antre gam (gade `docs/DESIGN_SYSTEM.md`) | Tablet 10-pous, `1280x800` |
-| PWA | Sèvis worker manyèl (`docs/PROMPTS/08-pwa.md` mansyone `next-pwa` kòm opsyon) | `next-pwa` |
-
-Si pwojè a dwe chanje pou vize tablet olye telefòn, se yon desizyon
-pwodwi/design ki merite konfimasyon eksplisit (li afekte
-`DESIGN_SYSTEM.md`, layout `(dashboard)/layout.tsx`, ak gwosè touch-target
-POS la) — pa yon swiv otomatik.
+Vèsyon Next.js rete **16.3.4** (gade `AGENTS.md` — `proxy.ts` ranplase
+`middleware.ts`) — pa gen konfli la, nenpòt referans "14+" se yon erè.
 
 **shadcn/ui ranje** — `npx shadcn@latest init --defaults` te kouri (Base
-UI, preset Nova), `components.json` egziste. **⚠️ Enpòtan**: pwosesis
-`init`/`add` la ekri sou pwòp `--primary`/`--accent`/`--background`/
-`--foreground` pwojè a nan `src/app/globals.css` — li deja fè sa yon fwa
-(ranplase koulè mak yo ak defo gri Nova a). Chak fwa w rele `npx shadcn
-add`, **verifye `git diff src/app/globals.css`** anvan w commit, epi
-restore valè mak yo (`docs/DESIGN_SYSTEM.md`) si CLI a ekrase yo ankò —
-gade kòmantè nan tèt blòk `:root`/`.dark` nan fichye a.
+UI, preset Nova), `components.json` egziste, ak yon gwo seri konpozan
+deja ajoute (gade `docs/DESIGN_SYSTEM.md`). **⚠️ Enpòtan**: pwosesis
+`init` la ekri sou pwòp `--primary`/`--background`/`--foreground` pwojè a
+nan `src/app/globals.css` — li deja fè sa yon fwa (ranplase koulè mak yo
+ak defo gri Nova a). Chak fwa w rele `npx shadcn add`/`init`, **verifye
+`git diff src/app/globals.css`** anvan w commit, epi restore valè mak yo
+(`docs/CLAUDE.md` "Tokens visuels") si CLI a ekrase yo ankò — gade
+kòmantè nan tèt blòk `:root`/`.dark` nan fichye a.
+
+**`--accent` se PA koulè mak "warning" a** — se tokens NEYIT shadcn pou
+hover/highlight (meni, select, elt.). Koulè oranj mak la (`#F59E0B`) viv
+nan `--warning`/`bg-warning` separeman. Pa janm melanje yo.
 
 ## Konvansyon pwojè a
 
-- Route groups: `(auth)` pou login/enskripsyon, `(dashboard)` pou aplikasyon
-  prensipal la apre koneksyon (POS, pwodwi, kredi, rapò).
+- Route groups: `(auth)` pou login/enskripsyon, `(dashboard)` pou
+  aplikasyon prensipal la apre koneksyon (`owner`/`employee`, yon sèl
+  boutik), `(admin)` pou konsòl `platform_admin` (atravè tout boutik —
+  gade `docs/DATA_MODEL.md`, wòl sa a pa gen `store_id`).
 - Kliyan Supabase: `src/lib/supabase/client.ts` (browser), `server.ts`
   (Server Components / route handlers), `middleware.ts` (helper refresh
   sesyon, rele pa `src/proxy.ts` — fichye rasin Next.js 16 la, **pa**

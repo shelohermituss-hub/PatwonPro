@@ -1,4 +1,4 @@
-# Jere Boutik Pro
+# Jere Boutik
 
 @AGENTS.md
 
