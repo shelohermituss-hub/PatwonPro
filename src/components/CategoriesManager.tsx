@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLiveQuery } from "dexie-react-hooks";
-import { LoaderCircle, MoreVertical, Tags } from "lucide-react";
+import { LoaderCircle, MoreVertical } from "lucide-react";
+import { Icons } from "@/lib/icons";
 import { toast } from "sonner";
 import { db } from "@/lib/db";
 import { pullProducts } from "@/lib/sync/products";
@@ -86,7 +87,7 @@ export function CategoriesManager() {
         </div>
       ) : sorted.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border py-16 text-center">
-          <Tags className="size-10 text-text-secondary" aria-hidden />
+          <Icons.folder className="size-10" aria-hidden />
           <div className="flex flex-col gap-1">
             <p className="font-medium text-foreground">Ou poko gen kategori</p>
             <p className="text-sm text-text-secondary">

@@ -1,4 +1,4 @@
-import { MessageCircle } from "lucide-react";
+import { Icons } from "@/lib/icons";
 import { SUPPORT_TICKET_STATUS_LABELS } from "@/lib/subscription/labels";
 import { formatDateTime } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +15,7 @@ export function SupportTicketList({ tickets }: { tickets: SupportTicket[] }) {
   if (tickets.length === 0) {
     return (
       <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border py-10 text-center">
-        <MessageCircle className="size-8 text-text-secondary" aria-hidden />
+        <Icons.support className="size-8" aria-hidden />
         <p className="text-sm text-text-secondary">Ou poko gen tikè sipò.</p>
       </div>
     );

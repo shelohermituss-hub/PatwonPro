@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
-import { Plus, Search, HandCoins, TriangleAlert } from "lucide-react";
+import { Icons } from "@/lib/icons";
 import { db } from "@/lib/db";
 import { pullCustomers } from "@/lib/sync/customers";
 import { pullCreditPayments } from "@/lib/sync/creditPayments";
@@ -105,7 +105,7 @@ export default function CreditsPage() {
           <p className="text-text-secondary">Jere dèt kliyan yo.</p>
         </div>
         <Link href="/credits/new" className={cn(buttonVariants(), "min-h-12")}>
-          <Plus data-icon="inline-start" aria-hidden />
+          <Icons.add data-icon="inline-start" aria-hidden />
           Nouvo Kredi
         </Link>
       </div>
@@ -115,7 +115,7 @@ export default function CreditsPage() {
           role="alert"
           className="flex items-center gap-3 rounded-md border border-danger/30 bg-danger/10 px-4 py-3 text-danger"
         >
-          <TriangleAlert className="size-5 shrink-0" aria-hidden />
+          <Icons.alert className="size-5 shrink-0" aria-hidden />
           <p className="text-sm font-medium">
             {overdue.length} kredi an reta pou yon total{" "}
             {formatCurrency(overdue.reduce((sum, c) => sum + c.remaining, 0))}.
@@ -125,8 +125,8 @@ export default function CreditsPage() {
 
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative min-w-[240px] flex-1">
-          <Search
-            className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary"
+          <Icons.search
+            className="absolute left-3 top-1/2 size-4 -translate-y-1/2"
             aria-hidden
           />
           <Input
@@ -161,7 +161,7 @@ export default function CreditsPage() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border py-16 text-center">
-          <HandCoins className="size-10 text-text-secondary" aria-hidden />
+          <Icons.credit className="size-10" aria-hidden />
           <div className="flex flex-col gap-1">
             <p className="font-medium text-foreground">
               {credits && credits.length > 0

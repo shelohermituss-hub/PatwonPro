@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
-import { Plus, Search, PackageX, TriangleAlert, MoreVertical } from "lucide-react";
+import { MoreVertical } from "lucide-react";
+import { Icons } from "@/lib/icons";
 import { db } from "@/lib/db";
 import { pullProducts } from "@/lib/sync/products";
 import { useCurrentProfile } from "@/hooks/useCurrentProfile";
@@ -88,7 +89,7 @@ export default function ProductsPage() {
               Kategori
             </Link>
             <Link href="/products/new" className={cn(buttonVariants(), "min-h-12")}>
-              <Plus data-icon="inline-start" aria-hidden />
+              <Icons.add data-icon="inline-start" aria-hidden />
               Ajoute Pwodwi
             </Link>
           </div>
@@ -107,8 +108,8 @@ export default function ProductsPage() {
 
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative min-w-[240px] flex-1">
-          <Search
-            className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary"
+          <Icons.search
+            className="absolute left-3 top-1/2 size-4 -translate-y-1/2"
             aria-hidden
           />
           <Input
@@ -149,7 +150,7 @@ export default function ProductsPage() {
           onClick={() => setLowStockOnly((v) => !v)}
           className="min-h-12"
         >
-          <TriangleAlert data-icon="inline-start" aria-hidden />
+          <Icons.alert data-icon="inline-start" aria-hidden />
           Stòk ba sèlman
         </Button>
       </div>
@@ -162,7 +163,7 @@ export default function ProductsPage() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border py-16 text-center">
-          <PackageX className="size-10 text-text-secondary" aria-hidden />
+          <Icons.product className="size-10" aria-hidden />
           <div className="flex flex-col gap-1">
             <p className="font-medium text-foreground">
               {products && products.length > 0
@@ -180,7 +181,7 @@ export default function ProductsPage() {
               href="/products/new"
               className={cn(buttonVariants(), "mt-2 min-h-12")}
             >
-              <Plus data-icon="inline-start" aria-hidden />
+              <Icons.add data-icon="inline-start" aria-hidden />
               Ajoute premye pwodwi ou
             </Link>
           )}

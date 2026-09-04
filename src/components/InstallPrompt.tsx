@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Download, X } from "lucide-react";
+import { X } from "lucide-react";
+import { Icons } from "@/lib/icons";
 import { Button } from "@/components/ui/button";
 
 const DISMISSED_KEY = "patwonpro:install-prompt-dismissed";
@@ -56,7 +57,7 @@ export function InstallPrompt() {
   return (
     <div className="flex items-center justify-between gap-3 border-b border-border bg-primary/5 px-4 py-2.5">
       <div className="flex items-center gap-2 text-sm text-foreground">
-        <Download className="size-4 shrink-0 text-primary" aria-hidden />
+        <Icons.download className="size-4 shrink-0" aria-hidden />
         Enstale PatwonPro sou aparèy ou pou l louvri pi vit e travay san entènèt.
       </div>
       <div className="flex shrink-0 items-center gap-2">

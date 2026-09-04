@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Receipt } from "lucide-react";
+import { Icons } from "@/lib/icons";
 import {
   Card,
   CardHeader,
@@ -29,7 +29,7 @@ export function RecentSalesPanel({ sales }: { sales: DashboardSale[] }) {
       <CardContent>
         {sales.length === 0 ? (
           <div className="flex flex-col items-center gap-2 py-6 text-center">
-            <Receipt className="size-8 text-text-secondary" aria-hidden />
+            <Icons.sales className="size-8" aria-hidden />
             <p className="text-sm text-text-secondary">Poko gen vant jodi a.</p>
           </div>
         ) : (

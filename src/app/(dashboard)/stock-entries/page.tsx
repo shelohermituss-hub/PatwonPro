@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
-import { Plus, Search, PackageSearch } from "lucide-react";
+import { Icons } from "@/lib/icons";
 import { db } from "@/lib/db";
 import { pullProducts } from "@/lib/sync/products";
 import { pullStockEntries } from "@/lib/sync/stockEntries";
@@ -67,15 +67,15 @@ export default function StockEntriesPage() {
         </div>
         {isOwner(profile) && (
           <Link href="/stock-entries/new" className={cn(buttonVariants(), "min-h-12")}>
-            <Plus data-icon="inline-start" aria-hidden />
+            <Icons.add data-icon="inline-start" aria-hidden />
             Nouvo Antre
           </Link>
         )}
       </div>
 
       <div className="relative min-w-[240px] max-w-sm">
-        <Search
-          className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary"
+        <Icons.search
+          className="absolute left-3 top-1/2 size-4 -translate-y-1/2"
           aria-hidden
         />
         <Input
@@ -95,7 +95,7 @@ export default function StockEntriesPage() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border py-16 text-center">
-          <PackageSearch className="size-10 text-text-secondary" aria-hidden />
+          <Icons.product className="size-10" aria-hidden />
           <div className="flex flex-col gap-1">
             <p className="font-medium text-foreground">
               {entries && entries.length > 0
@@ -113,7 +113,7 @@ export default function StockEntriesPage() {
               href="/stock-entries/new"
               className={cn(buttonVariants(), "mt-2 min-h-12")}
             >
-              <Plus data-icon="inline-start" aria-hidden />
+              <Icons.add data-icon="inline-start" aria-hidden />
               Ajoute premye antre a
             </Link>
           )}

@@ -4,7 +4,7 @@ import { use, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
-import { PackageX } from "lucide-react";
+import { Icons } from "@/lib/icons";
 import { db } from "@/lib/db";
 import { ProductForm } from "@/components/ProductForm";
 import { useCurrentProfile } from "@/hooks/useCurrentProfile";
@@ -52,7 +52,7 @@ export default function EditProductPage({
   if (!result.found || !result.product) {
     return (
       <div className="flex flex-col items-center gap-3 p-16 text-center">
-        <PackageX className="size-10 text-text-secondary" aria-hidden />
+        <Icons.product className="size-10" aria-hidden />
         <p className="font-medium text-foreground">
           Nou pa jwenn pwodwi sa a
         </p>

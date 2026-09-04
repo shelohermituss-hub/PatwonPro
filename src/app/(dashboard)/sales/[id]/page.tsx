@@ -3,7 +3,7 @@
 import { use } from "react";
 import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
-import { ArrowLeft, Receipt } from "lucide-react";
+import { Icons } from "@/lib/icons";
 import { db } from "@/lib/db";
 import { Skeleton } from "@/components/ui/skeleton";
 import { buttonVariants } from "@/components/ui/button";
@@ -67,7 +67,7 @@ export default function SaleDetailPage({
   if (!result.found) {
     return (
       <div className="flex flex-col items-center gap-3 p-16 text-center">
-        <Receipt className="size-10 text-text-secondary" aria-hidden />
+        <Icons.sales className="size-10" aria-hidden />
         <p className="font-medium text-foreground">Nou pa jwenn vant sa a</p>
         <p className="text-sm text-text-secondary">
           Li ka efase, oswa li poko senkwonize sou aparèy sa a.
@@ -89,7 +89,7 @@ export default function SaleDetailPage({
           aria-label="Tounen nan istorik vant"
           className={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
         >
-          <ArrowLeft className="size-4" aria-hidden />
+          <Icons.back className="size-4" aria-hidden />
         </Link>
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-extrabold text-foreground">

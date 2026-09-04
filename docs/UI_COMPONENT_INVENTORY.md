@@ -45,7 +45,7 @@ n'a pas été installé. À corriger dès le premier écran avec formulaire
 | `Cart` (panier POS) | Liste des articles du panier, quantité +/-, sous-total, total | `ScrollArea` + composants custom de ligne — pas d'équivalent shadcn |
 | `NumericKeypad` | Clavier numérique pour saisie de montant/quantité au tactile (paiement, remise) | 100% custom — aucun écran du kit `design-system/` n'en montre, à concevoir de zéro (voir `DESIGN_AUDIT.md` §5) |
 | `KpiStatCard` | Carte KPI avec titre, valeur, tendance, barre de progression colorée | `Card` + `Progress` shadcn en composition — inspiré de `design-system/Invoices/List/01.png` et `Calendar.png` |
-| `IconChip` | Icône Lucide dans un carré arrondi de couleur douce (catégories, types) | `div` + classes Tailwind, pas de composant shadcn dédié — pattern vu dans `design-system/Products/List/01.png` |
+| `IconChip` | Icône flat-color-icons (`src/lib/icons.ts`) dans un carré arrondi de couleur douce (catégories, types) | `div` + classes Tailwind, pas de composant shadcn dédié — pattern vu dans `design-system/Products/List/01.png` |
 | `DataTable` | Wrapper autour de `table` shadcn : tri de colonnes, sélection multiple, menu d'action par ligne, pagination | Compose `table` (existant) + `pagination` (à installer) + `dropdown-menu` (existant) |
 | `StatusBadge` (métier) | Badge teinte douce mappé aux statuts métier (`payment_status`, `payment_transactions.status`) | `Badge` shadcn avec variantes couleur custom (`success`/`warning`/`danger`) — **ne pas** copier les couleurs exactes du kit (voir `DESIGN_SYSTEM.md`) |
 | `RadialProgress` (donut) | Anneau de progression concentrique (ex. objectif de vente du jour) | Recharts `RadialBarChart` — aucun équivalent shadcn natif, vu dans `design-system/Products/List/01.png` |

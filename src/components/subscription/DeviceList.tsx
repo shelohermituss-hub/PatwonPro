@@ -1,4 +1,4 @@
-import { Tablet } from "lucide-react";
+import { Icons } from "@/lib/icons";
 import { DEVICE_STATUS_LABELS } from "@/lib/subscription/labels";
 import { formatDateTime } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +22,7 @@ export function DeviceList({ devices }: { devices: Device[] }) {
   if (devices.length === 0) {
     return (
       <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border py-10 text-center">
-        <Tablet className="size-8 text-text-secondary" aria-hidden />
+        <Icons.tablet className="size-8" aria-hidden />
         <p className="text-sm text-text-secondary">
           Pa gen tablèt anrejistre pou boutik ou.
         </p>

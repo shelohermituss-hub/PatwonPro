@@ -2,7 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ChevronDown, LogOut, Settings } from "lucide-react";
+import { ChevronDown, LogOut } from "lucide-react";
+import { Icons } from "@/lib/icons";
 import { SyncStatusBadge } from "@/components/SyncStatusBadge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -94,7 +95,7 @@ export function DashboardHeader({
               <DropdownMenuLabel>{profile.full_name}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem render={<Link href="/settings" />}>
-                <Settings data-icon="inline-start" aria-hidden />
+                <Icons.settings data-icon="inline-start" aria-hidden />
                 Paramèt
               </DropdownMenuItem>
               <DropdownMenuItem variant="destructive" onClick={handleSignOut}>

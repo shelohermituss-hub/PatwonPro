@@ -1,6 +1,7 @@
 "use client";
 
-import { Minus, Plus, Trash2, ShoppingCart, LoaderCircle } from "lucide-react";
+import { Minus, Plus, Trash2, LoaderCircle } from "lucide-react";
+import { Icons } from "@/lib/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldLabel } from "@/components/ui/field";
@@ -73,7 +74,7 @@ export function CartPanel({
     <div className="flex h-full flex-col border-l border-border bg-surface">
       <div className="min-h-0 flex-1 overflow-y-auto p-4">
         <h2 className="mb-3 flex items-center gap-2 text-base font-semibold text-foreground">
-          <ShoppingCart className="size-5" aria-hidden />
+          <Icons.pos className="size-5" aria-hidden />
           Panye
         </h2>
 

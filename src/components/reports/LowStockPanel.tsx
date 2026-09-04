@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PackageX } from "lucide-react";
+import { Icons } from "@/lib/icons";
 import {
   Card,
   CardHeader,
@@ -22,7 +22,7 @@ export function LowStockPanel({ products }: { products: Product[] }) {
       <CardContent>
         {products.length === 0 ? (
           <div className="flex flex-col items-center gap-2 py-6 text-center">
-            <PackageX className="size-8 text-text-secondary" aria-hidden />
+            <Icons.product className="size-8" aria-hidden />
             <p className="text-sm text-text-secondary">Tout pwodwi gen ase stòk.</p>
           </div>
         ) : (

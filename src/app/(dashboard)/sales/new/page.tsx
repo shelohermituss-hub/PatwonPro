@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
-import { History } from "lucide-react";
+import { Icons } from "@/lib/icons";
 import { toast } from "sonner";
 import { db } from "@/lib/db";
 import { pullProducts } from "@/lib/sync/products";
@@ -118,7 +118,7 @@ export default function NewSalePage() {
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
           <h1 className="text-lg font-semibold text-foreground">Pwen Vant</h1>
           <Link href="/sales" className={cn(buttonVariants({ variant: "outline" }))}>
-            <History data-icon="inline-start" aria-hidden />
+            <Icons.history data-icon="inline-start" aria-hidden />
             Istorik Vant
           </Link>
         </div>

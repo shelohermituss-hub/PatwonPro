@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
-import { Plus, Search, Receipt, ArrowRight } from "lucide-react";
+import { Icons } from "@/lib/icons";
 import { db } from "@/lib/db";
 import { pullCustomers } from "@/lib/sync/customers";
 import { useCurrentProfile } from "@/hooks/useCurrentProfile";
@@ -108,15 +108,15 @@ export default function SalesHistoryPage() {
           <p className="text-text-secondary">Tout vant ki fèt nan boutik ou.</p>
         </div>
         <Link href="/sales/new" className={cn(buttonVariants(), "min-h-12")}>
-          <Plus data-icon="inline-start" aria-hidden />
+          <Icons.add data-icon="inline-start" aria-hidden />
           Nouvo Vant
         </Link>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative min-w-[240px] flex-1">
-          <Search
-            className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary"
+          <Icons.search
+            className="absolute left-3 top-1/2 size-4 -translate-y-1/2"
             aria-hidden
           />
           <Input
@@ -182,7 +182,7 @@ export default function SalesHistoryPage() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border py-16 text-center">
-          <Receipt className="size-10 text-text-secondary" aria-hidden />
+          <Icons.sales className="size-10" aria-hidden />
           <div className="flex flex-col gap-1">
             <p className="font-medium text-foreground">
               {sales && sales.length > 0
@@ -240,7 +240,7 @@ export default function SalesHistoryPage() {
                       aria-label={`Wè detay vant ${formatDateTime(sale.created_at)}`}
                       className={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
                     >
-                      <ArrowRight className="size-4" aria-hidden />
+                      <Icons.next className="size-4" aria-hidden />
                     </Link>
                   </TableCell>
                 </TableRow>

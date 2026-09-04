@@ -1,0 +1,76 @@
+import {
+  FcStatistics,
+  FcShop,
+  FcPackage,
+  FcShipped,
+  FcMoneyTransfer,
+  FcComboChart,
+  FcVip,
+  FcSettings,
+  FcSalesPerformance,
+  FcCurrencyExchange,
+  FcHighPriority,
+  FcPositiveDynamic,
+  FcNegativeDynamic,
+  FcOk,
+  FcConferenceCall,
+  FcPlus,
+  FcNext,
+  FcPrevious,
+  FcList,
+  FcSearch,
+  FcCancel,
+  FcDisapprove,
+  FcDownload,
+  FcClock,
+  FcRatings,
+  FcFolder,
+  FcTabletAndroid,
+  FcSupport,
+  FcSms,
+  FcCallback,
+  FcCalculator,
+} from "react-icons/fc";
+
+/**
+ * Central registry of flat-color-icons (icons8, via react-icons/fc) used
+ * across the app — one semantic name per concept rather than importing
+ * `react-icons/fc` ad-hoc per file, so a mapping only needs fixing here.
+ * Lucide stays for shadcn's internal UI chrome (chevrons/checks/close
+ * buttons in src/components/ui/*.tsx) and every `LoaderCircle` spinner —
+ * flat-color-icons has no equivalents for those functional glyphs.
+ */
+export const Icons = {
+  dashboard: FcStatistics,
+  pos: FcShop,
+  product: FcPackage,
+  stock: FcShipped,
+  credit: FcMoneyTransfer,
+  reports: FcComboChart,
+  subscription: FcVip,
+  settings: FcSettings,
+
+  sales: FcSalesPerformance,
+  profit: FcCurrencyExchange,
+  alert: FcHighPriority,
+  trendUp: FcPositiveDynamic,
+  trendDown: FcNegativeDynamic,
+  success: FcOk,
+  customers: FcConferenceCall,
+  add: FcPlus,
+  next: FcNext,
+  back: FcPrevious,
+  search: FcSearch,
+  cancelled: FcCancel,
+  failed: FcDisapprove,
+  download: FcDownload,
+  history: FcClock,
+  topRated: FcRatings,
+  folder: FcFolder,
+  tablet: FcTabletAndroid,
+  support: FcSupport,
+  sms: FcSms,
+  callback: FcCallback,
+  transactionCount: FcList,
+  avgBasket: FcCalculator,
+} as const;

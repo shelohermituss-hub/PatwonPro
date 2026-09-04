@@ -2,17 +2,8 @@
 
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  ShoppingCart,
-  Package,
-  PackagePlus,
-  HandCoins,
-  BarChart3,
-  Settings,
-  CreditCard,
-  LogOut,
-} from "lucide-react";
+import { LogOut } from "lucide-react";
+import { Icons } from "@/lib/icons";
 import { SyncStatusBadge } from "@/components/SyncStatusBadge";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { Logo } from "@/components/Logo";
@@ -21,14 +12,14 @@ import { cn } from "@/lib/utils";
 import type { Profile } from "@/types";
 
 const navItems = [
-  { href: "/dashboard", label: "Tablo Bò", icon: LayoutDashboard },
-  { href: "/sales/new", matchPrefix: "/sales", label: "Pwen Vant", icon: ShoppingCart },
-  { href: "/products", label: "Pwodwi", icon: Package },
-  { href: "/stock-entries", label: "Antre Stòk", icon: PackagePlus },
-  { href: "/credits", label: "Kredi", icon: HandCoins },
-  { href: "/reports", label: "Rapò", icon: BarChart3 },
-  { href: "/subscription", label: "Abònman", icon: CreditCard },
-  { href: "/settings", label: "Paramèt", icon: Settings },
+  { href: "/dashboard", label: "Tablo Bò", icon: Icons.dashboard },
+  { href: "/sales/new", matchPrefix: "/sales", label: "Pwen Vant", icon: Icons.pos },
+  { href: "/products", label: "Pwodwi", icon: Icons.product },
+  { href: "/stock-entries", label: "Antre Stòk", icon: Icons.stock },
+  { href: "/credits", label: "Kredi", icon: Icons.credit },
+  { href: "/reports", label: "Rapò", icon: Icons.reports },
+  { href: "/subscription", label: "Abònman", icon: Icons.subscription },
+  { href: "/settings", label: "Paramèt", icon: Icons.settings },
 ];
 
 const ROLE_LABELS: Record<Profile["role"], string> = {

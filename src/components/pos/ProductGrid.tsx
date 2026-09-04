@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { Search, PackageX } from "lucide-react";
+import { Icons } from "@/lib/icons";
 import { db } from "@/lib/db";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -39,8 +39,8 @@ export function ProductGrid({
   return (
     <div className="flex h-full flex-col gap-4 p-4">
       <div className="relative">
-        <Search
-          className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary"
+        <Icons.search
+          className="absolute left-3 top-1/2 size-4 -translate-y-1/2"
           aria-hidden
         />
         <Input
@@ -83,7 +83,7 @@ export function ProductGrid({
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center gap-2 py-16 text-center">
-            <PackageX className="size-10 text-text-secondary" aria-hidden />
+            <Icons.product className="size-10" aria-hidden />
             <p className="font-medium text-foreground">
               {products && products.length > 0
                 ? "Pa gen pwodwi ki matche rechèch la"

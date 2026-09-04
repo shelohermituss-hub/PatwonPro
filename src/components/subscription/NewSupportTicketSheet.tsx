@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LoaderCircle, Plus } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
+import { Icons } from "@/lib/icons";
 import { toast } from "sonner";
 import { createSupportTicket } from "@/lib/support/createSupportTicket";
 import {
@@ -71,7 +72,7 @@ export function NewSupportTicketSheet({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger render={<Button className="min-h-12" />}>
-        <Plus data-icon="inline-start" aria-hidden />
+        <Icons.add data-icon="inline-start" aria-hidden />
         Nouvo Tikè
       </SheetTrigger>
       <SheetContent>

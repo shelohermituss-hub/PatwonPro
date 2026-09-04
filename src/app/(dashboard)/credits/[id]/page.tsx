@@ -5,13 +5,8 @@ import Link from "next/link";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLiveQuery } from "dexie-react-hooks";
-import {
-  HandCoins,
-  LoaderCircle,
-  MessageSquare,
-  Send,
-  TriangleAlert,
-} from "lucide-react";
+import { LoaderCircle } from "lucide-react";
+import { Icons } from "@/lib/icons";
 import { toast } from "sonner";
 import { db } from "@/lib/db";
 import { recordCreditPayment } from "@/lib/credits/recordPayment";
@@ -139,7 +134,7 @@ export default function CreditDetailPage({
   if (!result.found) {
     return (
       <div className="flex flex-col items-center gap-3 p-16 text-center">
-        <HandCoins className="size-10 text-text-secondary" aria-hidden />
+        <Icons.credit className="size-10" aria-hidden />
         <p className="font-medium text-foreground">Nou pa jwenn kredi sa a</p>
         <p className="text-sm text-text-secondary">
           Li ka efase, oswa li poko senkwonize sou aparèy sa a.
@@ -172,7 +167,7 @@ export default function CreditDetailPage({
           role="alert"
           className="flex items-center gap-3 rounded-md border border-danger/30 bg-danger/10 px-4 py-3 text-danger"
         >
-          <TriangleAlert className="size-5 shrink-0" aria-hidden />
+          <Icons.alert className="size-5 shrink-0" aria-hidden />
           <p className="text-sm font-medium">
             Dèt sa a an reta — pa gen vèsman depi plis pase 30 jou.
           </p>
@@ -210,7 +205,7 @@ export default function CreditDetailPage({
           className="min-h-12"
           onClick={() => sendReminderPlaceholder("SMS")}
         >
-          <MessageSquare data-icon="inline-start" aria-hidden />
+          <Icons.sms data-icon="inline-start" aria-hidden />
           Voye rapèl SMS
         </Button>
         <Button
@@ -219,7 +214,7 @@ export default function CreditDetailPage({
           className="min-h-12"
           onClick={() => sendReminderPlaceholder("WhatsApp")}
         >
-          <Send data-icon="inline-start" aria-hidden />
+          <Icons.callback data-icon="inline-start" aria-hidden />
           Voye rapèl WhatsApp
         </Button>
       </div>

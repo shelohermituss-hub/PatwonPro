@@ -1,4 +1,4 @@
-import { Wallet, TrendingUp, Receipt, ShoppingBasket } from "lucide-react";
+import { Icons } from "@/lib/icons";
 import {
   Card,
   CardHeader,
@@ -15,25 +15,25 @@ export function KpiCards({ summary }: { summary: ReportSummary }) {
       label: "Total Vant",
       value: formatCurrency(summary.total_sales),
       hint: "Total tout vant sou peryòd la",
-      icon: Wallet,
+      icon: Icons.sales,
     },
     {
       label: "Pwofi Estime",
       value: formatCurrency(summary.estimated_profit),
       hint: "Pri vant mwens pri achte",
-      icon: TrendingUp,
+      icon: Icons.trendUp,
     },
     {
       label: "Tranzaksyon",
       value: String(summary.transaction_count),
       hint: "Kantite vant sou peryòd la",
-      icon: Receipt,
+      icon: Icons.transactionCount,
     },
     {
       label: "Panye Mwayèn",
       value: formatCurrency(summary.avg_basket),
       hint: "Total vant / kantite vant",
-      icon: ShoppingBasket,
+      icon: Icons.avgBasket,
     },
   ];
 
@@ -46,7 +46,7 @@ export function KpiCards({ summary }: { summary: ReportSummary }) {
               <CardTitle className="text-sm font-medium text-text-secondary">
                 {label}
               </CardTitle>
-              <div className="flex size-9 items-center justify-center rounded-md bg-primary/10 text-primary">
+              <div className="flex size-9 items-center justify-center rounded-md bg-primary/10">
                 <Icon className="size-5" aria-hidden />
               </div>
             </div>

@@ -1,4 +1,4 @@
-import { Trophy } from "lucide-react";
+import { Icons } from "@/lib/icons";
 import {
   Card,
   CardHeader,
@@ -19,7 +19,7 @@ export function TopProductsList({ products }: { products: TopProductRow[] }) {
       <CardContent>
         {products.length === 0 ? (
           <div className="flex flex-col items-center gap-2 py-6 text-center">
-            <Trophy className="size-8 text-text-secondary" aria-hidden />
+            <Icons.topRated className="size-8" aria-hidden />
             <p className="text-sm text-text-secondary">
               Pa gen vant pwodwi sou peryòd sa a.
             </p>

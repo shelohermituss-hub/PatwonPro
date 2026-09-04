@@ -1,6 +1,7 @@
 "use client";
 
-import { CheckCircle2, LoaderCircle, TriangleAlert, XCircle } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
+import { Icons } from "@/lib/icons";
 import {
   Dialog,
   DialogContent,
@@ -71,28 +72,28 @@ export function MonCashPaymentDialog({
 
           {state.status === "confirmed" && (
             <>
-              <CheckCircle2 className="size-10 text-success" aria-hidden />
+              <Icons.success className="size-10" aria-hidden />
               <p className="text-sm font-medium text-foreground">Peman konfime!</p>
             </>
           )}
 
           {state.status === "cancelled" && (
             <>
-              <TriangleAlert className="size-10 text-warning" aria-hidden />
+              <Icons.cancelled className="size-10" aria-hidden />
               <p className="text-sm text-text-secondary">Peman an anile.</p>
             </>
           )}
 
           {state.status === "failed" && (
             <>
-              <XCircle className="size-10 text-danger" aria-hidden />
+              <Icons.failed className="size-10" aria-hidden />
               <p className="text-sm text-text-secondary">{state.message}</p>
             </>
           )}
 
           {state.status === "error" && (
             <>
-              <XCircle className="size-10 text-danger" aria-hidden />
+              <Icons.failed className="size-10" aria-hidden />
               <p className="text-sm text-text-secondary">{state.message}</p>
             </>
           )}
