@@ -164,14 +164,22 @@ focus plus visible sur tablette.
 
 ## Layout
 
-- **Sidebar tablette fixe** (`(dashboard)/layout.tsx`) : `w-sidebar`
-  (248px), logo + liste de modules (Tablo Bò, Pwen Vant, Pwodwi, Antre
-  Stòk, Kredi, Rapò, Abònman, Paramèt) chacun avec une icône
-  flat-color-icons (`src/lib/icons.ts`),
-  `SyncStatusBadge` en bas. Le lien actif est marqué par `bg-primary`.
-  **Écart assumé vs le kit** : celui-ci utilise un rail icône-seule
-  (~72–84px) ; on garde le sidebar labellisé (248px), plus lisible pour
-  des commerçants non-techniques — voir `DESIGN_AUDIT.md` §6.
+- **Sidebar tablette** (`src/components/AppSidebar.tsx`, `DashboardShell.tsx`) :
+  composant shadcn `Sidebar` (`collapsible="icon"`, largeur 248px via
+  `--sidebar-width` sur `SidebarProvider`) — logo boutik + liste de
+  modules (Tablo Bò, Pwen Vant, Pwodwi, Antre Stòk, Kredi, Rapò,
+  Abònman, Paramèt) chacun avec une icône flat-color-icons
+  (`src/lib/icons.ts`), pwofil + dekonekte ak `SyncStatusBadge` en bas.
+  Le lien actif est marqué par `bg-primary` (override du token neutre
+  `--sidebar-accent` par défaut du composant, via `data-active:bg-primary`
+  sur `SidebarMenuButton`). État ouvert/fermé persisté par cookie
+  (`sidebar_state`, lu côté serveur dans `(dashboard)/layout.tsx` pour
+  éviter un flash). **Écart assumé vs le kit** : le kit propose un rail
+  icône-seule fixe (~72–84px) ; ici le mode labellisé (248px) reste le
+  défaut — plus lisible pour des commerçants non-techniques — mais
+  `collapsible="icon"` permet de le réduire volontairement (bouton
+  `SidebarTrigger`, ou `Ctrl/Cmd+B`) pour gagner de la place sur le POS.
+  Voir `DESIGN_AUDIT.md` §6.
 - **`(admin)` séparé** : le rôle `platform_admin` n'a pas de `store_id`,
   donc il n'entre pas dans `(dashboard)` (toujours scopé à une boutique)
   — il a sa propre section (`(admin)/admin`) pour la gestion

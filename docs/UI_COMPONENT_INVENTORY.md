@@ -15,7 +15,11 @@ shadcn direct).
 `checkbox`, `scroll-area`, `progress`, `sonner`, `textarea`,
 `input-group`, `field`, `radio-group`, `accordion` (FAQ landing page —
 généré via `npx shadcn add accordion`, import `cn` cassé (`from "cn"`)
-corrigé manuellement vers `@/lib/utils`).
+corrigé manuellement vers `@/lib/utils`), `sidebar` (`AppSidebar.tsx` +
+`DashboardShell.tsx` — même correctif d'import `cn` appliqué ; ajoute
+aussi `src/hooks/use-mobile.ts`, réécrit avec `useSyncExternalStore` au
+lieu du `useState`+`useEffect` généré par défaut, qui violait la règle
+lint `react-hooks/set-state-in-effect` du projet).
 
 **Écart historique résolu** : `field`/`field-group` (pas un `form`
 monolithique) sont bien installés et utilisés dans tous les formulaires
