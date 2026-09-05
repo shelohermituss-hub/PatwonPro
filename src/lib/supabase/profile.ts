@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import type { Profile } from "@/types";
 
@@ -6,8 +7,17 @@ import type { Profile } from "@/types";
  * Components/layouts. Returns null if there's no session or no profile
  * row yet (e.g. a freshly-registered auth user before `register_owner`
  * has run).
+ *
+ * Wrapped in React's `cache()` so the auth round-trip (`auth.getUser()`)
+ * and the `profiles` select only happen once per request — several
+ * owner-gated pages (`products/new`, `stock-entries/new`,
+ * `products/categories`) call this again after `(dashboard)/layout.tsx`
+ * already has, and without this every one of those was a second,
+ * fully redundant pair of network round trips on top of the layout's
+ * own, directly adding to the latency a click on a sidebar link felt
+ * before the next page appeared.
  */
-export async function getCurrentProfile(): Promise<Profile | null> {
+export const getCurrentProfile = cache(async (): Promise<Profile | null> => {
   const supabase = await createClient();
 
   const {
@@ -23,4 +33,4 @@ export async function getCurrentProfile(): Promise<Profile | null> {
     .maybeSingle();
 
   return profile;
-}
+});

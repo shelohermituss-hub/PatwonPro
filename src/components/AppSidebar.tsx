@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
+import Link, { useLinkStatus } from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LogOut } from "lucide-react";
+import { LogOut, LoaderCircle } from "lucide-react";
 import { Icons } from "@/lib/icons";
 import { SyncStatusBadge } from "@/components/SyncStatusBadge";
 import { Logo } from "@/components/Logo";
@@ -40,6 +40,22 @@ const ROLE_LABELS: Record<Profile["role"], string> = {
   employee: "Anplwaye",
   platform_admin: "Admin platfòm",
 };
+
+/**
+ * Swaps the nav icon for a spinner the instant a click is registered —
+ * `useLinkStatus()` flips to `pending: true` synchronously on click,
+ * well before the new route's server round trip resolves, so this is
+ * the difference between a sidebar link feeling instantly responsive
+ * and feeling like it did nothing until the page eventually changes.
+ */
+function NavIcon({ icon: Icon }: { icon: React.ComponentType<{ "aria-hidden"?: boolean }> }) {
+  const { pending } = useLinkStatus();
+  return pending ? (
+    <LoaderCircle className="animate-spin" aria-hidden />
+  ) : (
+    <Icon aria-hidden />
+  );
+}
 
 function initials(name: string) {
   return name
@@ -109,7 +125,7 @@ export function AppSidebar({
                       tooltip={label}
                       className="data-active:bg-primary data-active:text-primary-foreground data-active:hover:bg-primary/90 data-active:hover:text-primary-foreground"
                     >
-                      <Icon aria-hidden />
+                      <NavIcon icon={Icon} />
                       <span>{label}</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
