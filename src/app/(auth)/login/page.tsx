@@ -124,6 +124,13 @@ function LoginForm() {
         </p>
 
         <SocialAuthButtons />
+
+        <p className="text-center text-xs text-text-secondary">
+          Ekip Jere Boutik?{" "}
+          <Link href="/admin" className="font-medium text-text-secondary underline hover:text-foreground">
+            Ale nan Admin
+          </Link>
+        </p>
       </FieldGroup>
     </form>
   );
