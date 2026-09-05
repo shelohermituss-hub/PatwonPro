@@ -1,8 +1,8 @@
-# Jere Boutik Admin — Architecture (Phase 1 : UI + mock data)
+# Jere Boutik Admin — Architecture
 
 Back-office interne sou `/admin`, konplètman separe de l'app komèsan
-(`(dashboard)`). Sa a se **premye faz** — entèfas + done mockup, san
-konesyon Supabase/MonCash/NatCash, jan itilizatè a te mande espesifikman.
+(`(dashboard)`). Depi "phase 2 backend", **tout done ak aksyon yo reyèl**
+— pa gen `MOCK_*` ki rete nan `src/app/(admin)/**` ankò.
 
 ## Vizyon
 
@@ -10,119 +10,138 @@ konesyon Supabase/MonCash/NatCash, jan itilizatè a te mande espesifikman.
 peye, konbyen esè ap fini, MRR atann, lajan an reta, tablèt disponib,
 tikè pou trete jodi a. Wè `docs/CLAUDE.md` pou kontèks pwodwi jeneral.
 
-## Rezo aksè — 3 kouch
+## Rezo aksè — 3 kouch, tout reyèl
 
-1. **Gate reyèl** (`(admin)/layout.tsx`, sèvè) : `isPlatformAdmin(profile)`
-   sou pwofil Supabase la. Sa a se **sèl** verifikasyon ki egziste
-   vreman jodi a — yon `owner`/`employee` pa ka rive sou `/admin` menm
-   si li tape URL la dirèkteman.
-2. **7 wòl admin mockup** (`AdminRole` nan `src/types/admin.ts`) :
+1. **Gate wout la** (`(admin)/layout.tsx`, sèvè) : `isPlatformAdmin(profile)`
+   sou pwofil Supabase la — yon `owner`/`employee` pa ka rive sou
+   `/admin` menm si li tape URL la dirèkteman.
+2. **7 wòl admin reyèl** (`profiles.admin_role`, migration 011) :
    `super_admin`, `operations_manager`, `sales_agent`, `field_agent`,
-   `support_agent`, `finance_agent`, `read_only`. Yon `AdminSessionProvider`
-   (Context React, `src/components/admin/AdminSessionProvider.tsx`) mock
-   yon `AdminActor` kouran, ak yon selektè wòl nan header la
-   (`AdminRoleSwitcher`) pou demontre chanjman navigasyon/aksyon.
-3. **Matris pèmisyon** (`src/lib/admin/permissions.ts`) : `visibleNav(role)`
-   filtre lyen sidebar yo, `can(role, action)` deside si yon bouton
-   aksyon parèt. **Sa a se ekran sèlman** — pa gen okenn RLS/backend
-   dèyè li kounye a. Fòm li fèt pou vin miwa egzat yon pwochen policy
-   Supabase (wè "Pwochen etap backend" pi ba).
+   `support_agent`, `finance_agent`, `read_only` — sèlman poze lè
+   `role = 'platform_admin'` (contrainte). `AdminSessionProvider`
+   (`src/components/admin/AdminSessionProvider.tsx`) pa mock ankò : li
+   resevwa yon `AdminActor` konstwi sèvè-kote nan `(admin)/layout.tsx`
+   soti nan `getCurrentProfile()`.
+3. **De miwa pèmisyon ki dwe rete senkwonize manyèlman** :
+   `src/lib/admin/permissions.ts` (`can(role, action)`, kontwòl UI —
+   ki bouton/lyen parèt) ak `admin_can(action text)` (fonksyon SQL,
+   migration 011 — **se sèl vrè baryè**, RLS chèk li sou chak tab
+   admin). Si youn chanje, chanje lòt la.
 
 ## Relasyon ak done reyèl yo
 
-`profiles`/`stores`/`subscriptions`/`devices`/`support_tickets` egziste
-deja nan Supabase (`docs/DATA_MODEL.md`) — `platform_admin` deja gen
-dwa ekri sou `subscriptions`/`devices` selon RLS aktyèl la. Se poutèt sa
-`AdminSubscription`/`AdminDevice`/`AdminSupportTicket` (nan
-`src/types/admin.ts`) se **vèsyon anrichi** menm antite sa yo (plis
-kolòn : plan/pri/reta pou abònman, seri/mak/istorik reparasyon pou
-aparèy, kategori/priyorite/SLA pou tikè) — **pa** yon lòt tab paralèl.
+`profiles`/`stores`/`subscriptions`/`devices`/`support_tickets` te deja
+egziste anvan back-office la (`docs/DATA_MODEL.md`). Yo te **anrichi
+sou plas** (migrations 013-017 : `device_code`, `serial_number`,
+`plan`/`price_htg` deja la, `category`/`priority`/`sla_deadline` sou
+tikè, elatriye) — **pa** dupliye nan yon dezyèm tab. Sis (6) tab
+antyèman nouvo te kreye pou konsèp ki pa t gen ekivalan ditou : `leads`,
+`deposits`, `installations`, `platform_transactions`,
+`platform_settings`, `audit_logs` (migrations 018-023).
 
-**Pwochen etap backend dwe `ALTER` tab ki egziste yo, pa kreye dwoub.**
-Antite ki pa gen ekivalan reyèl ditou (leads, trials, deposits,
-installations, transactions administratif, sync health, audit log,
-team) ap bezwen migrasyon nèf konplètman.
+Tout tab admin swiv menm patwon RLS : `SELECT` rezève
+`is_platform_admin()`, ekriti rezève `is_platform_admin() AND
+admin_can('manage_xxx')`. `audit_logs` se sèl eksepsyon — nenpòt
+sou-wòl admin ka ekri yon antre odit (`is_platform_admin()` sèlman),
+paske chak aksyon nan lòt tab yo dwe kite yon tras kèlkeswa ki wòl fè l.
 
 ## Estrikti fichye
 
 ```
-src/types/admin.ts              — tout modèl domèn admin
+src/types/admin.ts              — tout modèl domèn admin (anrichi ak
+                                   dbId/actor_name/etc. kote yo bezwen
+                                   diferansye kòd afichaj vs vrè UUID)
 src/lib/admin/
-  permissions.ts                 — matris nav/aksyon pa wòl
+  permissions.ts                 — matris nav/aksyon pa wòl (miwa admin_can())
   labels.ts                      — dictionè estati → {label, tone}
-  auditLog.ts                    — store mock an memwa + useAuditLog()
-  now.ts                         — "jodi a" fiks pou kalkil mockup yo
-  mock/*.ts                      — done reyalis (12 boutik, abònman,
-                                    kosyon, aparèy, lead/esè, sipò,
-                                    tranzaksyon, sync, ekip, odit)
+  auditLog.ts                    — insert Supabase reyèl (audit_logs)
+  installationChecklist.ts       — chèklis fiks sèd nouvo enstalasyon
+  queries/*.ts                   — yon lekti pa domèn (stores, leads,
+                                    deposits, installations, devices,
+                                    subscriptions, support, transactions,
+                                    sync, team, settings, analytics,
+                                    auditLog, storeDetail)
+  mutations/*.ts                 — ekriti client-side (`.update()`/
+                                    `.insert()` filtre pa RLS)
+  actions/*.ts                   — Server Actions ki bezwen service-role
+                                    (inviteAdmin, resetOwnerPassword)
 src/components/admin/
   AdminShell.tsx                 — sidebar sonm + header (rechèch,
-                                    notifikasyon, wòl, dekoneksyon)
-  AdminNav.tsx                   — lyen sidebar yo, filtre pa wòl
-  AdminSessionProvider.tsx       — Context wòl mockup
-  AdminRoleSwitcher.tsx          — chanjè wòl (demo pèmisyon)
+                                    notifikasyon, wòl reyèl, dekoneksyon)
+  AdminNav.tsx                   — lyen sidebar yo, filtre pa wòl reyèl
+  AdminSessionProvider.tsx       — Context sou vrè AdminActor
   AdminDataTable.tsx             — tablo jenerik: rechèch + filt +
                                     paginasyon + ekspòte CSV + eta
                                     loading/vid/erè — itilize pa tout
                                     paj lis yo
   AdminPageHeader.tsx, KpiStat.tsx, StatusBadge.tsx,
-  ConfirmActionDialog.tsx        — blòk repete yo
-  StoreGrowthChart.tsx, MrrChart.tsx — grafik Recharts tablo bò a
-src/app/(admin)/admin/           — 15 wout yo (wè pi ba)
+  ConfirmActionDialog.tsx        — konfimasyon jenerik ak `onConfirm`
+                                    (mutasyon reyèl) + audit_logs insert
+  StoreGrowthChart.tsx, MrrChart.tsx — grafik Recharts sou vrè agrega
+src/app/(admin)/admin/           — 15 wout yo, chak Server Component
+                                    (fetch) + yon `*Client.tsx` (UI/état)
+src/app/api/sync/heartbeat/      — mizajou devices.last_seen_at/
+                                    pending_actions/sync_errors
 docs/ADMIN_DASHBOARD_ARCHITECTURE.md — dokiman sa a
 ```
 
-## Wout yo — 2 nivo pwofondè
+## Wout yo
 
-**Nivo 1 (konplè, ak workflow)** : `/admin` (tablo bò), `/admin/stores`
-+ `/admin/stores/[id]` (8 onglè + meni aksyon + `ConfirmActionDialog`),
-`/admin/subscriptions` (relans/sispann), `/admin/deposits` (Sheet
-pwosesis 9 etap), `/admin/devices` (meni aksyon pa aparèy),
-`/admin/support` (tablo + Kanban).
+Tout 15 wout yo li de vrè tab. Sa ki gen aksyon reyèl konfime pa
+`ConfirmActionDialog`/fòm dedye :
 
-**Nivo 2 (tablo fonksyonèl, mwens pwofondè)** : `/admin/leads`,
-`/admin/trials`, `/admin/installations` (chèklis lekti sèlman nan
-Sheet), `/admin/transactions` (2 onglè, revni platfòm vs vant boutik),
-`/admin/sync`, `/admin/analytics`, `/admin/team` (chanjman wòl mockup),
-`/admin/audit-log` (branche sou `useAuditLog()` — antre ki fèt pandan
-sesyon an parèt vivan), `/admin/settings` (lekti sèlman pou non
-`super_admin`).
+- `/admin` — dashboard, agrega SQL sou 6 domèn.
+- `/admin/stores` + `/admin/stores/[id]` — CRM rollup + 8 onglè, aksyon
+  (konvèti esè, pwolonje, sispann/reyaktive, reyinisyalize modpas,
+  klotire kontra) ekri sou `subscriptions` reyèl.
+- `/admin/leads`, `/admin/trials` — pipeline reyèl, fòm ajoute lead,
+  chanjman etap, Dialog "Konvèti" (lye a yon vrè boutik ki egziste).
+- `/admin/subscriptions` — relans/sispann reyèl.
+- `/admin/deposits` — fòm ajoute + Sheet pwosesis ki ekri estati reyèl.
+- `/admin/devices` — envantè reyèl (`device_code` lizib, `store_id`
+  aksepte null pou tablèt `in_stock` anvan asiyasyon).
+- `/admin/installations` — fòm planifikasyon + chèklis entèraktif
+  pèsistan.
+- `/admin/support` — tablo + Kanban sou vrè `support_tickets`.
+- `/admin/transactions` — "Finans Jere Boutik" (`platform_transactions`)
+  vs "Tranzaksyon Boutik" (fizyon `sales` + `payment_transactions`).
+- `/admin/sync` — sante reyèl (`devices.last_seen_at`/`pending_actions`/
+  `sync_errors`, ranpli pa heartbeat la), "Kreye Tikè" kreye yon vrè
+  tikè P1.
+- `/admin/analytics` — agrega SQL, ak "Poko gen ase done" onèt kote
+  pa gen siyal reyèl (retansyon pa kohòt, kou akizisyon kliyan).
+- `/admin/team` — wozèt `profiles` reyèl + imèl/dènye koneksyon
+  (`auth.users` via service-role), envitasyon admin reyèl, chanjman wòl
+  pwoteje pa yon trigger `enforce_admin_role_change` (migration 028).
+- `/admin/audit-log` — Server Component ki li `audit_logs` dirèkteman.
+- `/admin/settings` — li/ekri `platform_settings` reyèl.
 
 ## Desizyon kle
 
 - **Tèm sonm scope, pa yon dezyèm design system** : `.admin-theme`
   (`globals.css`) redefini **sèlman** 8 varyab `--sidebar*` an ble-nwit
-  (`#0F172A`). Rès aplikasyon an (`--primary`, `--success`, `--warning`,
-  `--danger`, `--background`) rete menm tokens yo — zòn kontni admin lan
-  klè paske `--background` deja `#F8FAFC`.
+  (`#0F172A`). Rès aplikasyon an rete menm tokens yo.
 - **`AdminDataTable` jenerik** olye repwodwi rechèch/filt/paginasyon/CSV
-  nan chak nan 11 paj lis yo — yon sèl kote pou korije si konpòtman an
-  dwe chanje.
-- **Jounal odit an memwa** (`recordAuditEvent`/`useAuditLog`) : chak
-  konfimasyon nan `ConfirmActionDialog` ekri yon antre imedyatman
-  vizib sou `/admin/audit-log`. Pèdi nan refresh — se mockup, pa yon tab
-  `audit_logs` reyèl.
-- **Kanban san drag-and-drop** pou faz sa a — chanjman estati ta pase pa
-  yon meni sou kat la nan yon pwochen iterasyon, pa yon librè DnD.
-- **`ADMIN_MOCK_NOW`** (`src/lib/admin/now.ts`) ranplase `Date.now()`
-  nan kalkil "konbyen jou depi" pou rete pi ("purity" React) epi kenbe
-  yon "jodi a" koyerant (5 septanm 2026) atravè tout paj yo.
+  nan chak paj lis — done pase kòm props soti nan yon Server Component
+  ki fè lekti Supabase la.
+- **Server Component + `*Client.tsx`** : chak wout gen yon `page.tsx`
+  san `"use client"` ki fè `await fetch...()`, ki pase rezilta a bay yon
+  Client Component vwazen pou tablo/fòm/dyalòg entèraktif yo.
+  `router.refresh()` apre chak mutasyon reyèl pou paj la relè done fre.
+- **`enforce_admin_role_change`** : `profiles_all_platform_admin` (FOR
+  ALL, migration 001) twò laj pou fine-grain chanjman `admin_role` —
+  yon trigger separe egzije `admin_can('manage_team')` espesifikman sou
+  chanjman chan sa a, san afekte lòt operasyon platform_admin sou
+  `profiles`.
+- **Pa gen istorik MRR** : grafik "Lajan Antre pa Mwa" sèlman chate
+  `platform_transactions` reyèl (yon vrè seri tan) — MRR se yon chif
+  "kounye a" (KPI), pa yon tandans envante san istorik reyèl dèyè li.
 
-## Pwochen etap backend (pa fèt nan faz sa a)
+## Sa ki rete pou yon pwochen faz (pa `MOCK_*`, men limit reyèl kounye a)
 
-1. Kreye tab reyèl pou `leads`, `trials` (oswa yon sèl tab ak yon
-   `stage`), `deposits`, `installations`, `sync_health` (oswa kalkile
-   soti nan `sync_queue` ki egziste deja), `audit_logs` (fòm egzat
-   bay pa itilizatè a, wè `AuditLogEntry`).
-2. Ajoute kolòn ki manke sou `subscriptions`/`devices`/`support_tickets`
-   pou yo matche vèsyon anrichi mockup la (plan/pri/reta, seri/mak/kou,
-   kategori/priyorite/SLA).
-3. Ranplase `AdminSessionProvider` mockup ak yon vrè modèl `admin_users`
-   + `admin_role` — epi transfòme `src/lib/admin/permissions.ts` an
-   policy RLS reyèl pou chak tab (aksyon UI yo deja make ki pèmisyon yo
-   mande, sa fasilite tradiksyon an).
-4. Konekte CSV export ak yon export sèvè (limit ranje) si volim done a
-   depase sa yon ekspòte kliyan ka jere.
-5. Konekte `/admin/transactions` (onglè "Tranzaksyon Boutik") ak done
-   `payment_transactions`/`sales` reyèl yo — toujou kenbe separasyon
-   klè ak revni Jere Boutik.
+- Retansyon pa kohòt ak kou akizisyon kliyan — pa gen ase istorik/done
+  maketing pou kalkile yo.
+- Aksyon "Chanje plan/pri", "Asiyen/ranplase tablèt", "Anrejistre yon
+  peman", "Kreye yon tikè", "Ajoute nòt entèn" sou fich boutik la rete
+  dezaktive (`disabled`) — pa gen ase workflow espesifye pou yo ankò.
+- Export CSV rete client-side (limit pa volim reyèl aktyèl la, ki fèb).

@@ -26,6 +26,7 @@ Ekstansyon `auth.users` pou jere wòl.
 | store_id | uuid FK -> stores, **nullable** | Nul sèlman pou `platform_admin` — wòl sa a pa apatyen a yon sèl boutik |
 | full_name | text | |
 | role | text | `owner` \| `employee` \| `platform_admin` |
+| admin_role | text nullable | 7 valè (`super_admin`, `operations_manager`, `sales_agent`, `field_agent`, `support_agent`, `finance_agent`, `read_only`) — poze **sèlman** lè `role = 'platform_admin'` (contrainte `profiles_admin_role_matches_role`, migration 011). Baryè reyèl `/admin` yo tout pase pa `admin_can(action text)`, yon fonksyon SQL ki fè menm `case admin_role when ...` ke `src/lib/admin/permissions.ts` — de a dwe rete senkwonize manyèlman. |
 | created_at | timestamptz | |
 | updated_at | timestamptz | Ajou otomatikman pa trigger |
 
@@ -136,38 +137,54 @@ a — pa gen webhook dokimante) — gade `docs/PROMPTS/07-payments.md`.
 
 ### `subscriptions`
 Abònman boutik la — **LI sèlman pou `owner`/`employee`**, ekri se
-`platform_admin` sèlman (yon boutik pa dwe chanje pwòp bòday fakti li).
+`platform_admin` (ak `admin_can('manage_subscriptions')`) sèlman.
+`register_owner()` kreye yon liy `trialing`/`starter`/1200 HTG/30 jou
+otomatikman lè yon boutik enskri (migration 012 — te manke anvan).
 | Chan | Tip | Deskripsyon |
 |---|---|---|
 | id | uuid PK | |
 | store_id | uuid FK | |
 | plan | text | `starter` \| `pro` \| `enterprise` |
-| status | text | `trialing` \| `active` \| `past_due` \| `canceled` \| `expired` |
+| status | text | `trialing` \| `active` \| `past_due` \| `canceled` \| `expired` \| `suspended` |
 | current_period_start | timestamptz nullable | |
 | current_period_end | timestamptz nullable | |
 | price_htg | numeric nullable | |
+| collection_agent_id | uuid FK -> profiles, nullable | Admin responsab rekouvreman |
+| last_reminder_at | timestamptz nullable | |
 | created_at | timestamptz | |
 | updated_at | timestamptz | Ajou otomatikman pa trigger |
 
+`days_late`/`amount_due_htg` pa estoke — kalkile pa fonksyon SQL
+`subscription_days_late(s subscriptions)` (`current_period_end` vs
+`now()`), yon sèl sous verite.
+
 ### `devices`
-Tablèt/aparèy anrejistre pou yon boutik — menm règ aksè ak `subscriptions`
-(li pou manm boutik la, ekri pou `platform_admin`).
+Envantè tablèt konplè — pa sèlman aparèy deja asiyen a yon boutik.
+`store_id`/`name` **nullable** (migration 026) paske yon tablèt ka
+egziste `in_stock`/`reserved` anvan li asiyen.
 | Chan | Tip | Deskripsyon |
 |---|---|---|
 | id | uuid PK | |
-| store_id | uuid FK | |
-| name | text | Etikèt aparèy la (ex: "Tablèt Kesye 1") |
+| store_id | uuid FK, nullable | |
+| name | text nullable | Etikèt aparèy la |
 | device_identifier | text nullable | |
-| status | text | `active` \| `inactive` \| `blocked` |
-| last_seen_at | timestamptz nullable | |
+| device_code | text unique | Kòd lizib `JB-HT-######`, jenere pa yon sekans |
+| serial_number, brand, model, import_batch | text nullable | |
+| actual_cost_htg | numeric nullable | |
+| purchase_date, installed_at, returned_at | date nullable | |
+| contract_number | text nullable | |
+| repair_history | jsonb | Lis `{date, issue, cost}` |
+| photo_count | integer | |
+| status | text | `in_stock` \| `reserved` \| `deployed_trial` \| `deployed_active` \| `repair` \| `returned` \| `refurbished` \| `lost` \| `retired` |
+| last_seen_at | timestamptz nullable | Ranpli pa `POST /api/sync/heartbeat` |
+| pending_actions, sync_errors | integer | Sante sync, ranpli pa menm heartbeat la |
 | created_at | timestamptz | |
 | updated_at | timestamptz | Ajou otomatikman pa trigger |
 
 ### `support_tickets`
-Tikè sipò — mesaj inisyal sèlman pou kounye a; yon tab
-`support_ticket_messages` ka ajoute pita si yon vrè fil konvèsasyon
-nesesè. Manm boutik la ka kreye/li tikè pwòp boutik li; `platform_admin`
-wè/jere tout tikè.
+Tikè sipò — mesaj inisyal sèlman pou kounye a. Manm boutik la ka
+kreye/li tikè pwòp boutik li; `platform_admin` (ak
+`admin_can('manage_support')` pou modifye/efase) wè/jere tout tikè.
 | Chan | Tip | Deskripsyon |
 |---|---|---|
 | id | uuid PK | |
@@ -176,8 +193,114 @@ wè/jere tout tikè.
 | subject | text | |
 | message | text | |
 | status | text | `open` \| `in_progress` \| `resolved` \| `closed` |
+| category | text nullable | 9 valè (`training`, `products_stock`, ... `feature_suggestion`) — souvan `null` paske fòm kreyasyon kòmèsan an pa mande l |
+| priority | text | `P1`..`P4`, default `P3` |
+| assigned_agent_id | uuid FK -> profiles, nullable | |
+| sla_deadline | timestamptz | Kalkile pa trigger `set_support_ticket_sla()` selon priyorite a lè INSERT |
 | created_at | timestamptz | |
 | updated_at | timestamptz | Ajou otomatikman pa trigger |
+
+### `leads`
+Pipeline lead/esè — okenn ekivalan reyèl anvan migration 018.
+| Chan | Tip | Deskripsyon |
+|---|---|---|
+| id | uuid PK | |
+| store_name, owner_name | text | |
+| phone, whatsapp, address, zone, business_type | text nullable | |
+| estimated_product_count, seller_count | integer nullable | |
+| uses_mobile_money | boolean | |
+| agent_id | uuid FK -> profiles, nullable | |
+| device_id | uuid FK -> devices, nullable | |
+| trial_start_date, trial_end_date | date nullable | |
+| last_interaction_at | timestamptz | |
+| objections, loss_reason | text nullable | |
+| stage | text | 9 valè, `lead` → `converted`/`lost`/`device_recovered` |
+| converted_store_id | uuid FK -> stores, nullable | Poze **manyèlman** pa yon admin ki chwazi yon vrè boutik ki egziste — jamè kreyasyon otomatik yon kont pwopriyetè |
+| created_at, updated_at | timestamptz | |
+
+### `deposits`
+Kosyon materyèl — separe de revni Jere Boutik (yon obligasyon
+potansyèl, pa yon vant).
+| Chan | Tip | Deskripsyon |
+|---|---|---|
+| id | uuid PK | |
+| store_id | uuid FK | |
+| device_id | uuid FK -> devices, nullable | |
+| contract_number | text nullable | |
+| amount_htg | numeric | |
+| received_date | date | |
+| status | text | 7 valè, `received` → `refunded`/`partially_retained`/`fully_retained` |
+| eligible_refund_date | date nullable | |
+| device_condition | text nullable | |
+| amount_to_return_htg, amount_retained_htg | numeric nullable | |
+| retention_reason | text nullable | |
+| refund_proof_url | text nullable | |
+| finance_agent_id | uuid FK -> profiles, nullable | |
+| created_at, updated_at | timestamptz | |
+
+### `installations`
+Enstalasyon teren. `store_id`/`lead_id` nullable paske yon enstalasyon
+ka fèt anvan vrè boutik la egziste (pre-konvèsyon lead).
+| Chan | Tip | Deskripsyon |
+|---|---|---|
+| id | uuid PK | |
+| store_id | uuid FK -> stores, nullable | |
+| lead_id | uuid FK -> leads, nullable | |
+| store_name, contact, address | text | |
+| scheduled_at | timestamptz nullable | |
+| agent_id | uuid FK -> profiles, nullable | |
+| device_id | uuid FK -> devices, nullable | |
+| status | text | `scheduled` \| `en_route` \| `installed` \| `postponed` \| `cancelled` |
+| products_to_import | integer nullable | |
+| checklist | jsonb | Lis `{label, done}` — chèklis fiks (`INSTALLATION_CHECKLIST_TEMPLATE`), entèraktif e pèsistan |
+| photo_count | integer | |
+| client_signature | boolean | |
+| training_result, next_action | text nullable | |
+| created_at, updated_at | timestamptz | |
+
+### `platform_transactions`
+Revni Jere Boutik SÈLMAN (abònman, kosyon, enstalasyon...) — pa jamè
+lavant yon boutik, ki toujou li nan `sales`/`payment_transactions`.
+Insert-only (tankou `stock_entries`) — yon korije se yon nouvo liy
+`manual_adjustment`, jamè yon modifikasyon.
+| Chan | Tip | Deskripsyon |
+|---|---|---|
+| id | uuid PK | |
+| type | text | 7 valè (`subscription_payment`, `deposit_received`, ...) |
+| store_id | uuid FK -> stores, nullable | |
+| amount_htg | numeric | |
+| method | text | `cash` \| `moncash` \| `natcash` \| `bank` |
+| occurred_at | timestamptz | |
+| note | text nullable | |
+| created_by | uuid FK -> profiles, nullable | |
+| created_at | timestamptz | |
+
+### `platform_settings`
+Kle/valè senp pou paramèt platfòm (pri plan, montan kosyon default,
+delè gras, SLA P1).
+| Chan | Tip |
+|---|---|
+| key | text PK |
+| value | jsonb |
+| updated_at | timestamptz |
+| updated_by | uuid FK -> profiles, nullable |
+
+### `audit_logs`
+Jounal odit — append-only, okenn policy update/delete (menm prensip ke
+`stock_entries`).
+| Chan | Tip | Deskripsyon |
+|---|---|---|
+| id | uuid PK | |
+| actor_id | uuid FK -> profiles, nullable | |
+| actor_role | text nullable | Snapshot `admin_role` aktè a lè aksyon an fèt |
+| action | text | ex: `subscription.suspended` |
+| resource_type | text | |
+| resource_id | text nullable | |
+| store_id | uuid FK -> stores, nullable | |
+| reason | text nullable | |
+| metadata | jsonb | |
+| ip_address | text nullable | Jamè ranpli kounye a — bezwen yon chemen sèvè, okenn aksyon admin pa pase pa yonn jodi a |
+| created_at | timestamptz | |
 
 ## Storage (Supabase Storage)
 
@@ -207,6 +330,11 @@ sales 1───n payment_transactions
 stores 1───1 subscriptions
 stores 1───n devices
 stores 1───n support_tickets
+leads n───1 stores (converted_store_id, nullable)
+leads/installations n───1 devices (nullable)
+stores 1───n deposits ──n:1── devices (nullable)
+stores 1───n installations (store_id/lead_id nullable)
+stores 1───n platform_transactions (nullable — kèk san boutik)
 ```
 
 ## Row Level Security (RLS)
@@ -228,8 +356,15 @@ rekiziyon RLS sou `profiles`.
 
 `subscriptions` ak `devices` fè eksepsyon: **LI** swiv règ jeneral la
 (manm boutik oswa `platform_admin`), men **ekri** (insert/update/delete)
-rezève sèlman a `platform_admin` — pwovizyone yon tablèt oswa chanje yon
-abònman se yon aksyon platfòm, pa yon aksyon boutik.
+rezève sèlman a `platform_admin` **ak** `admin_can('manage_xxx')`
+(`admin_can(action text)`, migration 011 — menm patwon `security
+definer stable` ke `is_platform_admin()`). Sis tab back-office admin ki
+pa gen okenn manm boutik ki ka wè yo ditou (`leads`, `deposits`,
+`installations`, `platform_transactions`, `platform_settings`,
+`audit_logs`) swiv menm patwon : `SELECT` rezève `is_platform_admin()`,
+ekriti rezève anplis `admin_can('manage_xxx')` — sof `audit_logs`, kote
+nenpòt sou-wòl admin ka ekri yon antre (`is_platform_admin()` sèlman,
+paske chak aksyon dwe kite yon tras kèlkeswa ki wòl fè l).
 
 Distenksyon `owner` (aksè total sou pwòp boutik) vs `employee` (limite a
 vant/kredi) poko enplemante kòm politik RLS pa-wòl nan migrasyon inisyal

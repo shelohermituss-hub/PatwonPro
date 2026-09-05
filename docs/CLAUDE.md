@@ -103,9 +103,10 @@ Avant toute nouvelle interface importante :
     PatwonPro uniquement — gestion boutiques, leads/essais, abonnements,
     cautions, tablettes, installations terrain, support, transactions,
     sync, analytique, équipe et journal d'audit). Complètement séparé de
-    l'interface commerçant, sidebar sombre dédiée. Voir
-    `docs/ADMIN_DASHBOARD_ARCHITECTURE.md` — phase 1 actuelle est UI +
-    données mockées, sans connexion Supabase/MonCash/NatCash.
+    l'interface commerçant, sidebar sombre dédiée, 7 rôles admin réels
+    (`profiles.admin_role`). Toutes les données et actions sont réelles
+    (Supabase, RLS via `admin_can()`) — voir
+    `docs/ADMIN_DASHBOARD_ARCHITECTURE.md`.
 
 ## Architecture offline
 
