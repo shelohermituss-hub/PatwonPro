@@ -1,6 +1,14 @@
 import { createClient } from "@/lib/supabase/server";
 import type { AdminStore, StoreSubscriptionStatus } from "@/types/admin";
 
+/** Lightweight id/name list for dropdowns (lead conversion, installation linking) — not the full CRM rollup. */
+export async function fetchStoreOptions(): Promise<{ id: string; name: string }[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("stores").select("id, name").order("name");
+  if (error) throw new Error(`Pa t kapab chaje lis boutik yo: ${error.message}`);
+  return data ?? [];
+}
+
 function rollupStatus(subStatus: string | undefined, daysLate: number): StoreSubscriptionStatus {
   if (!subStatus) return "trial";
   if (subStatus === "trialing") return "trial";

@@ -10,8 +10,8 @@ import { fetchAdminSubscriptions } from "@/lib/admin/queries/subscriptions";
 import { fetchAdminDevices } from "@/lib/admin/queries/devices";
 import { fetchAdminSupportTickets } from "@/lib/admin/queries/support";
 import { fetchPlatformTransactions } from "@/lib/admin/queries/transactions";
+import { fetchLeads } from "@/lib/admin/queries/leads";
 import { MOCK_SYNC_HEALTH } from "@/lib/admin/mock/sync";
-import { MOCK_LEADS } from "@/lib/admin/mock/leads";
 import { SUPPORT_PRIORITY_LABELS } from "@/lib/admin/labels";
 import type { SyncHealthRow } from "@/types/admin";
 
@@ -21,12 +21,13 @@ function countOfflineDevices(rows: SyncHealthRow[]): number {
 }
 
 export default async function AdminOverviewPage() {
-  const [stores, subscriptions, devices, tickets, platformTransactions] = await Promise.all([
+  const [stores, subscriptions, devices, tickets, platformTransactions, leads] = await Promise.all([
     fetchAdminStores(),
     fetchAdminSubscriptions(),
     fetchAdminDevices(),
     fetchAdminSupportTickets(),
     fetchPlatformTransactions(),
+    fetchLeads(),
   ]);
 
   const activeStores = stores.filter((s) => s.subscriptionStatus === "active").length;
@@ -50,7 +51,7 @@ export default async function AdminOverviewPage() {
   const openTickets = tickets.filter((t) => t.status !== "resolved" && t.status !== "closed").length;
   const syncErrors = MOCK_SYNC_HEALTH.filter((row) => row.errors > 0).length;
 
-  const trialsEndingSoon = MOCK_LEADS.filter((l) => l.stage === "trial_active" || l.stage === "trial_installed").length;
+  const trialsEndingSoon = leads.filter((l) => l.stage === "trial_active" || l.stage === "trial_installed").length;
   const overdueSubs = subscriptions.filter((s) => s.status === "past_due" || s.status === "suspended").length;
   const offlineDeviceCount = countOfflineDevices(MOCK_SYNC_HEALTH);
   const repairDevices = devices.filter((d) => d.status === "repair").length;

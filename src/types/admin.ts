@@ -186,19 +186,20 @@ export interface InstallationChecklistItem {
 export interface Installation {
   id: string;
   storeId: string | null;
+  leadId: string | null;
   storeName: string;
   contact: string;
   address: string;
-  timeSlot: string;
+  scheduledAt: string | null;
   agentName: string;
   deviceId: string | null;
   status: InstallationStatus;
-  productsToImport: number;
+  productsToImport: number | null;
   checklist: InstallationChecklistItem[];
   photoCount: number;
   clientSignature: boolean;
   trainingResult: string | null;
-  nextAction: string;
+  nextAction: string | null;
 }
 
 export type SupportCategory =
