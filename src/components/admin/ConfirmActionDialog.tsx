@@ -19,9 +19,9 @@ import { recordAuditEvent } from "@/lib/admin/auditLog";
 /**
  * Generic confirmation for every sensitive admin action (financial,
  * destructive, suspension, device change — per the spec). Confirming
- * always appends a real `audit_logs` entry. The entity mutation itself
- * (e.g. actually suspending a subscription) is wired per-page via
- * `onConfirmed` — this dialog only owns the confirm step + audit trail.
+ * runs `onConfirm` (the real mutation, if given) then always appends a
+ * real `audit_logs` entry — if `onConfirm` throws (e.g. RLS denies the
+ * write for this admin's role), no audit entry is written either.
  */
 export function ConfirmActionDialog({
   open,
@@ -35,6 +35,7 @@ export function ConfirmActionDialog({
   resourceId,
   storeId = null,
   successMessage,
+  onConfirm,
   onConfirmed,
 }: {
   open: boolean;
@@ -48,6 +49,8 @@ export function ConfirmActionDialog({
   resourceId: string;
   storeId?: string | null;
   successMessage: string;
+  /** Performs the real mutation. Runs before the audit log write. */
+  onConfirm?: () => Promise<void>;
   onConfirmed?: () => void;
 }) {
   const actor = useAdminActor();
@@ -56,6 +59,7 @@ export function ConfirmActionDialog({
   async function handleConfirm() {
     setSubmitting(true);
     try {
+      await onConfirm?.();
       await recordAuditEvent({
         actorId: actor.id,
         actorRole: actor.role,

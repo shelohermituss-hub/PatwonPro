@@ -32,10 +32,10 @@ export interface AdminStore {
   name: string;
   ownerName: string;
   phone: string;
+  /** From the originating lead, when the store came through the sales pipeline — "—" otherwise (e.g. self-registered via /register). */
   whatsapp: string;
-  city: string;
+  address: string;
   zone: string;
-  quarter: string;
   businessType: string;
   subscriptionStatus: StoreSubscriptionStatus;
   plan: "starter" | "standard" | "pro";
@@ -85,12 +85,12 @@ export interface Lead {
 }
 
 export type AdminSubscriptionStatus =
-  | "trial"
+  | "trialing"
   | "active"
-  | "grace_period"
-  | "overdue"
-  | "suspended"
-  | "cancelled";
+  | "past_due"
+  | "canceled"
+  | "expired"
+  | "suspended";
 
 export interface AdminSubscription {
   id: string;
@@ -154,7 +154,10 @@ export interface DeviceRepairEntry {
 }
 
 export interface AdminDevice {
+  /** Human-readable device code (JB-HT-######) — display only. */
   id: string;
+  /** Real `devices.id` UUID — use this for writes. */
+  dbId: string;
   serialNumber: string;
   brand: string;
   model: string;
@@ -211,14 +214,14 @@ export type SupportCategory =
 
 export type SupportPriority = "P1" | "P2" | "P3" | "P4";
 
-export type AdminSupportStatus = "new" | "in_progress" | "waiting_customer" | "resolved";
+export type AdminSupportStatus = "open" | "in_progress" | "resolved" | "closed";
 
 export interface AdminSupportTicket {
   id: string;
   storeId: string;
   storeName: string;
   subject: string;
-  category: SupportCategory;
+  category: SupportCategory | null;
   priority: SupportPriority;
   status: AdminSupportStatus;
   createdAt: string;
@@ -249,6 +252,7 @@ export interface PlatformTransaction {
 
 export type StoreTransactionType =
   | "cash_sale"
+  | "credit_sale"
   | "moncash_sale"
   | "natcash_sale"
   | "payment_pending"

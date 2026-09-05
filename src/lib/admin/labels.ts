@@ -26,12 +26,12 @@ export const STORE_STATUS_LABELS: Record<StoreSubscriptionStatus, StatusMeta> = 
 };
 
 export const SUBSCRIPTION_STATUS_LABELS: Record<AdminSubscriptionStatus, StatusMeta> = {
-  trial: { label: "An Esè", tone: "info" },
+  trialing: { label: "An Esè", tone: "info" },
   active: { label: "Aktif", tone: "positive" },
-  grace_period: { label: "Delè Gras", tone: "warning" },
-  overdue: { label: "An Reta", tone: "warning" },
+  past_due: { label: "An Reta", tone: "warning" },
   suspended: { label: "Sispann", tone: "negative" },
-  cancelled: { label: "Anile", tone: "neutral" },
+  canceled: { label: "Anile", tone: "neutral" },
+  expired: { label: "Ekspire", tone: "neutral" },
 };
 
 export const DEPOSIT_STATUS_LABELS: Record<DepositStatus, StatusMeta> = {
@@ -65,10 +65,10 @@ export const INSTALLATION_STATUS_LABELS: Record<InstallationStatus, StatusMeta> 
 };
 
 export const SUPPORT_STATUS_LABELS: Record<AdminSupportStatus, StatusMeta> = {
-  new: { label: "Nouvo", tone: "info" },
+  open: { label: "Louvri", tone: "info" },
   in_progress: { label: "An Kou", tone: "warning" },
-  waiting_customer: { label: "Ap Tann Kliyan", tone: "neutral" },
   resolved: { label: "Rezoud", tone: "positive" },
+  closed: { label: "Fèmen", tone: "neutral" },
 };
 
 export const SUPPORT_PRIORITY_LABELS: Record<SupportPriority, StatusMeta> = {

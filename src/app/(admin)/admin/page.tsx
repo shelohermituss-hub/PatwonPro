@@ -5,47 +5,62 @@ import { MrrChart } from "@/components/admin/MrrChart";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrencyHTG } from "@/lib/format";
-import { MOCK_STORES } from "@/lib/admin/mock/stores";
-import { MOCK_SUBSCRIPTIONS } from "@/lib/admin/mock/subscriptions";
-import { MOCK_DEVICES } from "@/lib/admin/mock/devices";
-import { MOCK_SUPPORT_TICKETS } from "@/lib/admin/mock/support";
+import { fetchAdminStores } from "@/lib/admin/queries/stores";
+import { fetchAdminSubscriptions } from "@/lib/admin/queries/subscriptions";
+import { fetchAdminDevices } from "@/lib/admin/queries/devices";
+import { fetchAdminSupportTickets } from "@/lib/admin/queries/support";
+import { fetchPlatformTransactions } from "@/lib/admin/queries/transactions";
 import { MOCK_SYNC_HEALTH } from "@/lib/admin/mock/sync";
-import { MOCK_PLATFORM_TRANSACTIONS } from "@/lib/admin/mock/transactions";
 import { MOCK_LEADS } from "@/lib/admin/mock/leads";
 import { SUPPORT_PRIORITY_LABELS } from "@/lib/admin/labels";
-import { ADMIN_MOCK_NOW } from "@/lib/admin/now";
+import type { SyncHealthRow } from "@/types/admin";
 
-export default function AdminOverviewPage() {
-  const activeStores = MOCK_STORES.filter((s) => s.subscriptionStatus === "active").length;
-  const trialStores = MOCK_STORES.filter((s) => s.subscriptionStatus === "trial").length;
-  const mrr = MOCK_SUBSCRIPTIONS.filter((s) => s.status === "active").reduce(
-    (sum, s) => sum + s.monthlyPriceHtg,
-    0,
-  );
-  const collectedThisMonth = MOCK_PLATFORM_TRANSACTIONS.filter(
-    (t) => t.type === "subscription_payment" && t.date.startsWith("2026-08"),
-  ).reduce((sum, t) => sum + t.amountHtg, 0);
-  const overdueTotal = MOCK_SUBSCRIPTIONS.filter((s) =>
-    ["overdue", "suspended", "grace_period"].includes(s.status),
-  ).reduce((sum, s) => sum + s.amountDueHtg, 0);
-  const deployedDevices = MOCK_DEVICES.filter((d) => d.status.startsWith("deployed_")).length;
-  const availableDevices = MOCK_DEVICES.filter((d) => d.status === "in_stock").length;
-  const openTickets = MOCK_SUPPORT_TICKETS.filter((t) => t.status !== "resolved").length;
+function countOfflineDevices(rows: SyncHealthRow[]): number {
+  const now = Date.now();
+  return rows.filter((row) => (now - new Date(row.lastSyncAt).getTime()) / 86_400_000 > 3).length;
+}
+
+export default async function AdminOverviewPage() {
+  const [stores, subscriptions, devices, tickets, platformTransactions] = await Promise.all([
+    fetchAdminStores(),
+    fetchAdminSubscriptions(),
+    fetchAdminDevices(),
+    fetchAdminSupportTickets(),
+    fetchPlatformTransactions(),
+  ]);
+
+  const activeStores = stores.filter((s) => s.subscriptionStatus === "active").length;
+  const trialStores = stores.filter((s) => s.subscriptionStatus === "trial").length;
+  const mrr = subscriptions
+    .filter((s) => s.status === "active")
+    .reduce((sum, s) => sum + s.monthlyPriceHtg, 0);
+
+  const startOfMonth = new Date();
+  startOfMonth.setDate(1);
+  startOfMonth.setHours(0, 0, 0, 0);
+  const collectedThisMonth = platformTransactions
+    .filter((t) => t.type === "subscription_payment" && new Date(t.date) >= startOfMonth)
+    .reduce((sum, t) => sum + t.amountHtg, 0);
+
+  const overdueTotal = subscriptions
+    .filter((s) => s.status === "past_due" || s.status === "suspended")
+    .reduce((sum, s) => sum + s.amountDueHtg, 0);
+  const deployedDevices = devices.filter((d) => d.status.startsWith("deployed_")).length;
+  const availableDevices = devices.filter((d) => d.status === "in_stock").length;
+  const openTickets = tickets.filter((t) => t.status !== "resolved" && t.status !== "closed").length;
   const syncErrors = MOCK_SYNC_HEALTH.filter((row) => row.errors > 0).length;
 
   const trialsEndingSoon = MOCK_LEADS.filter((l) => l.stage === "trial_active" || l.stage === "trial_installed").length;
-  const overdueSubs = MOCK_SUBSCRIPTIONS.filter((s) => s.status === "overdue" || s.status === "grace_period").length;
-  const offlineDevices = MOCK_SYNC_HEALTH.filter((row) => {
-    const days = (ADMIN_MOCK_NOW - new Date(row.lastSyncAt).getTime()) / 86_400_000;
-    return days > 3;
-  });
-  const repairDevices = MOCK_DEVICES.filter((d) => d.status === "repair").length;
-  const p1Tickets = MOCK_SUPPORT_TICKETS.filter((t) => t.priority === "P1" && t.status !== "resolved").length;
+  const overdueSubs = subscriptions.filter((s) => s.status === "past_due" || s.status === "suspended").length;
+  const offlineDeviceCount = countOfflineDevices(MOCK_SYNC_HEALTH);
+  const repairDevices = devices.filter((d) => d.status === "repair").length;
+  const newTickets = tickets.filter((t) => t.status === "open").length;
+  const p1Tickets = tickets.filter((t) => t.priority === "P1" && t.status !== "resolved" && t.status !== "closed").length;
 
   return (
     <div className="flex flex-col gap-6 p-6">
       <AdminPageHeader
-        title="Bonjou, Shelo"
+        title="Bonjou"
         description="Men sante Jere Boutik jodi a."
       />
 
@@ -59,7 +74,7 @@ export default function AdminOverviewPage() {
           href="/admin/transactions"
           tone="positive"
         />
-        <KpiStat label="Total An Reta" value={formatCurrencyHTG(overdueTotal)} href="/admin/subscriptions?status=overdue" tone="warning" />
+        <KpiStat label="Total An Reta" value={formatCurrencyHTG(overdueTotal)} href="/admin/subscriptions?status=past_due" tone="warning" />
         <KpiStat label="Tablèt Deplwaye" value={String(deployedDevices)} href="/admin/devices?status=deployed" tone="info" />
         <KpiStat label="Tablèt Disponib" value={String(availableDevices)} href="/admin/devices?status=in_stock" tone="neutral" />
         <KpiStat label="Tikè Ouvè" value={String(openTickets)} href="/admin/support" tone="warning" />
@@ -82,7 +97,7 @@ export default function AdminOverviewPage() {
             </p>
             <p className="text-foreground">• {overdueSubs} kliyan bezwen relans</p>
             <p className="text-foreground">
-              • {MOCK_SUPPORT_TICKETS.filter((t) => t.status === "new").length} tikè nouvo pou triye
+              • {newTickets} tikè nouvo pou triye
             </p>
           </CardContent>
         </Card>
@@ -93,7 +108,7 @@ export default function AdminOverviewPage() {
           </CardHeader>
           <CardContent className="flex flex-col gap-2 text-sm">
             <p className="flex items-center gap-2 text-foreground">
-              • {offlineDevices.length} tablèt offline pi plis pase 3 jou
+              • {offlineDeviceCount} tablèt offline pi plis pase 3 jou
             </p>
             <p className="flex items-center gap-2 text-foreground">
               • {repairDevices} tablèt an reparasyon
