@@ -302,6 +302,5 @@ export interface TeamMember {
   name: string;
   email: string;
   role: AdminRole;
-  active: boolean;
   lastLoginAt: string | null;
 }

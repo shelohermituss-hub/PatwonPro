@@ -51,9 +51,15 @@ function AcceptInviteForm() {
       return;
     }
 
-    const { error: rpcError } = await supabase.rpc("accept_employee_invite", {
-      employee_full_name: values.fullName,
-    });
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const invitedAdminRole = (user?.app_metadata as Record<string, unknown> | undefined)
+      ?.invited_admin_role;
+
+    const { error: rpcError } = invitedAdminRole
+      ? await supabase.rpc("accept_admin_invite", { admin_full_name: values.fullName })
+      : await supabase.rpc("accept_employee_invite", { employee_full_name: values.fullName });
 
     if (rpcError) {
       setFormError(
@@ -62,7 +68,7 @@ function AcceptInviteForm() {
       return;
     }
 
-    router.push("/dashboard");
+    router.push(invitedAdminRole ? "/admin" : "/dashboard");
     router.refresh();
   }
 

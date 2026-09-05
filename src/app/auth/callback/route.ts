@@ -10,11 +10,11 @@ import { createClient } from "@/lib/supabase/server";
  * Where it lands next depends on what kind of account this is, since an
  * explicit `next` param (invite links) is the only case that already
  * knows — a fresh Google/Facebook/Apple sign-in never has one:
- *  - `next` param present (employee invite link) → there.
+ *  - `next` param present (employee/admin invite link) → there.
  *  - profile already exists → role-based landing, same as /login.
- *  - no profile, but `app_metadata.invited_store_id` is set (employee
- *    invite accepted via OAuth instead of the emailed magic link) →
- *    /accept-invite.
+ *  - no profile, but `app_metadata.invited_store_id` or
+ *    `invited_admin_role` is set (invite accepted via OAuth instead of
+ *    the emailed magic link) → /accept-invite.
  *  - no profile, no invite claim (first-time OAuth sign-up) →
  *    /onboarding to create their own store.
  */
@@ -43,9 +43,9 @@ export async function GET(request: Request) {
         return NextResponse.redirect(`${origin}${destination}`);
       }
 
-      const invitedStoreId = (user.app_metadata as Record<string, unknown> | undefined)
-        ?.invited_store_id;
-      const destination = invitedStoreId ? "/accept-invite" : "/onboarding";
+      const appMetadata = user.app_metadata as Record<string, unknown> | undefined;
+      const hasInvite = appMetadata?.invited_store_id || appMetadata?.invited_admin_role;
+      const destination = hasInvite ? "/accept-invite" : "/onboarding";
       return NextResponse.redirect(`${origin}${destination}`);
     }
   }
