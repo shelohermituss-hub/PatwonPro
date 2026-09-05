@@ -137,7 +137,7 @@ export function ProductForm({ product }: { product?: Product }) {
               className="size-16 shrink-0 rounded-lg border border-border object-cover"
             />
           ) : (
-            <div className="flex size-16 shrink-0 items-center justify-center rounded-lg border border-border bg-muted">
+            <div className="flex size-16 shrink-0 items-center justify-center rounded-lg border border-border bg-muted text-muted-foreground">
               <Icons.product className="size-6" aria-hidden />
             </div>
           )}

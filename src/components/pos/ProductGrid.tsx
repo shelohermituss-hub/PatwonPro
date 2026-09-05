@@ -41,7 +41,7 @@ export function ProductGrid({
     <div className="flex h-full flex-col gap-4 p-4">
       <div className="relative">
         <Icons.search
-          className="absolute left-3 top-1/2 size-4 -translate-y-1/2"
+          className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary"
           aria-hidden
         />
         <Input

@@ -1,16 +1,13 @@
-import type { IconType } from "react-icons";
+import type { LucideIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 export interface KpiTrend {
   tone: "positive" | "negative" | "neutral";
-  icon: IconType;
+  icon: LucideIcon;
   label: string;
 }
 
-// `text-*` here only colors `trend.label` — flat-color-icons render with
-// their own fixed SVG fills (not `currentColor`), so it has no effect on
-// `TrendIcon` itself.
 const TONE_CLASSES: Record<KpiTrend["tone"], string> = {
   positive: "bg-success/10 text-success",
   negative: "bg-danger/10 text-danger",
@@ -33,7 +30,7 @@ export function KpiCard({
 }: {
   label: string;
   value: string;
-  icon: IconType;
+  icon: LucideIcon;
   trend: KpiTrend;
   detail: string;
 }) {
@@ -44,7 +41,7 @@ export function KpiCard({
       <CardContent className="flex flex-col gap-4">
         <div className="flex items-start justify-between">
           <span className="text-sm font-medium text-text-secondary">{label}</span>
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary/10">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
             <Icon className="size-5" aria-hidden />
           </div>
         </div>
@@ -58,7 +55,7 @@ export function KpiCard({
               TONE_CLASSES[trend.tone],
             )}
           >
-            <TrendIcon className="size-4" aria-hidden />
+            <TrendIcon className="size-3.5" aria-hidden />
             {trend.label}
           </span>
           <span className="text-xs text-text-secondary">{detail}</span>

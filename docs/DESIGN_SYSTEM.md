@@ -147,15 +147,12 @@ d'écrire du markup brut — voir le skill `shadcn`
 `docs/UI_COMPONENT_INVENTORY.md` pour la liste des composants restant à
 construire/adapter pour PatwonPro spécifiquement.
 
-Les icônes de contenu sont **flat-color-icons** (icons8, via
-`react-icons/fc`) — registre central `src/lib/icons.ts` (une clé
-sémantique par concept, ex. `Icons.product`, `Icons.credit`) plutôt que
-des imports `react-icons/fc` ad-hoc par fichier. **Lucide React** reste
-utilisé pour deux choses seulement : les glyphes structurels internes des
-composants shadcn (chevrons, coches, croix de fermeture —
-`src/components/ui/*.tsx`) et tout spinner `LoaderCircle` — flat-color-icons
-n'a pas d'équivalent conceptuel pour ces glyphes fonctionnels. Jamais
-d'emoji comme icône d'interface, dans les deux cas.
+Les icônes sont **Lucide React** (`lucide-react`, la bibliothèque
+proposée par shadcn — `iconLibrary: "lucide"` dans `components.json`),
+via un registre central `src/lib/icons.ts` (une clé sémantique par
+concept, ex. `Icons.product`, `Icons.credit`) plutôt que des imports
+`lucide-react` ad-hoc par fichier. Jamais d'emoji comme icône
+d'interface.
 
 **Écart assumé vs le kit `design-system/`** : le kit utilise des champs
 en soulignement simple (voir `DESIGN_AUDIT.md` §4) ; on garde les inputs
@@ -168,8 +165,8 @@ focus plus visible sur tablette.
   composant shadcn `Sidebar` (`collapsible="icon"`, largeur 248px via
   `--sidebar-width` sur `SidebarProvider`) — logo boutik + liste de
   modules (Tablo Bò, Pwen Vant, Pwodwi, Antre Stòk, Kredi, Rapò,
-  Abònman, Paramèt) chacun avec une icône flat-color-icons
-  (`src/lib/icons.ts`), pwofil + dekonekte ak `SyncStatusBadge` en bas.
+  Abònman, Paramèt) chacun avec une icône Lucide (`src/lib/icons.ts`),
+  pwofil + dekonekte ak `SyncStatusBadge` en bas.
   Le lien actif est marqué par `bg-primary` (override du token neutre
   `--sidebar-accent` par défaut du composant, via `data-active:bg-primary`
   sur `SidebarMenuButton`). État ouvert/fermé persisté par cookie
@@ -206,7 +203,7 @@ PatwonPro est ajouté :
    `src/app/globals.css` (`:root`/`@theme`) — **vérifier d'abord contre
    `docs/CLAUDE.md`**, qui reste la source de vérité produit.
 3. Reporter les icônes/assets SVG utiles dans `src/components/icons/`
-   (ou utiliser `src/lib/icons.ts`/`react-icons/fc` directement si
+   (ou utiliser `src/lib/icons.ts`/`lucide-react` directement si
    l'export correspond).
 4. Mettre à jour ce document et `docs/DESIGN_AUDIT.md` si les vraies
    valeurs diffèrent de ce qui précède.

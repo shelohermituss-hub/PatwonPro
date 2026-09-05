@@ -110,7 +110,7 @@ export default function ProductsPage() {
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative min-w-[240px] flex-1">
           <Icons.search
-            className="absolute left-3 top-1/2 size-4 -translate-y-1/2"
+            className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary"
             aria-hidden
           />
           <Input
@@ -213,7 +213,7 @@ export default function ProductsPage() {
                           className="size-10 shrink-0 rounded-md border border-border object-cover"
                         />
                       ) : (
-                        <div className="flex size-10 shrink-0 items-center justify-center rounded-md border border-border bg-muted">
+                        <div className="flex size-10 shrink-0 items-center justify-center rounded-md border border-border bg-muted text-muted-foreground">
                           <Icons.product className="size-5" aria-hidden />
                         </div>
                       )}
