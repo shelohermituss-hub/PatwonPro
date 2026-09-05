@@ -2,18 +2,18 @@
 
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { STORE_GROWTH_SERIES } from "@/lib/admin/mock/analytics";
+import type { StoreGrowthPoint } from "@/lib/admin/queries/analytics";
 
-export function StoreGrowthChart() {
+export function StoreGrowthChart({ data }: { data: StoreGrowthPoint[] }) {
   return (
     <Card>
       <CardHeader>
         <CardTitle>Kwasans Boutik</CardTitle>
-        <CardDescription>Boutik aktif sou 6 dènye mwa</CardDescription>
+        <CardDescription>Total boutik enskri, sou 6 dènye mwa</CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={260}>
-          <AreaChart data={STORE_GROWTH_SERIES} margin={{ left: 0, right: 12, top: 8, bottom: 0 }}>
+          <AreaChart data={data} margin={{ left: 0, right: 12, top: 8, bottom: 0 }}>
             <defs>
               <linearGradient id="storeGrowthFill" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.3} />

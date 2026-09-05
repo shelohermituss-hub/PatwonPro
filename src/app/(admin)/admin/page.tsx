@@ -12,6 +12,7 @@ import { fetchAdminSupportTickets } from "@/lib/admin/queries/support";
 import { fetchPlatformTransactions } from "@/lib/admin/queries/transactions";
 import { fetchLeads } from "@/lib/admin/queries/leads";
 import { fetchSyncHealth } from "@/lib/admin/queries/sync";
+import { fetchStoreGrowthSeries, fetchCollectedSeries } from "@/lib/admin/queries/analytics";
 import { SUPPORT_PRIORITY_LABELS } from "@/lib/admin/labels";
 import type { SyncHealthRow } from "@/types/admin";
 
@@ -22,15 +23,18 @@ function countOfflineDevices(rows: SyncHealthRow[]): number {
 }
 
 export default async function AdminOverviewPage() {
-  const [stores, subscriptions, devices, tickets, platformTransactions, leads, syncHealth] = await Promise.all([
-    fetchAdminStores(),
-    fetchAdminSubscriptions(),
-    fetchAdminDevices(),
-    fetchAdminSupportTickets(),
-    fetchPlatformTransactions(),
-    fetchLeads(),
-    fetchSyncHealth(),
-  ]);
+  const [stores, subscriptions, devices, tickets, platformTransactions, leads, syncHealth, storeGrowth, collected] =
+    await Promise.all([
+      fetchAdminStores(),
+      fetchAdminSubscriptions(),
+      fetchAdminDevices(),
+      fetchAdminSupportTickets(),
+      fetchPlatformTransactions(),
+      fetchLeads(),
+      fetchSyncHealth(),
+      fetchStoreGrowthSeries(),
+      fetchCollectedSeries(),
+    ]);
 
   const activeStores = stores.filter((s) => s.subscriptionStatus === "active").length;
   const trialStores = stores.filter((s) => s.subscriptionStatus === "trial").length;
@@ -85,8 +89,8 @@ export default async function AdminOverviewPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <StoreGrowthChart />
-        <MrrChart />
+        <StoreGrowthChart data={storeGrowth} />
+        <MrrChart data={collected} />
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">

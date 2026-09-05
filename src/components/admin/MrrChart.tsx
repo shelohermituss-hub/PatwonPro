@@ -1,27 +1,30 @@
 "use client";
 
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { formatCurrencyHTG } from "@/lib/format";
-import { MRR_VS_COLLECTED_SERIES } from "@/lib/admin/mock/analytics";
+import type { CollectedPoint } from "@/lib/admin/queries/analytics";
 
-export function MrrChart() {
+/**
+ * Real platform revenue collected per month (from `platform_transactions`).
+ * The mock version charted a fabricated historical "MRR" line alongside
+ * this — dropped, since MRR is a point-in-time figure (sum of active
+ * subscriptions right now) with no snapshot history to reconstruct a
+ * trend from; the current MRR figure lives on the dashboard KPI instead.
+ */
+export function MrrChart({ data }: { data: CollectedPoint[] }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>MRR vs Lajan Antre</CardTitle>
-        <CardDescription>Revni mansyèl atann kont sa ki reyèlman kolekte</CardDescription>
+        <CardTitle>Lajan Antre pa Mwa</CardTitle>
+        <CardDescription>Revni Jere Boutik reyèlman kolekte (abònman)</CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={260}>
-          <AreaChart data={MRR_VS_COLLECTED_SERIES} margin={{ left: 0, right: 12, top: 8, bottom: 0 }}>
+          <AreaChart data={data} margin={{ left: 0, right: 12, top: 8, bottom: 0 }}>
             <defs>
-              <linearGradient id="mrrFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.25} />
-                <stop offset="100%" stopColor="var(--primary)" stopOpacity={0} />
-              </linearGradient>
               <linearGradient id="collectedFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="var(--success)" stopOpacity={0.25} />
+                <stop offset="0%" stopColor="var(--success)" stopOpacity={0.3} />
                 <stop offset="100%" stopColor="var(--success)" stopOpacity={0} />
               </linearGradient>
             </defs>
@@ -42,15 +45,6 @@ export function MrrChart() {
             <Tooltip
               formatter={(value) => formatCurrencyHTG(Number(value))}
               contentStyle={{ borderRadius: 12, borderColor: "var(--border)" }}
-            />
-            <Legend wrapperStyle={{ fontSize: 12 }} />
-            <Area
-              type="monotone"
-              dataKey="mrr"
-              name="MRR atann"
-              stroke="var(--primary)"
-              strokeWidth={2}
-              fill="url(#mrrFill)"
             />
             <Area
               type="monotone"
