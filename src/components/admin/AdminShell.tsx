@@ -16,10 +16,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { AdminNav } from "@/components/admin/AdminNav";
-import { AdminRoleSwitcher } from "@/components/admin/AdminRoleSwitcher";
 import { AdminSessionProvider, useAdminActor } from "@/components/admin/AdminSessionProvider";
 import { ADMIN_ROLE_LABELS } from "@/lib/admin/permissions";
 import { createClient } from "@/lib/supabase/client";
+import type { AdminActor } from "@/types/admin";
 
 function initials(name: string) {
   return name
@@ -52,8 +52,6 @@ function AdminHeader() {
       </div>
 
       <div className="ml-auto flex items-center gap-2">
-        <AdminRoleSwitcher />
-
         <Button type="button" variant="ghost" size="icon" aria-label="Notifikasyon" className="relative">
           <Bell aria-hidden />
           <span className="absolute right-1.5 top-1.5 size-2 rounded-full bg-danger" aria-hidden />
@@ -91,9 +89,15 @@ function AdminHeader() {
  * tokens) so the internal team immediately knows they're in a different
  * tool, per the spec.
  */
-export function AdminShell({ children }: { children: React.ReactNode }) {
+export function AdminShell({
+  actor,
+  children,
+}: {
+  actor: AdminActor;
+  children: React.ReactNode;
+}) {
   return (
-    <AdminSessionProvider>
+    <AdminSessionProvider actor={actor}>
       <div className="admin-theme">
         <SidebarProvider style={{ "--sidebar-width": "248px" } as React.CSSProperties} className="h-dvh overflow-hidden">
           <Sidebar collapsible="icon">

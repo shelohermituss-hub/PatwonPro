@@ -1,13 +1,12 @@
 import type { AdminRole } from "@/types/admin";
 
 /**
- * UI-only permission matrix for the admin back-office — decides which
- * nav links and action buttons a mocked `AdminActor` sees. This is NOT
- * real security: it exists so the interface already reflects the 7-role
- * model the user specified, and so a future Supabase RLS policy has an
- * exact 1:1 mapping to mirror (see docs/ADMIN_DASHBOARD_ARCHITECTURE.md).
- * The one real gate today is `isPlatformAdmin(profile)` in
- * `(admin)/layout.tsx`, checked server-side.
+ * UI permission matrix for the admin back-office — decides which nav
+ * links and action buttons a signed-in admin sees. This mirrors the SQL
+ * `admin_can(action text)` function (migration 011) exactly: the two
+ * must be kept in sync manually (see docs/ADMIN_DASHBOARD_ARCHITECTURE.md).
+ * The UI check here is a convenience — RLS via `admin_can()` is the real
+ * enforcement, not this file.
  */
 
 export type AdminNavId =
@@ -34,6 +33,8 @@ export type AdminAction =
   | "manage_devices"
   | "manage_installations"
   | "manage_support"
+  | "manage_leads"
+  | "manage_transactions"
   | "manage_team"
   | "manage_settings"
   | "delete_resource";
@@ -84,15 +85,23 @@ const ACTION_PERMISSIONS: Record<AdminRole, Set<AdminAction>> = {
     "manage_devices",
     "manage_installations",
     "manage_support",
+    "manage_leads",
+    "manage_transactions",
     "manage_team",
     "manage_settings",
     "delete_resource",
   ]),
-  operations_manager: new Set(["manage_stores", "manage_devices", "manage_installations", "manage_support"]),
-  sales_agent: new Set([]),
-  field_agent: new Set(["manage_installations"]),
+  operations_manager: new Set([
+    "manage_stores",
+    "manage_devices",
+    "manage_installations",
+    "manage_support",
+    "manage_leads",
+  ]),
+  sales_agent: new Set(["manage_leads"]),
+  field_agent: new Set(["manage_installations", "manage_devices"]),
   support_agent: new Set(["manage_support"]),
-  finance_agent: new Set(["manage_subscriptions", "manage_deposits"]),
+  finance_agent: new Set(["manage_subscriptions", "manage_deposits", "manage_transactions"]),
   read_only: new Set([]),
 };
 

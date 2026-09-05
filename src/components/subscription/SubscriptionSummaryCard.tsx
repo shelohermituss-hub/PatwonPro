@@ -12,6 +12,7 @@ const STATUS_VARIANT: Record<Subscription["status"], "default" | "secondary" | "
   past_due: "destructive",
   canceled: "destructive",
   expired: "destructive",
+  suspended: "destructive",
 };
 
 export function SubscriptionSummaryCard({

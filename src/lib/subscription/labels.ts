@@ -17,12 +17,19 @@ export const SUBSCRIPTION_STATUS_LABELS: Record<SubscriptionStatus, string> = {
   past_due: "An Reta",
   canceled: "Anile",
   expired: "Ekspire",
+  suspended: "Sispann",
 };
 
 export const DEVICE_STATUS_LABELS: Record<DeviceStatus, string> = {
-  active: "Aktif",
-  inactive: "Inaktif",
-  blocked: "Bloke",
+  in_stock: "Nan Estòk",
+  reserved: "Rezève",
+  deployed_trial: "Deplwaye (Eseyaj)",
+  deployed_active: "Deplwaye (Aktif)",
+  repair: "An Reparasyon",
+  returned: "Retounen",
+  refurbished: "Refèt",
+  lost: "Pèdi",
+  retired: "Retire",
 };
 
 export const SUPPORT_TICKET_STATUS_LABELS: Record<SupportTicketStatus, string> = {

@@ -1,3 +1,5 @@
+import type { AdminRole } from "@/types/admin";
+
 export type UserRole = "owner" | "employee" | "platform_admin";
 
 export type PaymentMethod = "cash" | "moncash" | "natcash" | "credit";
@@ -8,9 +10,24 @@ export type PaymentTransactionStatus = "pending" | "paid" | "failed" | "cancelle
 
 export type SubscriptionPlan = "starter" | "pro" | "enterprise";
 
-export type SubscriptionStatus = "trialing" | "active" | "past_due" | "canceled" | "expired";
+export type SubscriptionStatus =
+  | "trialing"
+  | "active"
+  | "past_due"
+  | "canceled"
+  | "expired"
+  | "suspended";
 
-export type DeviceStatus = "active" | "inactive" | "blocked";
+export type DeviceStatus =
+  | "in_stock"
+  | "reserved"
+  | "deployed_trial"
+  | "deployed_active"
+  | "repair"
+  | "returned"
+  | "refurbished"
+  | "lost"
+  | "retired";
 
 export type SupportTicketStatus = "open" | "in_progress" | "resolved" | "closed";
 
@@ -36,6 +53,8 @@ export interface Profile {
   store_id: string | null;
   full_name: string;
   role: UserRole;
+  /** Only set when `role = "platform_admin"` — see migration 011. */
+  admin_role: AdminRole | null;
   created_at: string;
   updated_at: string;
 }

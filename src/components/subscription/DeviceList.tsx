@@ -13,9 +13,15 @@ import {
 import type { Device } from "@/types";
 
 const STATUS_VARIANT: Record<Device["status"], "default" | "secondary" | "destructive"> = {
-  active: "default",
-  inactive: "secondary",
-  blocked: "destructive",
+  deployed_active: "default",
+  deployed_trial: "default",
+  in_stock: "secondary",
+  reserved: "secondary",
+  returned: "secondary",
+  refurbished: "secondary",
+  repair: "destructive",
+  lost: "destructive",
+  retired: "destructive",
 };
 
 export function DeviceList({ devices }: { devices: Device[] }) {

@@ -279,11 +279,12 @@ export interface SyncHealthRow {
 
 export interface AuditLogEntry {
   id: string;
-  actor_id: string;
-  actor_role: AdminRole;
+  actor_id: string | null;
+  actor_role: AdminRole | string | null;
+  actor_name?: string | null;
   action: string;
   resource_type: string;
-  resource_id: string;
+  resource_id: string | null;
   store_id: string | null;
   reason: string | null;
   metadata: Record<string, unknown>;

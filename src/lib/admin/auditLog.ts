@@ -1,21 +1,14 @@
-import { useSyncExternalStore } from "react";
-import type { AdminRole, AuditLogEntry } from "@/types/admin";
-import { AUDIT_LOG_SEED } from "@/lib/admin/mock/auditLog";
+import { createClient } from "@/lib/supabase/client";
+import type { AdminRole } from "@/types/admin";
 
 /**
- * In-memory mock audit trail — every confirmed sensitive action in the
- * admin back-office appends here so `/admin/audit-log` shows it live
- * during the session. Resets on refresh: there is no `audit_logs` table
- * yet (see docs/ADMIN_DASHBOARD_ARCHITECTURE.md "phase 2 backend").
+ * Writes to the real `audit_logs` table (migration 023) — insert-only,
+ * gated by `is_platform_admin()` RLS. Called from Client Components
+ * (`ConfirmActionDialog`), so this uses the browser Supabase client.
+ * `ip_address` is left null: capturing the real client IP needs a
+ * server-side request, which no admin action currently routes through.
  */
-let entries: AuditLogEntry[] = [...AUDIT_LOG_SEED];
-const listeners = new Set<() => void>();
-
-function notify() {
-  listeners.forEach((listener) => listener());
-}
-
-export function recordAuditEvent(input: {
+export async function recordAuditEvent(input: {
   actorId: string;
   actorRole: AdminRole;
   action: string;
@@ -25,8 +18,9 @@ export function recordAuditEvent(input: {
   reason?: string | null;
   metadata?: Record<string, unknown>;
 }) {
-  const entry: AuditLogEntry = {
-    id: `audit_${Date.now()}_${Math.round(Math.random() * 1e6)}`,
+  const supabase = createClient();
+
+  const { error } = await supabase.from("audit_logs").insert({
     actor_id: input.actorId,
     actor_role: input.actorRole,
     action: input.action,
@@ -35,26 +29,9 @@ export function recordAuditEvent(input: {
     store_id: input.storeId ?? null,
     reason: input.reason ?? null,
     metadata: input.metadata ?? {},
-    ip_address: null,
-    created_at: new Date().toISOString(),
-  };
-  entries = [entry, ...entries];
-  notify();
-}
+  });
 
-function subscribe(listener: () => void) {
-  listeners.add(listener);
-  return () => listeners.delete(listener);
-}
-
-function getSnapshot() {
-  return entries;
-}
-
-function getServerSnapshot() {
-  return AUDIT_LOG_SEED;
-}
-
-export function useAuditLog(): AuditLogEntry[] {
-  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  if (error) {
+    throw new Error(`Pa t kapab anrejistre nan jounal odit la: ${error.message}`);
+  }
 }

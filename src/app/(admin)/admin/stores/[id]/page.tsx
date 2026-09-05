@@ -40,7 +40,6 @@ import { MOCK_SUBSCRIPTIONS } from "@/lib/admin/mock/subscriptions";
 import { MOCK_DEVICES } from "@/lib/admin/mock/devices";
 import { MOCK_STORE_TRANSACTIONS } from "@/lib/admin/mock/transactions";
 import { MOCK_SUPPORT_TICKETS } from "@/lib/admin/mock/support";
-import { AUDIT_LOG_SEED } from "@/lib/admin/mock/auditLog";
 import { STORE_STATUS_LABELS, SUBSCRIPTION_STATUS_LABELS, DEVICE_STATUS_LABELS, SUPPORT_STATUS_LABELS } from "@/lib/admin/labels";
 
 type ActionKind =
@@ -112,7 +111,9 @@ export default function StoreDetailPage({ params }: { params: Promise<{ id: stri
   const device = MOCK_DEVICES.find((d) => d.assignedStoreId === id);
   const transactions = MOCK_STORE_TRANSACTIONS.filter((t) => t.storeId === id);
   const tickets = MOCK_SUPPORT_TICKETS.filter((t) => t.storeId === id);
-  const auditEntries = AUDIT_LOG_SEED.filter((entry) => entry.store_id === id);
+  // TODO(admin phase 2, task #124): fetch real audit_logs filtered by
+  // store_id once this whole page reads real store data instead of mocks.
+  const auditEntries: { id: string; action: string; created_at: string }[] = [];
 
   const action = pendingAction ? ACTION_CONFIG[pendingAction] : null;
 

@@ -19,8 +19,9 @@ import { recordAuditEvent } from "@/lib/admin/auditLog";
 /**
  * Generic confirmation for every sensitive admin action (financial,
  * destructive, suspension, device change — per the spec). Confirming
- * always appends an audit entry, even for the mock actions this phase
- * only simulates (no real backend write yet).
+ * always appends a real `audit_logs` entry. The entity mutation itself
+ * (e.g. actually suspending a subscription) is wired per-page via
+ * `onConfirmed` — this dialog only owns the confirm step + audit trail.
  */
 export function ConfirmActionDialog({
   open,
@@ -52,20 +53,25 @@ export function ConfirmActionDialog({
   const actor = useAdminActor();
   const [submitting, setSubmitting] = useState(false);
 
-  function handleConfirm() {
+  async function handleConfirm() {
     setSubmitting(true);
-    recordAuditEvent({
-      actorId: actor.id,
-      actorRole: actor.role,
-      action,
-      resourceType,
-      resourceId,
-      storeId,
-    });
-    setSubmitting(false);
-    onOpenChange(false);
-    toast.success(successMessage);
-    onConfirmed?.();
+    try {
+      await recordAuditEvent({
+        actorId: actor.id,
+        actorRole: actor.role,
+        action,
+        resourceType,
+        resourceId,
+        storeId,
+      });
+      onOpenChange(false);
+      toast.success(successMessage);
+      onConfirmed?.();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Yon erè fèt.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
