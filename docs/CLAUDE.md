@@ -99,6 +99,13 @@ Avant toute nouvelle interface importante :
 8. Paramètres de boutique et employés (profil boutique éditable + logo).
 9. Abonnement, tablettes et support.
 10. Synchronisation offline-first.
+11. Back-office interne **Jere Boutik Admin** (`/admin`, équipe
+    PatwonPro uniquement — gestion boutiques, leads/essais, abonnements,
+    cautions, tablettes, installations terrain, support, transactions,
+    sync, analytique, équipe et journal d'audit). Complètement séparé de
+    l'interface commerçant, sidebar sombre dédiée. Voir
+    `docs/ADMIN_DASHBOARD_ARCHITECTURE.md` — phase 1 actuelle est UI +
+    données mockées, sans connexion Supabase/MonCash/NatCash.
 
 ## Architecture offline
 

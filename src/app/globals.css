@@ -167,3 +167,22 @@
     @apply font-sans;
   }
 }
+
+/**
+ * Jere Boutik Admin (`/admin`, AdminShell.tsx) — a dark-navy sidebar so
+ * the internal team immediately sees they're in the back-office, not the
+ * merchant app. Scoped to only the `--sidebar*` tokens on purpose: the
+ * content area, cards, buttons and semantic colors (success/warning/
+ * danger) all keep the app's normal light tokens — this is not a second
+ * theme, just a different sidebar skin.
+ */
+.admin-theme {
+  --sidebar: #0f172a;
+  --sidebar-foreground: #f1f5f9;
+  --sidebar-primary: #4f46e5;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1e293b;
+  --sidebar-accent-foreground: #f1f5f9;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-ring: #4f46e5;
+}
