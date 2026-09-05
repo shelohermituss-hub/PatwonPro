@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/field";
 import { createClient } from "@/lib/supabase/client";
 import { registerSchema, type RegisterInput } from "@/lib/validations/auth";
+import { SocialAuthButtons } from "@/components/auth/SocialAuthButtons";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -161,6 +162,8 @@ export default function RegisterPage() {
             Konekte
           </Link>
         </p>
+
+        <SocialAuthButtons />
       </FieldGroup>
     </form>
   );

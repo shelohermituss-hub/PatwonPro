@@ -147,11 +147,15 @@ d'écrire du markup brut — voir le skill `shadcn`
 `docs/UI_COMPONENT_INVENTORY.md` pour la liste des composants restant à
 construire/adapter pour PatwonPro spécifiquement.
 
-Les icônes sont **Lucide React** (`lucide-react`, la bibliothèque
-proposée par shadcn — `iconLibrary: "lucide"` dans `components.json`),
-via un registre central `src/lib/icons.ts` (une clé sémantique par
-concept, ex. `Icons.product`, `Icons.credit`) plutôt que des imports
-`lucide-react` ad-hoc par fichier. Jamais d'emoji comme icône
+Les icônes de contenu viennent d'un pack **glassmorphism** fourni par
+l'utilisateur (SVG statiques, `public/icons/glass/`), via un registre
+central `src/lib/icons.tsx` (une clé sémantique par concept, ex.
+`Icons.product`, `Icons.credit`) plutôt que des imports ad-hoc par
+fichier. Ces icônes ont des couleurs fixes dans leur propre SVG (pas
+`currentColor`) — un conteneur `bg-primary/10 text-primary` autour ne
+teinte plus que du texte voisin, jamais l'icône elle-même. Lucide React
+reste utilisé pour les glyphes internes shadcn (chevron, coche, croix)
+et tous les spinners `LoaderCircle`. Jamais d'emoji comme icône
 d'interface.
 
 **Écart assumé vs le kit `design-system/`** : le kit utilise des champs
@@ -165,7 +169,7 @@ focus plus visible sur tablette.
   composant shadcn `Sidebar` (`collapsible="icon"`, largeur 248px via
   `--sidebar-width` sur `SidebarProvider`) — logo boutik + liste de
   modules (Tablo Bò, Pwen Vant, Pwodwi, Antre Stòk, Kredi, Rapò,
-  Abònman, Paramèt) chacun avec une icône Lucide (`src/lib/icons.ts`),
+  Abònman, Paramèt) chacun avec une icône du registre (`src/lib/icons.tsx`),
   pwofil + dekonekte ak `SyncStatusBadge` en bas.
   Le lien actif est marqué par `bg-primary` (override du token neutre
   `--sidebar-accent` par défaut du composant, via `data-active:bg-primary`

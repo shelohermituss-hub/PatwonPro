@@ -130,11 +130,11 @@ export default async function DashboardPage() {
               href={href}
               className="flex min-h-14 items-center gap-3 rounded-lg border border-border bg-surface px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:border-primary/40 hover:bg-primary/5"
             >
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary/10">
                 <Icon className="size-5" aria-hidden />
               </span>
               {label}
-              <Icons.next className="ml-auto size-4 text-text-secondary" aria-hidden />
+              <Icons.next className="ml-auto size-4" aria-hidden />
             </Link>
           ))}
         </div>

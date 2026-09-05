@@ -74,28 +74,28 @@ export function PaymentGatewayDialog({
 
           {state.status === "confirmed" && (
             <>
-              <Icons.success className="size-10 text-success" aria-hidden />
+              <Icons.success className="size-10" aria-hidden />
               <p className="text-sm font-medium text-foreground">Peman konfime!</p>
             </>
           )}
 
           {state.status === "cancelled" && (
             <>
-              <Icons.cancelled className="size-10 text-warning" aria-hidden />
+              <Icons.cancelled className="size-10" aria-hidden />
               <p className="text-sm text-text-secondary">Peman an anile.</p>
             </>
           )}
 
           {state.status === "failed" && (
             <>
-              <Icons.failed className="size-10 text-danger" aria-hidden />
+              <Icons.failed className="size-10" aria-hidden />
               <p className="text-sm text-text-secondary">{state.message}</p>
             </>
           )}
 
           {state.status === "error" && (
             <>
-              <Icons.failed className="size-10 text-danger" aria-hidden />
+              <Icons.failed className="size-10" aria-hidden />
               <p className="text-sm text-text-secondary">{state.message}</p>
             </>
           )}

@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/field";
 import { createClient } from "@/lib/supabase/client";
 import { loginSchema, type LoginInput } from "@/lib/validations/auth";
+import { SocialAuthButtons } from "@/components/auth/SocialAuthButtons";
 
 export default function LoginPage() {
   return (
@@ -121,6 +122,8 @@ function LoginForm() {
             Kreye yon boutik
           </Link>
         </p>
+
+        <SocialAuthButtons />
       </FieldGroup>
     </form>
   );

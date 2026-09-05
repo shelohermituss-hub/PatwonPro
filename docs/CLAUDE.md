@@ -20,11 +20,15 @@ L'interface doit paraître comme un POS fintech moderne et premium, mais rester 
 - TypeScript en strict mode.
 - Tailwind CSS.
 - shadcn/ui.
-- Icônes : **Lucide React** (`lucide-react`, la bibliothèque proposée par
-  shadcn — `iconLibrary: "lucide"` dans `components.json`), via un
-  registre central `src/lib/icons.ts` (une clé sémantique par concept :
-  `Icons.product`, `Icons.credit`, etc.) plutôt que des imports
-  `lucide-react` ad-hoc par fichier.
+- Icônes de contenu : pack **glassmorphism** fourni par l'utilisateur
+  (SVG statiques dans `public/icons/glass/`), via un registre central
+  `src/lib/icons.tsx` (une clé sémantique par concept : `Icons.product`,
+  `Icons.credit`, etc.) plutôt que des imports ad-hoc par fichier. Ces
+  icônes ont leurs propres couleurs fixes (pas `currentColor`) — un
+  conteneur `text-*` autour ne les teinte plus, seulement le texte à
+  côté. Lucide React reste utilisé pour les glyphes internes shadcn
+  (chevron, coche, croix — select/dialog/sheet/calendar/command/
+  checkbox/dropdown-menu/sonner) et tous les spinners `LoaderCircle`.
 - Supabase PostgreSQL, Auth, Storage et Row Level Security.
 - React Hook Form + Zod pour tous les formulaires.
 - Dexie.js + IndexedDB pour les données offline.
@@ -54,8 +58,8 @@ Avant toute nouvelle interface importante :
 - Aucun mot technique visible au commerçant.
 - Cibles tactiles : minimum 48 × 48 px.
 - Les boutons d'action critique doivent être explicites : "Konfime vant lan", "Anile", "Anrejistre".
-- Ne jamais utiliser d'emoji comme icônes d'interface ; utiliser Lucide
-  React (`src/lib/icons.ts`) partout.
+- Ne jamais utiliser d'emoji comme icônes d'interface ; utiliser le
+  registre `src/lib/icons.tsx` partout.
 - Ne jamais employer un dashboard générique ou des gradients excessifs.
 - Ne pas surcharger les écrans : priorité aux actions et chiffres importants.
 - Éviter les modales pour les tâches longues ; utiliser un `Sheet` latéral sur tablette.

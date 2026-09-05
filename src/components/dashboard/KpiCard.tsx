@@ -1,13 +1,16 @@
-import type { LucideIcon } from "lucide-react";
+import type { AppIconComponent } from "@/lib/icons";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 export interface KpiTrend {
   tone: "positive" | "negative" | "neutral";
-  icon: LucideIcon;
+  icon: AppIconComponent;
   label: string;
 }
 
+// `text-*` here only colors `trend.label` — the glassmorphism icons render
+// with their own fixed SVG fills (not `currentColor`), so it has no effect
+// on `TrendIcon` itself.
 const TONE_CLASSES: Record<KpiTrend["tone"], string> = {
   positive: "bg-success/10 text-success",
   negative: "bg-danger/10 text-danger",
@@ -30,7 +33,7 @@ export function KpiCard({
 }: {
   label: string;
   value: string;
-  icon: LucideIcon;
+  icon: AppIconComponent;
   trend: KpiTrend;
   detail: string;
 }) {
@@ -41,8 +44,8 @@ export function KpiCard({
       <CardContent className="flex flex-col gap-4">
         <div className="flex items-start justify-between">
           <span className="text-sm font-medium text-text-secondary">{label}</span>
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
-            <Icon className="size-5" aria-hidden />
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary/10">
+            <Icon className="size-6" aria-hidden />
           </div>
         </div>
 
