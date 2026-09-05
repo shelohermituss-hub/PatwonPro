@@ -11,10 +11,10 @@ import { pullCustomers } from "@/lib/sync/customers";
 import { checkoutSale } from "@/lib/pos/checkout";
 import { useCurrentProfile } from "@/hooks/useCurrentProfile";
 import { useCart } from "@/hooks/useCart";
-import { useMonCashPayment } from "@/hooks/useMonCashPayment";
+import { usePaymentGateway } from "@/hooks/usePaymentGateway";
 import { ProductGrid } from "@/components/pos/ProductGrid";
 import { CartPanel } from "@/components/pos/CartPanel";
-import { MonCashPaymentDialog } from "@/components/pos/MonCashPaymentDialog";
+import { PaymentGatewayDialog } from "@/components/pos/PaymentGatewayDialog";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -32,7 +32,7 @@ export default function NewSalePage() {
   const { profile } = useCurrentProfile();
   const cart = useCart();
   const customers = useLiveQuery(() => db.customers.toArray(), []);
-  const moncash = useMonCashPayment();
+  const paymentGateway = usePaymentGateway();
 
   const [discount, setDiscount] = useState(0);
   const [customerId, setCustomerId] = useState<string | null>(null);
@@ -70,7 +70,7 @@ export default function NewSalePage() {
       });
 
       if (linkTransactionId) {
-        void moncash.linkSale(linkTransactionId, sale.id);
+        void paymentGateway.linkSale(linkTransactionId, sale.id);
       }
 
       setCompletedSale({ ...sale, change });
@@ -79,7 +79,7 @@ export default function NewSalePage() {
       setCustomerId(null);
       setCashReceived("");
       setPaymentMethod("cash");
-      moncash.reset();
+      paymentGateway.reset();
     } catch {
       toast.error("Nou pa t ka kompete vant lan. Eseye ankò.");
     } finally {
@@ -88,29 +88,30 @@ export default function NewSalePage() {
   }
 
   async function handleCheckout() {
-    if (paymentMethod === "moncash") {
+    if (paymentMethod === "moncash" || paymentMethod === "natcash") {
       const total = Math.max(cart.subtotal - discount, 0);
-      void moncash.start(total);
+      void paymentGateway.start(paymentMethod, total);
       return;
     }
     await completeSale(paymentMethod);
   }
 
-  // MonCash has no webhook (docs/PROMPTS/07-payments.md) — confirmation
-  // arrives via useMonCashPayment's polling, surfaced here as a state
-  // transition rather than a direct callback. The processed-id guard
-  // keeps a re-render from re-running checkoutSale for the same payment.
+  // The payment gateway has no webhook (docs/PROMPTS/07-payments.md) —
+  // confirmation arrives via usePaymentGateway's polling, surfaced here
+  // as a state transition rather than a direct callback. The
+  // processed-id guard keeps a re-render from re-running checkoutSale
+  // for the same payment.
   const processedTransactionRef = useRef<string | null>(null);
   useEffect(() => {
     if (
-      moncash.state.status === "confirmed" &&
-      processedTransactionRef.current !== moncash.state.transactionId
+      paymentGateway.state.status === "confirmed" &&
+      processedTransactionRef.current !== paymentGateway.state.transactionId
     ) {
-      processedTransactionRef.current = moncash.state.transactionId;
-      void completeSale("moncash", moncash.state.transactionId);
+      processedTransactionRef.current = paymentGateway.state.transactionId;
+      void completeSale(paymentGateway.state.method, paymentGateway.state.transactionId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- completeSale intentionally reads current state at call time, not effect-tracked
-  }, [moncash.state]);
+  }, [paymentGateway.state]);
 
   return (
     <div className="grid h-full grid-cols-[1fr_400px] overflow-hidden">
@@ -145,13 +146,17 @@ export default function NewSalePage() {
         isSubmitting={isSubmitting}
       />
 
-      <MonCashPaymentDialog
-        state={moncash.state}
+      <PaymentGatewayDialog
+        state={paymentGateway.state}
         amount={Math.max(cart.subtotal - discount, 0)}
-        onManualCheck={moncash.manualCheck}
-        onCancel={() => void moncash.cancel()}
-        onRetry={() => void moncash.start(Math.max(cart.subtotal - discount, 0))}
-        onClose={moncash.reset}
+        onManualCheck={paymentGateway.manualCheck}
+        onCancel={() => void paymentGateway.cancel()}
+        onRetry={() => {
+          if (paymentMethod === "moncash" || paymentMethod === "natcash") {
+            void paymentGateway.start(paymentMethod, Math.max(cart.subtotal - discount, 0));
+          }
+        }}
+        onClose={paymentGateway.reset}
       />
 
       <Dialog

@@ -116,9 +116,11 @@ Kliyan k ap peye yon dèt kredi pa vèsman.
 | created_at | timestamptz |
 
 ### `payment_transactions`
-Rejis apèl API MonCash/NatCash (pou odit ak rekonsilyasyon). **Pa janm
-konfime yon `sale.payment_status` kòm `paid` sou baz sa a sèlman san yon
-webhook siyati verifye** — gade `docs/PROMPTS/07-payments.md`.
+Rejis apèl API MonCash/NatCash (pou odit ak rekonsilyasyon), atravè yon
+sèl gateway peman (`src/lib/payments/gateway.ts`). **Pa janm konfime yon
+`sale.payment_status` kòm `paid` sou baz sa a sèlman san yon verifikasyon
+sèvè-kote reyisi** (`GET /api/payments/status/[id]`, ki entèwoje gateway
+a — pa gen webhook dokimante) — gade `docs/PROMPTS/07-payments.md`.
 | Chan | Tip | Deskripsyon |
 |---|---|---|
 | id | uuid PK | |

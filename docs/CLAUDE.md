@@ -113,7 +113,9 @@ Avant toute nouvelle interface importante :
 ## Paiements
 
 - Ne jamais marquer un paiement MonCash ou NatCash comme payé à partir du frontend seul.
-- Les confirmations viennent d'un webhook signé et vérifié côté serveur.
+- Les confirmations viennent d'une vérification côté serveur (`GET /api/payments/status/[id]`,
+  qui interroge le gateway de paiement) — celui-ci ne documente aucun webhook/IPN,
+  le "poll" est donc le mécanisme de confirmation, pas un repli.
 - Stocker le provider, le transaction ID, le montant, le statut, les timestamps et l'événement brut sécurisé.
 - Prévoir les états `pending`, `paid`, `failed`, `cancelled`, `expired`.
 

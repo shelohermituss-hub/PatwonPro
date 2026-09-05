@@ -13,9 +13,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { QRCodeImage } from "@/components/pos/QRCode";
 import { formatCurrency } from "@/lib/format";
-import type { MonCashPaymentState } from "@/hooks/useMonCashPayment";
+import { PAYMENT_METHOD_LABELS } from "@/lib/pos/labels";
+import type { PaymentGatewayState } from "@/hooks/usePaymentGateway";
 
-export function MonCashPaymentDialog({
+export function PaymentGatewayDialog({
   state,
   amount,
   onManualCheck,
@@ -23,7 +24,7 @@ export function MonCashPaymentDialog({
   onRetry,
   onClose,
 }: {
-  state: MonCashPaymentState;
+  state: PaymentGatewayState;
   amount: number;
   onManualCheck: () => void;
   onCancel: () => void;
@@ -31,12 +32,13 @@ export function MonCashPaymentDialog({
   onClose: () => void;
 }) {
   const open = state.status !== "idle";
+  const methodLabel = "method" in state ? PAYMENT_METHOD_LABELS[state.method] : "Mobil";
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Peman MonCash</DialogTitle>
+          <DialogTitle>Peman {methodLabel}</DialogTitle>
           <DialogDescription>{formatCurrency(amount)}</DialogDescription>
         </DialogHeader>
 

@@ -2,44 +2,38 @@
 
 Nòt referans pou entegrasyon peman mobil Ayisyen yo.
 
-## MonCash (Digicel) — `src/lib/payments/moncash.ts`
+## Gateway "PLOP PLOP" — `src/lib/payments/gateway.ts`
 
-- OAuth2 client-credentials pou jwenn yon `access_token`, apre sa
-  `POST /v1/CreatePayment` ak `{ amount, orderId }`.
-- **Peye atansyon**: repons `CreatePayment` la gen yon `payment_token.token`
-  ki **diferan** de OAuth `access_token` la — se `payment_token.token` yo
-  itilize pou bati redireksyon an
-  (`.../Moncash-middleware/Payment/Redirect?token=<payment_token.token>`),
-  **pa** `access_token` la. (Yon premye vèsyon nan fichye a te melanje de
-  a — koreksyon sa a verifye kont yon SDK piblik depi sit dokiman ofisyèl
-  MonCash a t ap retounen 404.)
-- Verifikasyon estati: `getMonCashPaymentStatus(orderId)` rele
-  `POST /v1/RetrieveOrderPayment` (gen yon lòt wout,
-  `RetrieveTransactionPayment`, pou chèche pa `transactionId` olye
-  `orderId`, si sa ta nesesè pita).
-- Anviwònman: `sandbox.moncashbutton.digicelgroup.com` (tès) vs
-  `moncashbutton.digicelgroup.com` (pwodiksyon) — chwazi ak `MONCASH_ENV`.
-
-## NatCash (Natcom) — `src/lib/payments/natcash.ts`
-
-- **Pa gen dokiman piblik NatCash yo jwenn** (chèche fèt, pa gen anyen) —
-  kliyan an se yon **plasholder ke pa verifye**: chak non chan/wout la se
-  yon divinèt rezonab sou API mobil-lajan tipik, pa yon reyalite konfime.
-  Mete ajou fichye a (ak kòmantè anwo l la) lè yon vrè dokiman machann
-  Natcom disponib — pa konte sou fòm aktyèl la san verifye l.
-- Egzije nimewo telefòn kliyan an (`customerPhone`) anplis `orderId` ak
-  `amount`.
+- Yon sèl API pou MonCash **ak** NatCash (baz URL fiks,
+  `https://plopplop.solutionip.app`) — pa de entegrasyon separe. Chan
+  `payment_method` (`"moncash"` oswa `"natcash"`) sèl bagay ki chanje ant
+  de founisè yo; kliyan/wout/hook/dyalòg yo pataje.
+- `createGatewayPayment({ referenceId, amountHtg, method })` →
+  `POST /api/paiement-marchand` (`client_id`, `refference_id`, `montant`
+  >= 20 HTG, `payment_method`). Retounen `{ redirectUrl, transactionId }`
+  — `transactionId` se ID **gateway** a (diferan de `referenceId`, ki se
+  `payment_transactions.id` machann lan).
+- `verifyGatewayPayment(referenceId)` →
+  `POST /api/paiement-verify` (`client_id`, `refference_id`). Retounen
+  `trans_status`: `"no"` (an atant) oswa `"ok"` (konfime) —
+  `mapGatewayStatus()` tradui sa an `"paid" | "unresolved"`.
+- **Sèlman `client_id` nesesè** pou kreye/verifye yon peman — pa gen
+  `client_secret` pou API sa a (li rezève pou API **retrè machann** yo,
+  ki egzije yon otantifikasyon an 3 etap ak yon siyati HMAC-SHA256 — pa
+  entegre nan pwojè sa a, se yon fonksyonalite separe pou retire solde
+  prepeye machann lan, pa pou POS la).
 
 ## Kle sekrè
 
-- `MONCASH_CLIENT_ID` / `MONCASH_CLIENT_SECRET` ak `NATCASH_CLIENT_ID` /
-  `NATCASH_CLIENT_SECRET` — sèlman nan `.env.local` (pa janm commit),
-  itilize sèlman nan kòd sèvè-kote (route handlers, pa Client Components).
+- `PAYMENT_GATEWAY_CLIENT_ID` — sèlman nan `.env.local` (pa janm commit),
+  itilize sèlman nan kòd sèvè-kote (`src/app/api/payments/*`, pa Client
+  Components).
 - `SUPABASE_SERVICE_ROLE_KEY` — itilize atravè
   `src/lib/supabase/admin.ts` (`createAdminClient()`) sèlman; pa janm
-  enpòte l nan yon Client Component. Sa nesesè paske yon webhook founisè
-  peman pa gen sesyon itilizatè Supabase (pa gen `auth.uid()`), donk RLS
-  ta bloke yon ekriti nòmal — kliyan admin lan bypass RLS entansyonèlman.
+  enpòte l nan yon Client Component. `src/lib/payments/audit.ts` sèvi
+  avè l paske pa gen sesyon itilizatè Supabase ki garanti disponib nan
+  chak kontèks (verifikasyon estati ka rive apre yon rekonesyon), donk
+  RLS ta bloke yon ekriti nòmal.
 
 ## Odit / Rejis tranzaksyon
 
@@ -47,33 +41,32 @@ Nòt referans pou entegrasyon peman mobil Ayisyen yo.
   ranje `payment_transactions`, `status: "pending"` pa default) ak
   `updatePaymentTransactionStatus()` (mete estati ajou + `provider_reference`
   si l disponib). Route handlers `07-payments.md` yo dwe rele fonksyon sa
-  yo pito pase ekri SQL dirèk — **chak apèl bay yon founisè peman (kreyasyon,
-  verifikasyon estati, resepsyon webhook) dwe kreye/mete ajou yon ranje**,
-  san eksepsyon, pou gen yon istorik konplè pou rekonsilyasyon/kontestasyon.
+  yo pito pase ekri SQL dirèk — **chak apèl bay gateway a (kreyasyon,
+  verifikasyon estati) dwe kreye/mete ajou yon ranje**, san eksepsyon,
+  pou gen yon istorik konplè pou rekonsilyasyon/kontestasyon.
 
-## Sekirite webhook — pa gen kòd egzanp isit la, e se fè espre
+## Pa gen webhook — "poll" se mekanis prensipal la, pa yon fallback
 
-- **Pa janm mete yon vant `paid` sèlman paske yon webhook rive** — verifye
-  siyati/otantisite li dabò selon dokiman founisè a. Pwojè sa a
-  **pa gen** mekanis verifikasyon siyati ekri toujou, paske egzat
-  algorit/tèt siyati MonCash ak NatCash pa konfime kont dokiman ofisyèl —
-  ekri yon egzanp san verifye l ta ka bay yon fo sentiman sekirite ki pi
-  danjere pase pa gen anyen ditou. Chèche mekanis egzat la nan dokiman
-  machann ou resevwa lè kont peman an vin aktive, epi enplemante l lè sa
-  rive.
-- Yon "poll" manyèl (`getMonCashPaymentStatus`/`getNatCashPaymentStatus`)
-  se yon **fallback** pou lè yon webhook pa rive — pa yon ranplasman pou
-  verifikasyon siyati sou vrè webhook la.
+- Dokiman gateway a **pa gen okenn seksyon webhook/IPN**. Sèl mekanis
+  konfimasyon dokimante se `POST /api/paiement-verify`. Kidonk
+  `GET /api/payments/status/[id]` (rele pa `usePaymentGateway.ts` chak 4
+  segonn) se sèl chemen konfimasyon — pa janm mete yon vant `paid` san l
+  pase pa verifikasyon sa a.
+- Pa gen kòd webhook nan pwojè a — pa envante youn san dokiman ki
+  konfime l egziste; sa ta bay yon fo santiman sekirite pi danjere pase
+  pa gen anyen ditou.
 
 ## Flux tipik
 
-1. Kesye a chwazi `moncash`/`natcash` kòm mwayen peman nan POS la.
-2. Route handler kreye yon peman bay founisè a, epi
-   `recordPaymentTransaction` (`status: "pending"`), epi retounen
-   URL/referans peman an bay fwontyè a.
-3. Yon webhook (verifye siyati) oswa yon verifikasyon manyèl mete estati
-   ajou (`updatePaymentTransactionStatus`) epi, si siksè, mete
-   `sales.payment_status = "paid"`.
+1. Kesye a chwazi `moncash`/`natcash` kòm mwayen peman nan POS la
+   (`CartPanel.tsx`) — toude mache, menm dyalòg (`PaymentGatewayDialog`).
+2. `POST /api/payments/create` kreye yon `payment_transactions`
+   (`status: "pending"`), rele `createGatewayPayment`, retounen URL
+   redireksyon an bay fwontyè a (kòd QR pou kliyan an eskane ak pwòp
+   telefòn li).
+3. `usePaymentGateway` "poll" `GET /api/payments/status/[id]` chak 4
+   segonn jiskaske `trans_status` vin `"ok"`, epi POS la kreye vant lan
+   (`checkoutSale`, Dexie) — pa gen "vant pandan" anvan konfimasyon.
 
 ## Konfòmite (nòt jeneral, pa konsèy legal)
 

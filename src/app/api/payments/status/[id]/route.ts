@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getMonCashPaymentStatus, mapMonCashStatus } from "@/lib/payments/moncash";
+import { verifyGatewayPayment } from "@/lib/payments/gateway";
 import {
   getPaymentTransaction,
   updatePaymentTransactionStatus,
@@ -24,10 +24,10 @@ async function requireStoreId(): Promise<string | null> {
 }
 
 /**
- * Polls MonCash for the current status of a payment. This is the
- * primary confirmation mechanism (no webhook — see
- * src/lib/payments/moncash.ts), called every few seconds by
- * useMonCashPayment.ts while a payment is in flight, plus once more for
+ * Polls the gateway for the current status of a payment. This is the
+ * sole confirmation mechanism (no webhook — see
+ * src/lib/payments/gateway.ts), called every few seconds by
+ * usePaymentGateway.ts while a payment is in flight, plus once more for
  * a manual "Verifye kounye a" recheck.
  */
 export async function GET(
@@ -51,28 +51,29 @@ export async function GET(
   }
 
   try {
-    const result = await getMonCashPaymentStatus(id);
-    const outcome = mapMonCashStatus(result.message);
+    const result = await verifyGatewayPayment(id);
 
-    console.log("[moncash/status] checked", { transactionId: id, message: result.message, outcome });
+    console.log("[payments/status] checked", {
+      transactionId: id,
+      transStatus: result.raw.trans_status,
+      outcome: result.outcome,
+    });
 
-    if (outcome === "paid") {
+    if (result.outcome === "paid") {
       await updatePaymentTransactionStatus(
         id,
         "paid",
         result.transactionId,
-        result as unknown as Record<string, unknown>,
+        result.raw as unknown as Record<string, unknown>,
       );
       return NextResponse.json({ status: "paid" });
     }
 
     return NextResponse.json({ status: "pending" });
   } catch (error) {
-    // A 404 from MonCash ("no such order") is the expected response
-    // while the customer hasn't completed payment yet — we can't tell
-    // that apart from a transient provider hiccup from this call alone,
-    // so any lookup failure here means "still pending", never "failed".
-    console.warn("[moncash/status] verifikasyon pa reyisi, rete pending", {
+    // A transient failure while polling means "still pending", never a
+    // hard failure — the next poll (or a manual recheck) will retry.
+    console.warn("[payments/status] verifikasyon pa reyisi, rete pending", {
       transactionId: id,
       error,
     });
@@ -106,14 +107,14 @@ export async function POST(
   if (body?.action === "cancel") {
     if (transaction.status === "pending") {
       await updatePaymentTransactionStatus(id, "cancelled");
-      console.log("[moncash/status] anile pa kesye a", { transactionId: id });
+      console.log("[payments/status] anile pa kesye a", { transactionId: id });
     }
     return NextResponse.json({ status: "cancelled" });
   }
 
   if (body?.action === "link-sale" && typeof body.saleId === "string") {
     await linkPaymentTransactionToSale(id, body.saleId);
-    console.log("[moncash/status] mare ak vant", { transactionId: id, saleId: body.saleId });
+    console.log("[payments/status] mare ak vant", { transactionId: id, saleId: body.saleId });
     return NextResponse.json({ ok: true });
   }
 
