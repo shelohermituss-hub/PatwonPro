@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Icons } from "@/lib/icons";
+import { EmptyState } from "@/components/EmptyState";
 import { db } from "@/lib/db";
 import { pullProducts } from "@/lib/sync/products";
 import { pullStockEntries } from "@/lib/sync/stockEntries";
@@ -94,30 +95,29 @@ export default function StockEntriesPage() {
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border py-16 text-center">
-          <Icons.product className="size-10" aria-hidden />
-          <div className="flex flex-col gap-1">
-            <p className="font-medium text-foreground">
-              {entries && entries.length > 0
-                ? "Pa gen antre stòk ki matche rechèch la"
-                : "Ou poko gen antre stòk"}
-            </p>
-            <p className="text-sm text-text-secondary">
-              {entries && entries.length > 0
-                ? "Eseye chanje rechèch la."
-                : "Ajoute yon antre stòk pou swiv chanjman envantè yo."}
-            </p>
-          </div>
-          {isOwner(profile) && (!entries || entries.length === 0) && (
-            <Link
-              href="/stock-entries/new"
-              className={cn(buttonVariants(), "mt-2 min-h-12")}
-            >
-              <Icons.add data-icon="inline-start" aria-hidden />
-              Ajoute premye antre a
-            </Link>
-          )}
-        </div>
+        <EmptyState
+          title={
+            entries && entries.length > 0
+              ? "Pa gen antre stòk ki matche rechèch la"
+              : "Ou poko gen antre stòk"
+          }
+          description={
+            entries && entries.length > 0
+              ? "Eseye chanje rechèch la."
+              : "Ajoute yon antre stòk pou swiv chanjman envantè yo."
+          }
+          action={
+            isOwner(profile) && (!entries || entries.length === 0) ? (
+              <Link
+                href="/stock-entries/new"
+                className={cn(buttonVariants(), "mt-2 min-h-12")}
+              >
+                <Icons.add data-icon="inline-start" aria-hidden />
+                Ajoute premye antre a
+              </Link>
+            ) : undefined
+          }
+        />
       ) : (
         <div className="overflow-x-auto rounded-lg border border-border">
           <Table>

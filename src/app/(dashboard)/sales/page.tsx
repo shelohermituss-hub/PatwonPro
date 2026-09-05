@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Icons } from "@/lib/icons";
+import { EmptyState } from "@/components/EmptyState";
 import { db } from "@/lib/db";
 import { pullCustomers } from "@/lib/sync/customers";
 import { useCurrentProfile } from "@/hooks/useCurrentProfile";
@@ -181,21 +182,18 @@ export default function SalesHistoryPage() {
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border py-16 text-center">
-          <Icons.sales className="size-10" aria-hidden />
-          <div className="flex flex-col gap-1">
-            <p className="font-medium text-foreground">
-              {sales && sales.length > 0
-                ? "Pa gen vant ki matche filtè yo"
-                : "Ou poko gen vant"}
-            </p>
-            <p className="text-sm text-text-secondary">
-              {sales && sales.length > 0
-                ? "Eseye chanje filtè yo."
-                : "Fè premye vant ou nan Pwen Vant lan."}
-            </p>
-          </div>
-        </div>
+        <EmptyState
+          title={
+            sales && sales.length > 0
+              ? "Pa gen vant ki matche filtè yo"
+              : "Ou poko gen vant"
+          }
+          description={
+            sales && sales.length > 0
+              ? "Eseye chanje filtè yo."
+              : "Fè premye vant ou nan Pwen Vant lan."
+          }
+        />
       ) : (
         <div className="overflow-x-auto rounded-lg border border-border">
           <Table>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,8 +25,10 @@ import {
   FieldDescription,
   FieldError,
 } from "@/components/ui/field";
+import { Icons } from "@/lib/icons";
 import { db } from "@/lib/db";
 import { syncPendingProducts } from "@/lib/sync/products";
+import { uploadImage } from "@/lib/storage/uploadImage";
 import { useCurrentProfile } from "@/hooks/useCurrentProfile";
 import { productSchema } from "@/lib/validations/product";
 import type { z } from "zod";
@@ -40,6 +42,32 @@ export function ProductForm({ product }: { product?: Product }) {
   const { profile } = useCurrentProfile();
   const categories = useLiveQuery(() => db.categories.toArray(), []);
   const [formError, setFormError] = useState<string | null>(null);
+  const [productId] = useState(() => product?.id ?? crypto.randomUUID());
+  const [imageUrl, setImageUrl] = useState(product?.image_url ?? null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  async function handleImageChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file || !profile?.store_id) return;
+
+    setIsUploadingImage(true);
+    const { publicUrl, error } = await uploadImage({
+      bucket: "product-images",
+      storeId: profile.store_id,
+      fileName: productId,
+      file,
+    });
+    setIsUploadingImage(false);
+
+    if (error || !publicUrl) {
+      toast.error(error ?? "Nou pa t ka voye imaj la.");
+      return;
+    }
+
+    setImageUrl(publicUrl);
+  }
 
   const {
     register,
@@ -70,10 +98,9 @@ export function ProductForm({ product }: { product?: Product }) {
     }
 
     const now = new Date().toISOString();
-    const id = product?.id ?? crypto.randomUUID();
 
     await db.products.put({
-      id,
+      id: productId,
       store_id: profile.store_id,
       category_id: values.categoryId ?? null,
       name: values.name,
@@ -84,6 +111,7 @@ export function ProductForm({ product }: { product?: Product }) {
       stock_quantity: values.stockQuantity,
       low_stock_threshold: values.lowStockThreshold,
       is_active: values.isActive,
+      image_url: imageUrl,
       sync_status: "pending",
       sync_attempts: 0,
       next_sync_at: null,
@@ -100,6 +128,43 @@ export function ProductForm({ product }: { product?: Product }) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="max-w-2xl">
       <FieldGroup>
+        <div className="flex items-center gap-4">
+          {imageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element -- Supabase Storage URLs aren't in next.config's image domains, and this is a small fixed-size preview (no need for next/image's optimization pipeline).
+            <img
+              src={imageUrl}
+              alt=""
+              className="size-16 shrink-0 rounded-lg border border-border object-cover"
+            />
+          ) : (
+            <div className="flex size-16 shrink-0 items-center justify-center rounded-lg border border-border bg-muted">
+              <Icons.product className="size-6" aria-hidden />
+            </div>
+          )}
+          <div className="flex flex-col gap-1">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={handleImageChange}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={isUploadingImage}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {isUploadingImage && (
+                <LoaderCircle className="animate-spin" data-icon="inline-start" aria-hidden />
+              )}
+              Chanje imaj
+            </Button>
+            <p className="text-xs text-text-secondary">JPEG, PNG oswa WebP · 3 Mo maks</p>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           <Field data-invalid={!!errors.name || undefined}>
             <FieldLabel htmlFor="name">Non pwodwi a</FieldLabel>

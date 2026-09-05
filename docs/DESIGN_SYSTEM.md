@@ -30,17 +30,18 @@ par les classes Tailwind générées (`bg-primary`, `text-danger`, etc.).
 ```css
 :root {
   /* Marque */
-  --primary: #4f46e5;
-  --primary-hover: #4338ca;
+  --primary: #84cc16;
+  --primary-hover: #65a30d;
+  --primary-foreground: #0f172a; /* texte quasi-noir — lime ne passe pas AA avec du blanc */
   --warning: #f59e0b;
   --success: #16a34a;
   --danger: #dc2626;
 
   /* Dégradé de marque (logo, panneau héro auth — jamais un fond de
      composant par défaut, voir la note plus bas) + point d'accent */
-  --brand-gradient-start: #4f46e5;
-  --brand-gradient-via: #7c3aed;
-  --brand-gradient-end: #06b6d4;
+  --brand-gradient-start: #14532d;
+  --brand-gradient-via: #4d7c0f;
+  --brand-gradient-end: #84cc16;
   --brand-accent: #facc15;
 
   /* Neutres produit (pas les neutres shadcn — voir plus bas) */
@@ -66,27 +67,28 @@ par les classes Tailwind générées (`bg-primary`, `text-danger`, etc.).
 |---|---|---|---|
 | `--background` | `#F8FAFC` | Fond de page | `bg-background` |
 | `--surface` / `--card` | `#FFFFFF` | Cartes, modales | `bg-surface` / `bg-card` |
-| `--primary` | `#4F46E5` | Boutons d'action, lien actif sidebar | `bg-primary` `text-primary` |
-| `--primary-hover` | `#4338CA` | Hover explicite (voir note ci-dessous) | `bg-primary-hover` |
+| `--primary` | `#84CC16` | Boutons d'action, lien actif sidebar | `bg-primary` `text-primary` |
+| `--primary-hover` | `#65A30D` | Hover explicite (voir note ci-dessous) | `bg-primary-hover` |
+| `--primary-foreground` | `#0F172A` | Texte sur fond `--primary` — quasi-noir, pas blanc (contraste AA) | `text-primary-foreground` |
 | `--success` | `#16A34A` | Vente complétée, paiement reçu | `bg-success` `text-success` |
 | `--warning` | `#F59E0B` | Alerte, badge stock bas, sync en attente | `bg-warning` `text-warning` |
 | `--danger` | `#DC2626` | Suppression, dette en retard | `bg-danger` `text-danger` |
 | `--foreground` | `#0F172A` | Texte principal | `text-foreground` |
 | `--text-secondary` | `#64748B` | Texte secondaire/label | `text-text-secondary` |
 | `--border` / `--input` | `#E2E8F0` | Bordures, contours de champs | `border-border` |
-| `--brand-gradient-start/via/end` | `#4F46E5`/`#7C3AED`/`#06B6D4` | Dégradé de marque — logo (`Logo.tsx`), panneau héro `(auth)` | `from-brand-gradient-start via-brand-gradient-via to-brand-gradient-end` |
+| `--brand-gradient-start/via/end` | `#14532D`/`#4D7C0F`/`#84CC16` | Dégradé de marque — logo (`Logo.tsx`), panneau héro `(auth)` | `from-brand-gradient-start via-brand-gradient-via to-brand-gradient-end` |
 | `--brand-accent` | `#FACC15` | Point d'accent de marque, usage très ponctuel | `bg-brand-accent` |
 | `--radius-md` | `12px` (littéral, pas dérivé de `--radius`) | Rayon "medium" | `rounded-md` |
 | `--radius-lg` | `16px` (littéral) | Rayon "large" | `rounded-lg` |
 | `--sidebar-width` | `248px` | Largeur du sidebar tablette | `w-sidebar` |
-| `--font-sans` | Plus Jakarta Sans | Police par défaut | `font-sans` (déjà appliqué sur `<html>`) |
+| `--font-sans` | Geist | Police par défaut (préset shadcn "Nova") | `font-sans` (déjà appliqué sur `<html>`) |
 
 **Note `--primary-hover`** : le token existe et est exposé
 (`--color-primary-hover` → `bg-primary-hover`/`hover:bg-primary-hover`),
 mais le composant `Button` shadcn par défaut utilise
 `hover:bg-primary/80` (opacité), pas ce token. Utiliser `--primary-hover`
 explicitement sur des composants **custom** (pas les composants shadcn
-générés) quand un hover exact `#4338CA` est requis.
+générés) quand un hover exact `#65A30D` est requis.
 
 **⚠️ Le dégradé de marque n'est pas un fond de composant par défaut.**
 Il est réservé aux moments de marque délibérés — le logo (`Logo.tsx`) et

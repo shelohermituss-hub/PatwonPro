@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
 import { MoreVertical } from "lucide-react";
 import { Icons } from "@/lib/icons";
+import { EmptyState } from "@/components/EmptyState";
 import { db } from "@/lib/db";
 import { pullProducts } from "@/lib/sync/products";
 import { useCurrentProfile } from "@/hooks/useCurrentProfile";
@@ -162,30 +163,29 @@ export default function ProductsPage() {
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border py-16 text-center">
-          <Icons.product className="size-10" aria-hidden />
-          <div className="flex flex-col gap-1">
-            <p className="font-medium text-foreground">
-              {products && products.length > 0
-                ? "Pa gen pwodwi ki matche rechèch la"
-                : "Ou poko gen pwodwi"}
-            </p>
-            <p className="text-sm text-text-secondary">
-              {products && products.length > 0
-                ? "Eseye chanje filtè yo."
-                : "Ajoute premye pwodwi ou pou kòmanse vann."}
-            </p>
-          </div>
-          {isOwner(profile) && (!products || products.length === 0) && (
-            <Link
-              href="/products/new"
-              className={cn(buttonVariants(), "mt-2 min-h-12")}
-            >
-              <Icons.add data-icon="inline-start" aria-hidden />
-              Ajoute premye pwodwi ou
-            </Link>
-          )}
-        </div>
+        <EmptyState
+          title={
+            products && products.length > 0
+              ? "Pa gen pwodwi ki matche rechèch la"
+              : "Ou poko gen pwodwi"
+          }
+          description={
+            products && products.length > 0
+              ? "Eseye chanje filtè yo."
+              : "Ajoute premye pwodwi ou pou kòmanse vann."
+          }
+          action={
+            isOwner(profile) && (!products || products.length === 0) ? (
+              <Link
+                href="/products/new"
+                className={cn(buttonVariants(), "mt-2 min-h-12")}
+              >
+                <Icons.add data-icon="inline-start" aria-hidden />
+                Ajoute premye pwodwi ou
+              </Link>
+            ) : undefined
+          }
+        />
       ) : (
         <div className="overflow-x-auto rounded-lg border border-border">
           <Table>
@@ -204,15 +204,29 @@ export default function ProductsPage() {
               {filtered.map((product) => (
                 <TableRow key={product.id}>
                   <TableCell>
-                    <div className="flex flex-col">
-                      <span className="font-medium text-foreground">
-                        {product.name}
-                      </span>
-                      {product.sku && (
-                        <span className="text-xs text-text-secondary">
-                          SKU {product.sku}
-                        </span>
+                    <div className="flex items-center gap-3">
+                      {product.image_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element -- Supabase Storage URLs aren't in next.config's image domains, and this is a small fixed-size thumbnail (no need for next/image's optimization pipeline).
+                        <img
+                          src={product.image_url}
+                          alt=""
+                          className="size-10 shrink-0 rounded-md border border-border object-cover"
+                        />
+                      ) : (
+                        <div className="flex size-10 shrink-0 items-center justify-center rounded-md border border-border bg-muted">
+                          <Icons.product className="size-5" aria-hidden />
+                        </div>
                       )}
+                      <div className="flex flex-col">
+                        <span className="font-medium text-foreground">
+                          {product.name}
+                        </span>
+                        {product.sku && (
+                          <span className="text-xs text-text-secondary">
+                            SKU {product.sku}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell className="text-text-secondary">

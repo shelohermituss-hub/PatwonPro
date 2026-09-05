@@ -25,6 +25,7 @@ export interface Store {
   currency: string;
   address: string | null;
   phone: string | null;
+  logo_url: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -59,6 +60,7 @@ export interface Product {
   stock_quantity: number;
   low_stock_threshold: number;
   is_active: boolean;
+  image_url: string | null;
   sync_status: SyncStatus;
   /** Dexie-only bookkeeping for retry backoff — stripped before upload. */
   sync_attempts?: number;

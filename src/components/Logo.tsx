@@ -16,9 +16,9 @@ export function Logo({ size = 32, className }: { size?: number; className?: stri
     >
       <defs>
         <linearGradient id="patwonpro-logo-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#4F46E5" />
-          <stop offset="55%" stopColor="#7C3AED" />
-          <stop offset="100%" stopColor="#06B6D4" />
+          <stop offset="0%" stopColor="#14532D" />
+          <stop offset="55%" stopColor="#4D7C0F" />
+          <stop offset="100%" stopColor="#84CC16" />
         </linearGradient>
       </defs>
       <rect width="800" height="800" rx="176" fill="url(#patwonpro-logo-bg)" />

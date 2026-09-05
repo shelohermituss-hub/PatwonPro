@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLiveQuery } from "dexie-react-hooks";
 import { LoaderCircle, MoreVertical } from "lucide-react";
-import { Icons } from "@/lib/icons";
+import { EmptyState } from "@/components/EmptyState";
 import { toast } from "sonner";
 import { db } from "@/lib/db";
 import { pullProducts } from "@/lib/sync/products";
@@ -86,15 +86,10 @@ export function CategoriesManager() {
           ))}
         </div>
       ) : sorted.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border py-16 text-center">
-          <Icons.folder className="size-10" aria-hidden />
-          <div className="flex flex-col gap-1">
-            <p className="font-medium text-foreground">Ou poko gen kategori</p>
-            <p className="text-sm text-text-secondary">
-              Ajoute yon kategori pou klase pwodwi ou yo.
-            </p>
-          </div>
-        </div>
+        <EmptyState
+          title="Ou poko gen kategori"
+          description="Ajoute yon kategori pou klase pwodwi ou yo."
+        />
       ) : (
         <div className="overflow-x-auto rounded-lg border border-border">
           <Table>

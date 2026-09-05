@@ -7,6 +7,8 @@ import { Icons } from "@/lib/icons";
 import { SyncStatusBadge } from "@/components/SyncStatusBadge";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { Logo } from "@/components/Logo";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import type { Profile } from "@/types";
@@ -28,11 +30,22 @@ const ROLE_LABELS: Record<Profile["role"], string> = {
   platform_admin: "Admin platfòm",
 };
 
+function storeInitials(name: string) {
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((word) => word[0]?.toUpperCase())
+    .join("");
+}
+
 export function DashboardShell({
   profile,
+  store,
   children,
 }: {
   profile: Profile | null;
+  store?: { name: string; logo_url: string | null } | null;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -52,6 +65,17 @@ export function DashboardShell({
           <Logo size={28} className="shrink-0 rounded-md" />
           <span className="text-lg font-semibold text-foreground">PatwonPro</span>
         </div>
+
+        {store && (
+          <div className="flex items-center gap-2 border-t border-border px-4 py-3">
+            <Avatar size="sm">
+              <AvatarImage src={store.logo_url ?? undefined} alt={store.name} />
+              <AvatarFallback>{storeInitials(store.name)}</AvatarFallback>
+            </Avatar>
+            <span className="truncate text-sm font-medium text-foreground">{store.name}</span>
+          </div>
+        )}
+
         <nav className="flex flex-1 flex-col gap-1 px-2">
           {navItems.map(({ href, matchPrefix, label, icon: Icon }) => {
             const prefix = matchPrefix ?? href;
@@ -85,14 +109,16 @@ export function DashboardShell({
                 {ROLE_LABELS[profile.role]}
               </span>
             </div>
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon"
               onClick={handleSignOut}
               aria-label="Dekonekte"
-              className="flex size-9 shrink-0 items-center justify-center rounded-md text-text-secondary hover:bg-muted hover:text-danger"
+              className="size-9 shrink-0 text-text-secondary hover:text-danger"
             >
               <LogOut className="size-5" aria-hidden />
-            </button>
+            </Button>
           </div>
         )}
 

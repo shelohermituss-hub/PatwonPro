@@ -30,6 +30,8 @@ import {
   FcSms,
   FcCallback,
   FcCalculator,
+  FcSynchronize,
+  FcDataSheet,
 } from "react-icons/fc";
 
 /**
@@ -73,4 +75,6 @@ export const Icons = {
   callback: FcCallback,
   transactionCount: FcList,
   avgBasket: FcCalculator,
+  sync: FcSynchronize,
+  setup: FcDataSheet,
 } as const;

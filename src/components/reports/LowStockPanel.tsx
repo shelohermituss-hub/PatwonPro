@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Icons } from "@/lib/icons";
+import { EmptyState } from "@/components/EmptyState";
 import {
   Card,
   CardHeader,
@@ -21,10 +21,7 @@ export function LowStockPanel({ products }: { products: Product[] }) {
       </CardHeader>
       <CardContent>
         {products.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 py-6 text-center">
-            <Icons.product className="size-8" aria-hidden />
-            <p className="text-sm text-text-secondary">Tout pwodwi gen ase stòk.</p>
-          </div>
+          <EmptyState title="Tout pwodwi gen ase stòk." compact className="border-none py-6" />
         ) : (
           <ul className="flex flex-col gap-3">
             {visible.map((p) => (

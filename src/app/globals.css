@@ -11,8 +11,8 @@
      hover-highlight tokens (dropdown/select item hover etc.) — do NOT
      repoint them to the brand "warning" orange, that would turn every
      menu-item hover bright orange. Warning lives in --warning instead. */
-  --primary: #4f46e5;
-  --primary-hover: #4338ca;
+  --primary: #84cc16;
+  --primary-hover: #65a30d;
   --warning: #f59e0b;
   --success: #16a34a;
   --danger: #dc2626;
@@ -20,9 +20,9 @@
      for deliberate brand moments (logo, auth hero panel), never a default
      component background. Everyday UI (buttons, active nav, cards) stays
      solid --primary, per docs/CLAUDE.md's "pas de gradients excessifs". */
-  --brand-gradient-start: #4f46e5;
-  --brand-gradient-via: #7c3aed;
-  --brand-gradient-end: #06b6d4;
+  --brand-gradient-start: #14532d;
+  --brand-gradient-via: #4d7c0f;
+  --brand-gradient-end: #84cc16;
   --brand-accent: #facc15;
   --surface: #ffffff;
   --text-secondary: #64748b;
@@ -33,7 +33,12 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary-foreground: #ffffff;
+  /* Lime is a bright/light hue — white text on it fails contrast (WCAG
+     AA needs 4.5:1, unreachable on any shade that still reads as "lime").
+     Near-black text is the standard accessible pairing for lime brand
+     colors, matching --foreground so it's the same ink used everywhere
+     else in the app. */
+  --primary-foreground: #0f172a;
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
@@ -76,7 +81,7 @@
   --color-surface: var(--surface);
   --color-text-secondary: var(--text-secondary);
   --width-sidebar: var(--sidebar-width);
-  --font-sans: var(--font-jakarta);
+  --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -127,10 +132,10 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: #4f46e5;
-  --primary-hover: #4338ca;
+  --primary: #84cc16;
+  --primary-hover: #65a30d;
   --warning: #f59e0b;
-  --primary-foreground: #ffffff;
+  --primary-foreground: #0f172a;
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);

@@ -3,6 +3,7 @@ import { getCurrentProfile } from "@/lib/supabase/profile";
 import { createClient } from "@/lib/supabase/server";
 import { isOwner } from "@/lib/auth/roles";
 import { InviteEmployeeForm } from "@/components/InviteEmployeeForm";
+import { StoreProfileForm } from "@/components/StoreProfileForm";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -36,6 +37,10 @@ export default async function SettingsPage() {
       .order("role"),
   ]);
 
+  if (!store) {
+    redirect("/dashboard");
+  }
+
   return (
     <div className="flex flex-col gap-8 p-6">
       <div className="flex flex-col gap-1">
@@ -47,17 +52,7 @@ export default async function SettingsPage() {
         </p>
       </div>
 
-      <div className="flex max-w-lg flex-col gap-2 rounded-lg border border-border p-4">
-        <h2 className="font-semibold text-foreground">{store?.name ?? "—"}</h2>
-        <dl className="grid grid-cols-2 gap-y-1 text-sm text-text-secondary">
-          <dt>Adrès</dt>
-          <dd className="text-foreground">{store?.address ?? "—"}</dd>
-          <dt>Telefòn</dt>
-          <dd className="text-foreground">{store?.phone ?? "—"}</dd>
-          <dt>Lajan</dt>
-          <dd className="text-foreground">{store?.currency ?? "—"}</dd>
-        </dl>
-      </div>
+      <StoreProfileForm store={store} />
 
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">

@@ -1,4 +1,4 @@
-import { Icons } from "@/lib/icons";
+import { EmptyState } from "@/components/EmptyState";
 import { SUPPORT_TICKET_STATUS_LABELS } from "@/lib/subscription/labels";
 import { formatDateTime } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
@@ -13,12 +13,7 @@ const STATUS_VARIANT: Record<SupportTicket["status"], "default" | "secondary" | 
 
 export function SupportTicketList({ tickets }: { tickets: SupportTicket[] }) {
   if (tickets.length === 0) {
-    return (
-      <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border py-10 text-center">
-        <Icons.support className="size-8" aria-hidden />
-        <p className="text-sm text-text-secondary">Ou poko gen tikè sipò.</p>
-      </div>
-    );
+    return <EmptyState illustration="support" title="Ou poko gen tikè sipò." compact />;
   }
 
   return (

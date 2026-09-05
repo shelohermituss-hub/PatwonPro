@@ -19,7 +19,7 @@ export default function AuthLayout({
         <div className="w-full max-w-sm">{children}</div>
       </div>
 
-      <div className="relative hidden w-[42%] shrink-0 overflow-hidden bg-gradient-to-br from-brand-gradient-start via-brand-gradient-via to-brand-gradient-end md:flex md:flex-col md:justify-between md:p-12">
+      <div className="relative hidden w-[42%] shrink-0 overflow-hidden bg-gradient-to-br from-brand-gradient-start via-brand-gradient-via to-brand-gradient-start md:flex md:flex-col md:justify-between md:p-12">
         <div
           className="absolute -right-24 -top-24 size-96 rounded-full bg-white/10"
           aria-hidden

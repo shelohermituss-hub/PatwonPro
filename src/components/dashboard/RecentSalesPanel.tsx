@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Icons } from "@/lib/icons";
+import { EmptyState } from "@/components/EmptyState";
 import {
   Card,
   CardHeader,
@@ -28,10 +28,7 @@ export function RecentSalesPanel({ sales }: { sales: DashboardSale[] }) {
       </CardHeader>
       <CardContent>
         {sales.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 py-6 text-center">
-            <Icons.sales className="size-8" aria-hidden />
-            <p className="text-sm text-text-secondary">Poko gen vant jodi a.</p>
-          </div>
+          <EmptyState title="Poko gen vant jodi a." compact className="border-none py-6" />
         ) : (
           <ul className="flex flex-col gap-3">
             {sales.map((sale) => (

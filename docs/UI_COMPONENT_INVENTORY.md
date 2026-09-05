@@ -7,20 +7,19 @@ installation faite dans ce document — voir consigne "ne pas modifier le
 code"), et ce qui doit être **construit sur-mesure** (aucun équivalent
 shadcn direct).
 
-## Déjà installés (26 composants, `src/components/ui/`)
+## Déjà installés (`src/components/ui/`)
 
 `button`, `card`, `input`, `label`, `dialog`, `sheet`, `dropdown-menu`,
 `select`, `tabs`, `table`, `badge`, `tooltip`, `separator`, `avatar`,
 `command`, `popover`, `skeleton`, `alert-dialog`, `calendar`, `switch`,
 `checkbox`, `scroll-area`, `progress`, `sonner`, `textarea`,
-`input-group`.
+`input-group`, `field`, `radio-group`, `accordion` (FAQ landing page —
+généré via `npx shadcn add accordion`, import `cn` cassé (`from "cn"`)
+corrigé manuellement vers `@/lib/utils`).
 
-**Écart constaté** : un `npx shadcn add ... form ...` a été exécuté
-précédemment mais aucun `form.tsx`/`field.tsx` n'existe dans
-`src/components/ui/` — cette version de shadcn expose les formulaires
-via `field`/`field-group` (pas un composant `form` monolithique), qui
-n'a pas été installé. À corriger dès le premier écran avec formulaire
-(voir tableau ci-dessous).
+**Écart historique résolu** : `field`/`field-group` (pas un `form`
+monolithique) sont bien installés et utilisés dans tous les formulaires
+(`ProductForm`, `StoreProfileForm`, `InviteEmployeeForm`, etc.).
 
 ## À installer — confirmés dans le registre `@shadcn`
 
@@ -31,7 +30,6 @@ n'a pas été installé. À corriger dès le premier écran avec formulaire
 | `slider` | `npx shadcn add slider` | Antre Stòk (ajisteman kantite, si UI slider retenue), Rapò (filtre plage) |
 | `toggle-group` | `npx shadcn add toggle-group` | POS (mode Kach/MonCash/NatCash/Kredi — 2 à 7 choix, règle shadcn : jamais une boucle de `Button` avec état actif manuel) |
 | `pagination` | `npx shadcn add pagination` | Pwodwi (liste), Kredi (historique), Rapò |
-| `empty` | `npx shadcn add empty` | **Chaque écran de liste** (Pwodwi, Kredi, Rapò, Antre Stòk, Abònman) — le kit `design-system/` a un fichier "Empty" par module, confirmant que c'est un état systématique à couvrir |
 | `spinner` | `npx shadcn add spinner` | État loading — composer avec `disabled` sur les boutons en cours d'action (règle shadcn : pas de prop `isLoading` sur `Button`) |
 | `chart` | `npx shadcn add chart` | Tablo Bò, Rapò (wrap Recharts déjà en dépendance) |
 | `breadcrumb` | `npx shadcn add breadcrumb` | Paramèt (sous-sections), détail Pwodwi/Kliyan si navigation profonde |
@@ -50,8 +48,19 @@ n'a pas été installé. À corriger dès le premier écran avec formulaire
 | `StatusBadge` (métier) | Badge teinte douce mappé aux statuts métier (`payment_status`, `payment_transactions.status`) | `Badge` shadcn avec variantes couleur custom (`success`/`warning`/`danger`) — **ne pas** copier les couleurs exactes du kit (voir `DESIGN_SYSTEM.md`) |
 | `RadialProgress` (donut) | Anneau de progression concentrique (ex. objectif de vente du jour) | Recharts `RadialBarChart` — aucun équivalent shadcn natif, vu dans `design-system/Products/List/01.png` |
 | Auth split-screen layout | Formulaire d'un côté, panneau illustratif de l'autre | Layout custom `(auth)/layout.tsx` (n'existe pas encore) — inspiré de `design-system/Sign In.svg` |
+| `EmptyState` | **Déjà construit** (`src/components/EmptyState.tsx`) — illustration (kit "Empty State Illustration Kit"), titre, description, action optionnelle, variante `compact` pour les cards de dashboard | Remplace l'option `empty` du registre shadcn (jamais installée) — un seul composant réutilisé sur ~14 écrans plutôt que du HTML ad-hoc répété |
+| Composants `landing/*` | Sections de la page d'accueil publique (`Hero`, `Features`, `HowItWorks`, `Stats`, `PaymentMethods`, `CtaBanner`, `Faq`, `LandingNavbar`, `LandingFooter`) | Composition `card`-like custom + `accordion` (FAQ) + `button` — pas de composant shadcn "landing" dédié |
 
 ## Par module
+
+### Landing page publique (`/`)
+`LandingNavbar`, `Hero`, `Features`, `HowItWorks`, `Stats`,
+`PaymentMethods` (MonCash/NatCash — remplace tout pattern "logos
+partenaires" par les vrais moyens de paiement du produit), `CtaBanner`,
+`Faq` (`accordion`), `LandingFooter` — voir `src/components/landing/`.
+Contenu volontairement sans témoignages, équipe, ou logos clients
+fabriqués (voir décision de contenu-honnêteté dans l'historique de
+session) : uniquement des faits vérifiables sur le produit.
 
 ### Tablo Bò (Dashboard)
 `card`, `chart` (à installer), `KpiStatCard` (custom), `empty` (à installer, si aucune vente du jour).
@@ -60,7 +69,7 @@ n'a pas été installé. À corriger dès le premier écran avec formulaire
 `ProductGridCard` (custom), `Cart` (custom), `NumericKeypad` (custom), `toggle-group` (à installer, mode paiement), `sheet` (existant, panneau panier/détail sur tablette au lieu d'une modale), `dialog`/`alert-dialog` (existant, confirmation "Konfime vant lan"/"Anile"), `sonner` (existant, confirmation de vente).
 
 ### Pwodwi (Produits/Stock)
-`DataTable` (custom, compose `table`+`pagination`), `field`+`input`+`select` (formulaire produit — `field` à installer), `badge` (alerte stock bas — `warning`), `empty` (à installer), `IconChip` (custom, catégories).
+`DataTable` (custom, compose `table`+`pagination`), `field`+`input`+`select` (formulaire produit), `badge` (alerte stock bas — `warning`), `EmptyState` (custom), `IconChip` (custom, catégories), photo pwodwi (`<img>` brut vers l'URL publique Supabase Storage — pas `next/image`, voir `src/lib/storage/uploadImage.ts`).
 
 ### Antre Stòk (Mouvements de stock)
 `field`, `select`, `input-group` (quantité + unité), `table` (historique des mouvements).
@@ -75,7 +84,7 @@ n'a pas été installé. À corriger dès le premier écran avec formulaire
 `card` (état abonnement), `badge` (statut `trialing`/`active`/`past_due`), `table` (liste appareils/tablettes), `field`+`textarea` (nouveau ticket support) — inspiré de `design-system/Help Center.png` pour la structure liste de tickets, sans en reprendre le style visuel exact.
 
 ### Paramèt
-`tabs` (sections Compte/Boutique/Anplwaye), `field`+`radio-group` (à installer), `switch` (existant, préférences), `avatar` (existant, photo profil).
+`tabs` (sections Compte/Boutique/Anplwaye), `field`+`radio-group`, `switch` (existant, préférences), `avatar` (logo boutique — `StoreProfileForm`, upload vers bucket `store-logos`).
 
 ### Auth (login/register)
 Layout split-screen custom, `field`+`input` (à installer/existant), `button` (existant) — inspiré structurellement de `design-system/Sign In.svg`/`Sign Up.svg` (illustration à refaire, pas réutiliser celle du kit qui n'est pas à la marque PatwonPro).

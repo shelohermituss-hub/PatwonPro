@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { DashboardShell } from "@/components/DashboardShell";
 import { getCurrentProfile } from "@/lib/supabase/profile";
+import { createClient } from "@/lib/supabase/server";
 import { isPlatformAdmin } from "@/lib/auth/roles";
 
 export default async function DashboardLayout({
@@ -14,5 +15,20 @@ export default async function DashboardLayout({
     redirect("/admin");
   }
 
-  return <DashboardShell profile={profile}>{children}</DashboardShell>;
+  let store: { name: string; logo_url: string | null } | null = null;
+  if (profile?.store_id) {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("stores")
+      .select("name, logo_url")
+      .eq("id", profile.store_id)
+      .maybeSingle();
+    store = data;
+  }
+
+  return (
+    <DashboardShell profile={profile} store={store}>
+      {children}
+    </DashboardShell>
+  );
 }

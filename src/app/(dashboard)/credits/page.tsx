@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Icons } from "@/lib/icons";
+import { EmptyState } from "@/components/EmptyState";
 import { db } from "@/lib/db";
 import { pullCustomers } from "@/lib/sync/customers";
 import { pullCreditPayments } from "@/lib/sync/creditPayments";
@@ -160,21 +161,19 @@ export default function CreditsPage() {
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border py-16 text-center">
-          <Icons.credit className="size-10" aria-hidden />
-          <div className="flex flex-col gap-1">
-            <p className="font-medium text-foreground">
-              {credits && credits.length > 0
-                ? "Pa gen kredi ki matche filtè yo"
-                : "Ou poko gen kredi"}
-            </p>
-            <p className="text-sm text-text-secondary">
-              {credits && credits.length > 0
-                ? "Eseye chanje filtè yo."
-                : "Kreye premye kredi ou pou swiv dèt kliyan yo."}
-            </p>
-          </div>
-        </div>
+        <EmptyState
+          illustration="credit"
+          title={
+            credits && credits.length > 0
+              ? "Pa gen kredi ki matche filtè yo"
+              : "Ou poko gen kredi"
+          }
+          description={
+            credits && credits.length > 0
+              ? "Eseye chanje filtè yo."
+              : "Kreye premye kredi ou pou swiv dèt kliyan yo."
+          }
+        />
       ) : (
         <div className="overflow-x-auto rounded-lg border border-border">
           <Table>

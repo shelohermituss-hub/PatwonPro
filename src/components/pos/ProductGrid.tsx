@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Icons } from "@/lib/icons";
+import { EmptyState } from "@/components/EmptyState";
 import { db } from "@/lib/db";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -82,19 +83,22 @@ export function ProductGrid({
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 py-16 text-center">
-            <Icons.product className="size-10" aria-hidden />
-            <p className="font-medium text-foreground">
-              {products && products.length > 0
+          <EmptyState
+            title={
+              products && products.length > 0
                 ? "Pa gen pwodwi ki matche rechèch la"
-                : "Ou poko gen pwodwi aktif"}
-            </p>
-          </div>
+                : "Ou poko gen pwodwi aktif"
+            }
+            className="border-none"
+          />
         ) : (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
             {filtered.map((product) => {
               const outOfStock = product.stock_quantity <= 0;
               return (
+                // Raw <button>, not shadcn Button: this is a full multi-line
+                // card layout (flex-col, custom disabled/hover treatment),
+                // not a fit for Button's single-line variant system.
                 <button
                   key={product.id}
                   type="button"
@@ -106,9 +110,19 @@ export function ProductGrid({
                     "disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-border disabled:hover:bg-surface",
                   )}
                 >
-                  <span className="line-clamp-2 text-sm font-medium text-foreground">
-                    {product.name}
-                  </span>
+                  <div className="flex w-full items-start gap-2">
+                    {product.image_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element -- Supabase Storage URLs aren't in next.config's image domains, and this is a small fixed-size thumbnail (no need for next/image's optimization pipeline).
+                      <img
+                        src={product.image_url}
+                        alt=""
+                        className="size-9 shrink-0 rounded-md border border-border object-cover"
+                      />
+                    ) : null}
+                    <span className="line-clamp-2 text-sm font-medium text-foreground">
+                      {product.name}
+                    </span>
+                  </div>
                   <div className="flex w-full items-end justify-between gap-2">
                     <span className="text-base font-bold text-foreground">
                       {formatCurrency(product.sale_price)}

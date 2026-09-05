@@ -68,8 +68,11 @@ Avant toute nouvelle interface importante :
 
 - App background : `#F8FAFC`.
 - Surface/card : `#FFFFFF`.
-- Primary : `#4F46E5` (indigo — départ du dégradé de marque PatwonPro).
-- Primary hover : `#4338CA`.
+- Primary : `#84CC16` (lime-500).
+- Primary hover : `#65A30D` (lime-600).
+- Primary foreground (texte sur fond primary) : `#0F172A` — lime est une
+  teinte claire, un texte blanc n'atteint pas le contraste AA (4.5:1) ;
+  texte quasi-noir est la paire standard et accessible pour une marque lime.
 - Success : `#16A34A`.
 - Warning : `#F59E0B`.
 - Danger : `#DC2626`.
@@ -79,22 +82,23 @@ Avant toute nouvelle interface importante :
 - Radius large : 16px.
 - Radius medium : 12px.
 - Sidebar tablette : 248px.
-- Font : Inter ou Plus Jakarta Sans.
+- Font : Geist (préset shadcn "Nova" — voir `components.json`).
 - Dégradé de marque (usage réservé — logo, panneau héro auth, jamais un
-  fond de composant par défaut) : `#4F46E5` → `#7C3AED` → `#06B6D4`.
+  fond de composant par défaut) : `#14532D` → `#4D7C0F` → `#84CC16`.
 - Point d'accent de marque (très ponctuel) : `#FACC15`.
 
 ## Modules produit
 
-1. Tableau de bord.
-2. Point de vente : ventes cash, MonCash, NatCash, crédit.
-3. Produits et stock.
-4. Entrées de stock et ajustements.
-5. Crédits clients et remboursements.
-6. Rapports.
-7. Paramètres de boutique et employés.
-8. Abonnement, tablettes et support.
-9. Synchronisation offline-first.
+1. Page d'accueil publique (landing page, `/` — non authentifiée).
+2. Tableau de bord.
+3. Point de vente : ventes cash, MonCash, NatCash, crédit.
+4. Produits et stock (avec photo de pwodwi, optionnelle).
+5. Entrées de stock et ajustements.
+6. Crédits clients et remboursements.
+7. Rapports.
+8. Paramètres de boutique et employés (profil boutique éditable + logo).
+9. Abonnement, tablettes et support.
+10. Synchronisation offline-first.
 
 ## Architecture offline
 

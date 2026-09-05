@@ -1,4 +1,4 @@
-import { Icons } from "@/lib/icons";
+import { EmptyState } from "@/components/EmptyState";
 import {
   Card,
   CardHeader,
@@ -18,12 +18,11 @@ export function TopProductsList({ products }: { products: TopProductRow[] }) {
       </CardHeader>
       <CardContent>
         {products.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 py-6 text-center">
-            <Icons.topRated className="size-8" aria-hidden />
-            <p className="text-sm text-text-secondary">
-              Pa gen vant pwodwi sou peryòd sa a.
-            </p>
-          </div>
+          <EmptyState
+            title="Pa gen vant pwodwi sou peryòd sa a."
+            compact
+            className="border-none py-6"
+          />
         ) : (
           <ol className="flex flex-col gap-3">
             {products.map((p, index) => (

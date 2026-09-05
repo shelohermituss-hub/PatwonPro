@@ -14,6 +14,7 @@ Boutik la (tenant).
 | currency | text | Default `HTG` |
 | address | text | |
 | phone | text | |
+| logo_url | text nullable | URL piblik nan bucket Storage `store-logos` (gade seksyon Storage anba) |
 | created_at | timestamptz | |
 | updated_at | timestamptz | Ajou otomatikman pa trigger |
 
@@ -59,6 +60,7 @@ Ekstansyon `auth.users` pou jere wòl.
 | stock_quantity | numeric | Kantite an stòk |
 | low_stock_threshold | numeric | Alèt stòk ba |
 | is_active | boolean | |
+| image_url | text nullable | URL piblik nan bucket Storage `product-images` (gade seksyon Storage anba) |
 | created_at | timestamptz | |
 | updated_at | timestamptz | Ajou otomatikman pa trigger |
 
@@ -174,6 +176,21 @@ wè/jere tout tikè.
 | status | text | `open` \| `in_progress` \| `resolved` \| `closed` |
 | created_at | timestamptz | |
 | updated_at | timestamptz | Ajou otomatikman pa trigger |
+
+## Storage (Supabase Storage)
+
+De bucket piblik-li-sèlman (`00000000000010_storage_logos_and_product_images.sql`) :
+
+| Bucket | Kolòn ki referanse l | Politik |
+|---|---|---|
+| `store-logos` | `stores.logo_url` | Lekti piblik ; ekriti rezève pou `owner` nan pwòp chemen `{store_id}/...` li |
+| `product-images` | `products.image_url` | Lekti piblik ; ekriti rezève pou `owner` nan pwòp chemen `{store_id}/...` li |
+
+Chemen objè yo toujou prefikse pa `{store_id}/` — se sou baz sa a RLS
+(`storage.foldername(name))[1] = my_store_id()::text` konbine ak
+`is_owner()`) izole ekriti pa boutik san bezwen yon tab metadata separe.
+Upload fèt kliyan-kote (`src/lib/storage/uploadImage.ts`), lekti a piblik
+paske yon lojo/foto pwodwi pa done sansib.
 
 ## Relasyon kle
 

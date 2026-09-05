@@ -93,37 +93,43 @@ export function CartPanel({
                   <span className="text-sm font-medium text-foreground">
                     {line.name}
                   </span>
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
+                    size="icon"
                     onClick={() => onRemove(line.productId)}
                     aria-label={`Retire ${line.name} nan panye a`}
-                    className="flex size-8 shrink-0 items-center justify-center rounded-md text-text-secondary hover:bg-danger/10 hover:text-danger"
+                    className="size-8 shrink-0 text-text-secondary hover:bg-danger/10 hover:text-danger"
                   >
                     <Trash2 className="size-4" aria-hidden />
-                  </button>
+                  </Button>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1">
-                    <button
+                    <Button
                       type="button"
+                      variant="outline"
+                      size="icon"
                       onClick={() => onQuantityChange(line.productId, line.quantity - 1)}
                       aria-label={`Diminye kantite pou ${line.name}`}
-                      className="flex size-8 items-center justify-center rounded-md border border-border hover:bg-muted"
+                      className="size-8"
                     >
                       <Minus className="size-3.5" aria-hidden />
-                    </button>
+                    </Button>
                     <span className="w-8 text-center text-sm font-medium text-foreground">
                       {line.quantity}
                     </span>
-                    <button
+                    <Button
                       type="button"
+                      variant="outline"
+                      size="icon"
                       onClick={() => onQuantityChange(line.productId, line.quantity + 1)}
                       aria-label={`Ogmante kantite pou ${line.name}`}
                       disabled={line.quantity >= line.availableStock}
-                      className="flex size-8 items-center justify-center rounded-md border border-border hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
+                      className="size-8"
                     >
                       <Plus className="size-3.5" aria-hidden />
-                    </button>
+                    </Button>
                   </div>
                   <span className="text-sm font-semibold text-foreground">
                     {formatCurrency(line.unitPrice * line.quantity)}

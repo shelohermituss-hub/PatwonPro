@@ -64,14 +64,16 @@ export function InstallPrompt() {
         <Button type="button" onClick={install}>
           Enstale
         </Button>
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="icon"
           onClick={dismiss}
           aria-label="Fèmen"
-          className="flex size-9 items-center justify-center rounded-md text-text-secondary hover:bg-muted"
+          className="size-9 text-text-secondary"
         >
           <X className="size-4" aria-hidden />
-        </button>
+        </Button>
       </div>
     </div>
   );
