@@ -70,11 +70,9 @@ Avant toute nouvelle interface importante :
 
 - App background : `#F8FAFC`.
 - Surface/card : `#FFFFFF`.
-- Primary : `#84CC16` (lime-500).
-- Primary hover : `#65A30D` (lime-600).
-- Primary foreground (texte sur fond primary) : `#0F172A` — lime est une
-  teinte claire, un texte blanc n'atteint pas le contraste AA (4.5:1) ;
-  texte quasi-noir est la paire standard et accessible pour une marque lime.
+- Primary : `#4F46E5` (indigo-600).
+- Primary hover : `#4338CA` (indigo-700).
+- Primary foreground (texte sur fond primary) : `#FFFFFF`.
 - Success : `#16A34A`.
 - Warning : `#F59E0B`.
 - Danger : `#DC2626`.
@@ -86,7 +84,7 @@ Avant toute nouvelle interface importante :
 - Sidebar tablette : 248px.
 - Font : Geist (préset shadcn "Nova" — voir `components.json`).
 - Dégradé de marque (usage réservé — logo, panneau héro auth, jamais un
-  fond de composant par défaut) : `#14532D` → `#4D7C0F` → `#84CC16`.
+  fond de composant par défaut) : `#4F46E5` → `#7C3AED` → `#06B6D4`.
 - Point d'accent de marque (très ponctuel) : `#FACC15`.
 
 ## Modules produit

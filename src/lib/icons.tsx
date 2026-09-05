@@ -1,4 +1,5 @@
 import type { ComponentPropsWithoutRef } from "react";
+import { cn } from "@/lib/utils";
 
 export type AppIconComponent = (props: ComponentPropsWithoutRef<"img">) => React.JSX.Element;
 
@@ -11,15 +12,33 @@ export type AppIconComponent = (props: ComponentPropsWithoutRef<"img">) => React
  * fills — a `text-*` class next to one only colors sibling text, never
  * the icon itself (see the detinted containers in KpiCard.tsx, dashboard
  * page.tsx, etc.).
+ *
+ * Defaulting the size here matters more than it would for an inline
+ * `<svg>`: shadcn's own components size icons via CSS descendant
+ * selectors that target `svg` specifically (e.g. Button's
+ * `[&_svg:not([class*='size-'])]:size-4`), which never match an `<img>`
+ * — without a default, an icon used bare (most `data-icon="inline-start"`
+ * call sites) fell back to the raw SVG file's own intrinsic size
+ * (44px, or up to 365px for a couple of the source files), blowing up
+ * every button/badge that expected a ~16px glyph. `cn()` lets any
+ * caller-supplied `size-*` still win via tailwind-merge.
  */
 function glassIcon(file: string, label: string): AppIconComponent {
-  return function GlassIcon({ alt, ...props }) {
+  return function GlassIcon({ alt, className, ...props }) {
     // Every call site marks these `aria-hidden` (decorative, next to a
     // real text label) except the handful passing their own `alt` —
     // mirrors how the equivalent Lucide icons carried no accessible text
     // of their own either.
-    // eslint-disable-next-line @next/next/no-img-element -- fixed tiny SVG icons rendered at arbitrary caller-chosen sizes across 30+ call sites; next/image's optimization pipeline buys nothing for static vector assets and would force width/height props everywhere Lucide never needed them.
-    return <img src={`/icons/glass/${file}.svg`} alt={alt ?? ""} title={label} {...props} />;
+    return (
+      // eslint-disable-next-line @next/next/no-img-element -- fixed tiny SVG icons rendered at arbitrary caller-chosen sizes across 30+ call sites; next/image's optimization pipeline buys nothing for static vector assets and would force width/height props everywhere Lucide never needed them.
+      <img
+        src={`/icons/glass/${file}.svg`}
+        alt={alt ?? ""}
+        title={label}
+        className={cn("size-4 shrink-0", className)}
+        {...props}
+      />
+    );
   };
 }
 

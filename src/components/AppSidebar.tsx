@@ -123,7 +123,6 @@ export function AppSidebar({
                       render={<Link href={href} />}
                       isActive={isActive}
                       tooltip={label}
-                      className="data-active:bg-primary data-active:text-primary-foreground data-active:hover:bg-primary/90 data-active:hover:text-primary-foreground"
                     >
                       <NavIcon icon={Icon} />
                       <span>{label}</span>
