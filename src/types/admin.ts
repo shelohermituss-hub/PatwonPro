@@ -276,7 +276,7 @@ export interface SyncHealthRow {
   storeId: string;
   storeName: string;
   deviceId: string;
-  lastSyncAt: string;
+  lastSyncAt: string | null;
   pendingActions: number;
   errors: number;
   conflicts: number;

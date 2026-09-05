@@ -11,23 +11,25 @@ import { fetchAdminDevices } from "@/lib/admin/queries/devices";
 import { fetchAdminSupportTickets } from "@/lib/admin/queries/support";
 import { fetchPlatformTransactions } from "@/lib/admin/queries/transactions";
 import { fetchLeads } from "@/lib/admin/queries/leads";
-import { MOCK_SYNC_HEALTH } from "@/lib/admin/mock/sync";
+import { fetchSyncHealth } from "@/lib/admin/queries/sync";
 import { SUPPORT_PRIORITY_LABELS } from "@/lib/admin/labels";
 import type { SyncHealthRow } from "@/types/admin";
 
 function countOfflineDevices(rows: SyncHealthRow[]): number {
   const now = Date.now();
-  return rows.filter((row) => (now - new Date(row.lastSyncAt).getTime()) / 86_400_000 > 3).length;
+  return rows.filter((row) => row.lastSyncAt !== null && (now - new Date(row.lastSyncAt).getTime()) / 86_400_000 > 3)
+    .length;
 }
 
 export default async function AdminOverviewPage() {
-  const [stores, subscriptions, devices, tickets, platformTransactions, leads] = await Promise.all([
+  const [stores, subscriptions, devices, tickets, platformTransactions, leads, syncHealth] = await Promise.all([
     fetchAdminStores(),
     fetchAdminSubscriptions(),
     fetchAdminDevices(),
     fetchAdminSupportTickets(),
     fetchPlatformTransactions(),
     fetchLeads(),
+    fetchSyncHealth(),
   ]);
 
   const activeStores = stores.filter((s) => s.subscriptionStatus === "active").length;
@@ -49,11 +51,11 @@ export default async function AdminOverviewPage() {
   const deployedDevices = devices.filter((d) => d.status.startsWith("deployed_")).length;
   const availableDevices = devices.filter((d) => d.status === "in_stock").length;
   const openTickets = tickets.filter((t) => t.status !== "resolved" && t.status !== "closed").length;
-  const syncErrors = MOCK_SYNC_HEALTH.filter((row) => row.errors > 0).length;
+  const syncErrors = syncHealth.filter((row) => row.errors > 0).length;
 
   const trialsEndingSoon = leads.filter((l) => l.stage === "trial_active" || l.stage === "trial_installed").length;
   const overdueSubs = subscriptions.filter((s) => s.status === "past_due" || s.status === "suspended").length;
-  const offlineDeviceCount = countOfflineDevices(MOCK_SYNC_HEALTH);
+  const offlineDeviceCount = countOfflineDevices(syncHealth);
   const repairDevices = devices.filter((d) => d.status === "repair").length;
   const newTickets = tickets.filter((t) => t.status === "open").length;
   const p1Tickets = tickets.filter((t) => t.priority === "P1" && t.status !== "resolved" && t.status !== "closed").length;
