@@ -59,12 +59,65 @@ export async function createDeviceBatch(input: DeviceBatchFormOutput & { modelPh
   if (error) throw new Error(error.message);
 }
 
-/** Assigns an in-stock/reserved device to a store, marking it deployed. */
-export async function assignDeviceToStore(deviceDbId: string, storeId: string) {
+export interface AssignDeviceDepositInput {
+  amountHtg: number;
+  paymentMode: "lump_sum" | "monthly_installment";
+  monthlyInstallmentHtg: number | null;
+}
+
+/**
+ * Assigns an in-stock/reserved device to a store, marking it deployed,
+ * and creates the tablet's security deposit ("kosyon") at the same
+ * time — until now these were two disconnected admin actions, leaving
+ * every assigned tablet with no deposit for the merchant to ever pay.
+ * Only creates one if the device has no non-terminal deposit already
+ * (a device reassigned after a previous stint keeps its old
+ * refunded/fully_retained history instead of duplicating it).
+ */
+export async function assignDeviceToStore(
+  deviceDbId: string,
+  storeId: string,
+  deposit: AssignDeviceDepositInput,
+) {
   const supabase = createClient();
   const { error } = await supabase
     .from("devices")
     .update({ store_id: storeId, status: "deployed_active", installed_at: new Date().toISOString().slice(0, 10) })
+    .eq("id", deviceDbId);
+  if (error) throw new Error(error.message);
+
+  const { data: existing, error: existingError } = await supabase
+    .from("deposits")
+    .select("id")
+    .eq("device_id", deviceDbId)
+    .neq("status", "refunded")
+    .neq("status", "fully_retained")
+    .maybeSingle();
+  if (existingError) throw new Error(existingError.message);
+  if (existing) return;
+
+  const { error: depositError } = await supabase.from("deposits").insert({
+    store_id: storeId,
+    device_id: deviceDbId,
+    amount_htg: deposit.amountHtg,
+    payment_mode: deposit.paymentMode,
+    monthly_installment_htg: deposit.paymentMode === "monthly_installment" ? deposit.monthlyInstallmentHtg : null,
+    status: "pending",
+  });
+  if (depositError) throw new Error(depositError.message);
+}
+
+/**
+ * Returns a device to stock — the reverse of `assignDeviceToStore`.
+ * Never touches the linked `deposits` row: refund eligibility is a
+ * separate admin decision made through the existing /admin/deposits
+ * workflow, at whatever pace fits the tablet's actual condition.
+ */
+export async function unassignDeviceFromStore(deviceDbId: string) {
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("devices")
+    .update({ store_id: null, status: "in_stock", installed_at: null })
     .eq("id", deviceDbId);
   if (error) throw new Error(error.message);
 }

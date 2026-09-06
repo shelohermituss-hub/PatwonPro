@@ -4,7 +4,7 @@ import { useRef, Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronDown, LoaderCircle, PackageCheck, Plus, Wrench, AlertTriangle, RotateCcw } from "lucide-react";
+import { ChevronDown, LoaderCircle, PackageCheck, Plus, Wrench, AlertTriangle, RotateCcw, PackageMinus } from "lucide-react";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AdminDataTable, type AdminColumn, type AdminFilter } from "@/components/admin/AdminDataTable";
@@ -56,13 +56,14 @@ import {
   reportDeviceLost,
   createDeviceBatch,
   assignDeviceToStore,
+  unassignDeviceFromStore,
 } from "@/lib/admin/mutations/devices";
 import { uploadDevicePhoto } from "@/lib/storage/uploadDevicePhoto";
 import { deviceBatchSchema, type DeviceBatchFormInput, type DeviceBatchFormOutput } from "@/lib/validations/device";
 import { formatCurrencyHTG } from "@/lib/format";
 import type { AdminDevice, DeviceStatusAdmin } from "@/types/admin";
 
-type ActionKind = "mark_ready" | "reserve" | "lost";
+type ActionKind = "mark_ready" | "reserve" | "lost" | "unassign";
 
 const ACTION_CONFIG: Record<ActionKind, { title: string; description: string; confirmLabel: string; destructive?: boolean; auditAction: string; successMessage: string; mutate: (dbId: string) => Promise<void> }> = {
   mark_ready: {
@@ -89,6 +90,15 @@ const ACTION_CONFIG: Record<ActionKind, { title: string; description: string; co
     auditAction: "device.reported_lost",
     successMessage: "Tablèt make pèdi.",
     mutate: reportDeviceLost,
+  },
+  unassign: {
+    title: "Dezasiyen tablèt la",
+    description: "Tablèt la ap tounen nan estòk (\"Disponib\") e li p ap plis lye ak boutik la. Sa a pa afekte kosyon ki deja gen pou tablèt sa a — jere ranbousman an separeman sou paj Kosyon yo.",
+    confirmLabel: "Dezasiyen",
+    destructive: true,
+    auditAction: "device.unassigned",
+    successMessage: "Tablèt dezasiyen, li tounen nan estòk.",
+    mutate: unassignDeviceFromStore,
   },
 };
 
@@ -245,23 +255,39 @@ function AssignDeviceDialog({
   device,
   storeOptions,
   disabled,
+  defaultDepositAmountHtg,
   onDone,
 }: {
   device: AdminDevice;
   storeOptions: { id: string; name: string }[];
   disabled: boolean;
+  defaultDepositAmountHtg: number;
   onDone: () => void;
 }) {
   const actor = useAdminActor();
   const [open, setOpen] = useState(false);
   const [storeId, setStoreId] = useState("");
+  const [depositAmount, setDepositAmount] = useState(String(defaultDepositAmountHtg));
+  const [paymentMode, setPaymentMode] = useState<"lump_sum" | "monthly_installment">("lump_sum");
+  const [monthlyAmount, setMonthlyAmount] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  const depositAmountHtg = Number(depositAmount) || 0;
+  const monthlyInstallmentHtg = Number(monthlyAmount) || 0;
+  const canSubmit =
+    !!storeId &&
+    depositAmountHtg > 0 &&
+    (paymentMode === "lump_sum" || monthlyInstallmentHtg > 0);
+
   async function handleAssign() {
-    if (!storeId) return;
+    if (!canSubmit) return;
     setSubmitting(true);
     try {
-      await assignDeviceToStore(device.dbId, storeId);
+      await assignDeviceToStore(device.dbId, storeId, {
+        amountHtg: depositAmountHtg,
+        paymentMode,
+        monthlyInstallmentHtg: paymentMode === "monthly_installment" ? monthlyInstallmentHtg : null,
+      });
       await recordAuditEvent({
         actorId: actor.id,
         actorRole: actor.role,
@@ -269,6 +295,7 @@ function AssignDeviceDialog({
         resourceType: "device",
         resourceId: device.id,
         storeId,
+        metadata: { depositAmountHtg, paymentMode, monthlyInstallmentHtg: paymentMode === "monthly_installment" ? monthlyInstallmentHtg : null },
       });
       toast.success(`${device.id} asiyen.`);
       setOpen(false);
@@ -288,26 +315,76 @@ function AssignDeviceDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Asiyen {device.id}</DialogTitle>
-          <DialogDescription>Chwazi boutik ki pral resevwa tablèt sa a — li ap pase an estati &quot;Deplwaye (Aktif)&quot;.</DialogDescription>
+          <DialogDescription>Chwazi boutik ki pral resevwa tablèt sa a — li ap pase an estati &quot;Deplwaye (Aktif)&quot;, epi yon kosyon ap kreye pou kòmèsan an peye.</DialogDescription>
         </DialogHeader>
-        <Select value={storeId} onValueChange={(v) => setStoreId(v ?? "")}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Chwazi yon boutik">
-              {(value: string) => storeOptions.find((s) => s.id === value)?.name ?? "Chwazi yon boutik"}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              {storeOptions.map((s) => (
-                <SelectItem key={s.id} value={s.id}>
-                  {s.name}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+        <FieldGroup>
+          <Field>
+            <FieldLabel htmlFor="assign-store">Boutik</FieldLabel>
+            <Select value={storeId} onValueChange={(v) => setStoreId(v ?? "")}>
+              <SelectTrigger id="assign-store" className="w-full">
+                <SelectValue placeholder="Chwazi yon boutik">
+                  {(value: string) => storeOptions.find((s) => s.id === value)?.name ?? "Chwazi yon boutik"}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {storeOptions.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.name}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor="assign-deposit-amount">Montan kosyon total (HTG)</FieldLabel>
+            <Input
+              id="assign-deposit-amount"
+              type="number"
+              min={0}
+              step="1"
+              value={depositAmount}
+              onChange={(e) => setDepositAmount(e.target.value)}
+            />
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor="assign-payment-mode">Fason peye kosyon</FieldLabel>
+            <Select value={paymentMode} onValueChange={(v) => setPaymentMode((v as typeof paymentMode) ?? "lump_sum")}>
+              <SelectTrigger id="assign-payment-mode" className="w-full">
+                <SelectValue>
+                  {(value: typeof paymentMode) =>
+                    value === "lump_sum" ? "Yon sèl fwa (nan enstalasyon)" : "Mansyalite fiks chak mwa"
+                  }
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="lump_sum">Yon sèl fwa (nan enstalasyon)</SelectItem>
+                  <SelectItem value="monthly_installment">Mansyalite fiks chak mwa</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </Field>
+
+          {paymentMode === "monthly_installment" && (
+            <Field>
+              <FieldLabel htmlFor="assign-monthly-amount">Montan mansyèl (HTG)</FieldLabel>
+              <Input
+                id="assign-monthly-amount"
+                type="number"
+                min={0}
+                step="1"
+                value={monthlyAmount}
+                onChange={(e) => setMonthlyAmount(e.target.value)}
+              />
+            </Field>
+          )}
+        </FieldGroup>
         <DialogFooter>
-          <Button type="button" disabled={!storeId || submitting} onClick={handleAssign}>
+          <Button type="button" disabled={!canSubmit || submitting} onClick={handleAssign}>
             {submitting && <LoaderCircle className="animate-spin" data-icon="inline-start" aria-hidden />}
             Konfime Asiyasyon
           </Button>
@@ -385,7 +462,15 @@ function RepairDeviceDialog({
   );
 }
 
-function DevicesContent({ devices, storeOptions }: { devices: AdminDevice[]; storeOptions: { id: string; name: string }[] }) {
+function DevicesContent({
+  devices,
+  storeOptions,
+  defaultDepositAmountHtg,
+}: {
+  devices: AdminDevice[];
+  storeOptions: { id: string; name: string }[];
+  defaultDepositAmountHtg: number;
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const actor = useAdminActor();
@@ -419,7 +504,13 @@ function DevicesContent({ devices, storeOptions }: { devices: AdminDevice[]; sto
     { id: "status", header: "Estati", csvValue: (r) => DEVICE_STATUS_LABELS[r.status].label, cell: (r) => <StatusBadge {...DEVICE_STATUS_LABELS[r.status]} /> },
     { id: "store", header: "Boutik Asiyen", csvValue: (r) => r.assignedStoreName ?? "—", cell: (r) => (
       r.assignedStoreName ?? (
-        <AssignDeviceDialog device={r} storeOptions={storeOptions} disabled={readOnly} onDone={() => router.refresh()} />
+        <AssignDeviceDialog
+          device={r}
+          storeOptions={storeOptions}
+          disabled={readOnly}
+          defaultDepositAmountHtg={defaultDepositAmountHtg}
+          onDone={() => router.refresh()}
+        />
       )
     ) },
     { id: "cost", header: "Kou Reyèl", csvValue: (r) => r.actualCostHtg, cell: (r) => formatCurrencyHTG(r.actualCostHtg) },
@@ -444,6 +535,12 @@ function DevicesContent({ devices, storeOptions }: { devices: AdminDevice[]; sto
             <Wrench data-icon="inline-start" aria-hidden />
             Anrejistre reparasyon
           </DropdownMenuItem>
+          {r.assignedStoreId && (
+            <DropdownMenuItem onClick={() => setPending({ device: r, kind: "unassign" })} variant="destructive">
+              <PackageMinus data-icon="inline-start" aria-hidden />
+              Dezasiyen
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem onClick={() => setPending({ device: r, kind: "lost" })} variant="destructive">
             <AlertTriangle data-icon="inline-start" aria-hidden />
             Siyale vòl / pèt
@@ -505,13 +602,19 @@ function DevicesContent({ devices, storeOptions }: { devices: AdminDevice[]; sto
 export function DevicesClient({
   devices,
   storeOptions,
+  defaultDepositAmountHtg,
 }: {
   devices: AdminDevice[];
   storeOptions: { id: string; name: string }[];
+  defaultDepositAmountHtg: number;
 }) {
   return (
     <Suspense>
-      <DevicesContent devices={devices} storeOptions={storeOptions} />
+      <DevicesContent
+        devices={devices}
+        storeOptions={storeOptions}
+        defaultDepositAmountHtg={defaultDepositAmountHtg}
+      />
     </Suspense>
   );
 }
