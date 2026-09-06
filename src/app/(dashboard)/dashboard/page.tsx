@@ -2,7 +2,6 @@ import Link from "next/link";
 import { Icons } from "@/lib/icons";
 import { getCurrentProfile } from "@/lib/supabase/profile";
 import { fetchDashboardData } from "@/lib/dashboard/queries";
-import { formatCurrencyHTG } from "@/lib/format";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { KpiCard, type KpiTrend } from "@/components/dashboard/KpiCard";
 import { RecentSalesPanel } from "@/components/dashboard/RecentSalesPanel";
@@ -24,19 +23,25 @@ function pctChange(current: number, previous: number): number | null {
   return ((current - previous) / previous) * 100;
 }
 
+// `KpiTrend.icon` is a rendered element, not a bare component — `KpiCard`
+// is a Client Component (needs `AnimatedNumber`), and a component
+// *reference* can't cross the Server→Client boundary from this page.
+const trendUpIcon = <Icons.trendUp className="size-3.5" aria-hidden />;
+const trendDownIcon = <Icons.trendDown className="size-3.5" aria-hidden />;
+
 function moneyTrend(current: number, previous: number, noBaselineLabel: string): KpiTrend {
   if (current === 0 && previous === 0) {
-    return { tone: "neutral", icon: Icons.trendUp, label: noBaselineLabel };
+    return { tone: "neutral", icon: trendUpIcon, label: noBaselineLabel };
   }
   const pct = pctChange(current, previous);
   if (pct === null) {
-    return { tone: "positive", icon: Icons.trendUp, label: "Premye a depi ayè" };
+    return { tone: "positive", icon: trendUpIcon, label: "Premye a depi ayè" };
   }
   const rounded = Math.round(pct);
-  if (rounded === 0) return { tone: "neutral", icon: Icons.trendUp, label: "Menm nivo ak ayè" };
+  if (rounded === 0) return { tone: "neutral", icon: trendUpIcon, label: "Menm nivo ak ayè" };
   return rounded > 0
-    ? { tone: "positive", icon: Icons.trendUp, label: `+${rounded}% pase ayè` }
-    : { tone: "negative", icon: Icons.trendDown, label: `${rounded}% pase ayè` };
+    ? { tone: "positive", icon: trendUpIcon, label: `+${rounded}% pase ayè` }
+    : { tone: "negative", icon: trendDownIcon, label: `${rounded}% pase ayè` };
 }
 
 export default async function DashboardPage() {
@@ -75,17 +80,21 @@ export default async function DashboardPage() {
 
   const lowStockCount = data.lowStockProducts.length;
 
+  const alertIcon = <Icons.alert className="size-3.5" aria-hidden />;
+  const successIcon = <Icons.success className="size-3.5" aria-hidden />;
+  const customersIcon = <Icons.customers className="size-3.5" aria-hidden />;
+
   const stockTrend: KpiTrend =
     data.outOfStockCount > 0
-      ? { tone: "negative", icon: Icons.alert, label: `${data.outOfStockCount} san stòk nèt` }
+      ? { tone: "negative", icon: alertIcon, label: `${data.outOfStockCount} san stòk nèt` }
       : lowStockCount > 0
-        ? { tone: "neutral", icon: Icons.alert, label: "Bezwen reapwovizyone" }
-        : { tone: "positive", icon: Icons.success, label: "Tout pwodwi ok" };
+        ? { tone: "neutral", icon: alertIcon, label: "Bezwen reapwovizyone" }
+        : { tone: "positive", icon: successIcon, label: "Tout pwodwi ok" };
 
   const creditTrend: KpiTrend =
     data.creditCustomersCount > 0
-      ? { tone: "neutral", icon: Icons.customers, label: `${data.creditCustomersCount} kliyan gen dèt` }
-      : { tone: "positive", icon: Icons.success, label: "Pa gen dèt kliyan" };
+      ? { tone: "neutral", icon: customersIcon, label: `${data.creditCustomersCount} kliyan gen dèt` }
+      : { tone: "positive", icon: successIcon, label: "Pa gen dèt kliyan" };
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -96,8 +105,8 @@ export default async function DashboardPage() {
           <KpiCard
             label="Vant jodi a"
             value={data.todaySales}
-            format={formatCurrencyHTG}
-            icon={Icons.sales}
+            format="currency"
+            icon={<Icons.sales className="size-6" aria-hidden />}
             trend={moneyTrend(data.todaySales, data.yesterdaySales, "Pa gen vant jodi a")}
             detail={`${data.todayTransactionCount} vant`}
           />
@@ -106,8 +115,8 @@ export default async function DashboardPage() {
           <KpiCard
             label="Benefis estime"
             value={data.todayProfit}
-            format={formatCurrencyHTG}
-            icon={Icons.profit}
+            format="currency"
+            icon={<Icons.profit className="size-6" aria-hidden />}
             trend={moneyTrend(data.todayProfit, data.yesterdayProfit, "Pa gen benefis jodi a")}
             detail="Estimasyon apati pri achte"
           />
@@ -116,7 +125,7 @@ export default async function DashboardPage() {
           <KpiCard
             label="Pwodwi ki gen stòk ba"
             value={lowStockCount}
-            icon={Icons.alert}
+            icon={<Icons.alert className="size-6" aria-hidden />}
             trend={stockTrend}
             detail="Anba sèy alèt la"
           />
@@ -125,8 +134,8 @@ export default async function DashboardPage() {
           <KpiCard
             label="Kredi kliyan pou resevwa"
             value={data.creditReceivable}
-            format={formatCurrencyHTG}
-            icon={Icons.credit}
+            format="currency"
+            icon={<Icons.credit className="size-6" aria-hidden />}
             trend={creditTrend}
             detail="Total dèt kliyan poko peye"
           />
