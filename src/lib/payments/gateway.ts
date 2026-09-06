@@ -8,24 +8,45 @@
  * both — there is no separate MonCash-specific or NatCash-specific
  * contract the way there was with MonCash's own direct Digicel API.
  *
- * `PAYMENT_GATEWAY_CLIENT_ID` must only ever be read server-side (route
- * handler) — never bundle it into client code. Payment creation itself
- * needs only the client_id (no secret), per the documented contract;
- * the gateway's separate merchant *withdrawal* API (client_secret +
- * HMAC-signed tokens) is a distinct capability, not implemented here.
+ * The client_id is only ever read server-side (route handler) — never
+ * bundle it into client code. Payment creation itself needs only the
+ * client_id (no secret), per the documented contract; the gateway's
+ * separate merchant *withdrawal* API (client_secret + HMAC-signed
+ * tokens) is a distinct capability, not implemented here.
+ *
+ * Resolved from `platform_settings.payment_gateway_client_id`
+ * (configurable by a super_admin on `/admin/settings`) first, falling
+ * back to `PAYMENT_GATEWAY_CLIENT_ID` for deployments that haven't set
+ * it via the dashboard yet.
  */
+
+import { createAdminClient } from "@/lib/supabase/admin";
 
 const GATEWAY_BASE_URL = "https://plopplop.solutionip.app";
 const MIN_AMOUNT_HTG = 20;
 
 export type GatewayPaymentMethod = "moncash" | "natcash";
 
-function requireClientId(): string {
-  const clientId = process.env.PAYMENT_GATEWAY_CLIENT_ID;
-  if (!clientId) {
-    throw new Error("PAYMENT_GATEWAY_CLIENT_ID pa konfigire.");
+async function requireClientId(): Promise<string> {
+  try {
+    const admin = createAdminClient();
+    const { data } = await admin
+      .from("platform_settings")
+      .select("value")
+      .eq("key", "payment_gateway_client_id")
+      .maybeSingle();
+
+    const configured = typeof data?.value === "string" ? data.value.trim() : "";
+    if (configured) return configured;
+  } catch (error) {
+    console.warn("[payments/gateway] pa t ka li platform_settings, ap sèvi ak varyab anviwònman", error);
   }
-  return clientId;
+
+  const envClientId = process.env.PAYMENT_GATEWAY_CLIENT_ID;
+  if (!envClientId) {
+    throw new Error("Gateway peman an pa konfigire. Antre yon Client ID sou /admin/settings.");
+  }
+  return envClientId;
 }
 
 export interface CreateGatewayPaymentParams {
@@ -57,11 +78,13 @@ export async function createGatewayPayment({
     throw new Error(`Montan an dwe pi gwo pase ${MIN_AMOUNT_HTG} HTG.`);
   }
 
+  const clientId = await requireClientId();
+
   const response = await fetch(`${GATEWAY_BASE_URL}/api/paiement-marchand`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      client_id: requireClientId(),
+      client_id: clientId,
       refference_id: referenceId,
       montant: amountHtg,
       payment_method: method,
@@ -111,11 +134,13 @@ export interface GatewayPaymentStatus {
  * MonCash's own direct API required before.
  */
 export async function verifyGatewayPayment(referenceId: string): Promise<GatewayPaymentStatus> {
+  const clientId = await requireClientId();
+
   const response = await fetch(`${GATEWAY_BASE_URL}/api/paiement-verify`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      client_id: requireClientId(),
+      client_id: clientId,
       refference_id: referenceId,
     }),
   });

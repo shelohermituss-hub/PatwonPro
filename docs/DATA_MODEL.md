@@ -277,13 +277,21 @@ Insert-only (tankou `stock_entries`) — yon korije se yon nouvo liy
 
 ### `platform_settings`
 Kle/valè senp pou paramèt platfòm (pri plan, montan kosyon default,
-delè gras, SLA P1).
+delè gras, SLA P1, Client ID gateway peman).
 | Chan | Tip |
 |---|---|
 | key | text PK |
 | value | jsonb |
 | updated_at | timestamptz |
 | updated_by | uuid FK -> profiles, nullable |
+
+`payment_gateway_client_id` (jsonb string, ajoute apre migration 023 —
+pa nan seed inisyal la, kreye pa premye `upsert` soti nan
+`/admin/settings`) : Client ID gateway Pay'm PLOP PLOP la
+(MonCash + NatCash). `src/lib/payments/gateway.ts` li valè sa a via
+service-role client (checkout se yon `owner`/`employee`, ki pa gen
+dwa RLS `is_platform_admin()` sou tab sa a) anvan li tonbe sou
+varyab anviwònman `PAYMENT_GATEWAY_CLIENT_ID` si vid.
 
 ### `audit_logs`
 Jounal odit — append-only, okenn policy update/delete (menm prensip ke

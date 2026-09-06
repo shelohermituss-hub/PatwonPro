@@ -13,7 +13,13 @@ import { can } from "@/lib/admin/permissions";
 import { savePlatformSettings } from "@/lib/admin/mutations/settings";
 import type { PlatformSettingsData } from "@/lib/admin/queries/settings";
 
-export function SettingsClient({ settings }: { settings: PlatformSettingsData }) {
+export function SettingsClient({
+  settings,
+  envClientIdConfigured,
+}: {
+  settings: PlatformSettingsData;
+  envClientIdConfigured: boolean;
+}) {
   const actor = useAdminActor();
   const readOnly = !can(actor.role, "manage_settings");
   const [saving, setSaving] = useState(false);
@@ -23,6 +29,7 @@ export function SettingsClient({ settings }: { settings: PlatformSettingsData })
   const [depositAmount, setDepositAmount] = useState(String(settings.depositAmountHtg));
   const [p1Sla, setP1Sla] = useState(settings.slaP1Label);
   const [gracePeriodDays, setGracePeriodDays] = useState(String(settings.gracePeriodDays));
+  const [paymentGatewayClientId, setPaymentGatewayClientId] = useState(settings.paymentGatewayClientId);
 
   async function handleSave() {
     setSaving(true);
@@ -36,6 +43,7 @@ export function SettingsClient({ settings }: { settings: PlatformSettingsData })
         depositAmountHtg: Number(depositAmount) || 0,
         gracePeriodDays: Number(gracePeriodDays) || 0,
         slaP1Label: p1Sla,
+        paymentGatewayClientId: paymentGatewayClientId.trim(),
       });
       toast.success("Paramèt platfòm anrejistre.");
     } catch (error) {
@@ -93,6 +101,37 @@ export function SettingsClient({ settings }: { settings: PlatformSettingsData })
             <Field>
               <FieldLabel htmlFor="p1sla">SLA Sipò P1</FieldLabel>
               <Input id="p1sla" value={p1Sla} onChange={(e) => setP1Sla(e.target.value)} disabled={readOnly} />
+            </Field>
+          </FieldGroup>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Entegrasyon Peman — MonCash / NatCash</CardTitle>
+          <CardDescription>
+            Client ID gateway Pay&apos;m PLOP PLOP la (yon sèl API pou de founisè yo).
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <FieldGroup className="grid grid-cols-1 gap-4 sm:max-w-md">
+            <Field>
+              <FieldLabel htmlFor="gatewayClientId">Client ID</FieldLabel>
+              <Input
+                id="gatewayClientId"
+                value={paymentGatewayClientId}
+                onChange={(e) => setPaymentGatewayClientId(e.target.value)}
+                disabled={readOnly}
+                placeholder={envClientIdConfigured ? "Konfigire pa varyab anviwònman (PAYMENT_GATEWAY_CLIENT_ID)" : "Antre Client ID gateway a"}
+                autoComplete="off"
+              />
+              <FieldDescription>
+                {paymentGatewayClientId
+                  ? "Valè sa a pran priyorite sou varyab anviwònman an."
+                  : envClientIdConfigured
+                    ? "Vid — aplikasyon an ap sèvi ak varyab anviwònman PAYMENT_GATEWAY_CLIENT_ID pou kounye a."
+                    : "Vid, e pa gen varyab anviwònman konfigire — peman MonCash/NatCash p ap fonksyone jiskaske w antre yon Client ID."}
+              </FieldDescription>
             </Field>
           </FieldGroup>
         </CardContent>

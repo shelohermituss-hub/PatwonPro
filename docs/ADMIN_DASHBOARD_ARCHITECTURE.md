@@ -114,7 +114,9 @@ Tout 15 wout yo li de vrè tab. Sa ki gen aksyon reyèl konfime pa
   (`auth.users` via service-role), envitasyon admin reyèl, chanjman wòl
   pwoteje pa yon trigger `enforce_admin_role_change` (migration 028).
 - `/admin/audit-log` — Server Component ki li `audit_logs` dirèkteman.
-- `/admin/settings` — li/ekri `platform_settings` reyèl.
+- `/admin/settings` — li/ekri `platform_settings` reyèl, ki gen ladan
+  Client ID gateway peman MonCash/NatCash (Pay'm PLOP PLOP) — gade
+  `src/lib/payments/gateway.ts`, ki li valè sa a anvan `PAYMENT_GATEWAY_CLIENT_ID`.
 
 ## Desizyon kle
 

@@ -12,6 +12,7 @@ export async function savePlatformSettings(settings: PlatformSettingsData) {
     { key: "deposit_amount_htg", value: settings.depositAmountHtg, updated_by },
     { key: "grace_period_days", value: settings.gracePeriodDays, updated_by },
     { key: "sla_p1_label", value: settings.slaP1Label, updated_by },
+    { key: "payment_gateway_client_id", value: settings.paymentGatewayClientId, updated_by },
   ]);
 
   if (error) throw new Error(error.message);
