@@ -20,7 +20,9 @@ export async function fetchPendingReplacementRequests(): Promise<AdminReplacemen
 
   const { data, error } = await supabase
     .from("replacement_requests")
-    .select("id, store_id, reason, created_at, store:stores(name), device:devices(id, device_code)")
+    .select(
+      "id, store_id, reason, created_at, store:stores(name), device:devices!replacement_requests_device_id_fkey(id, device_code)",
+    )
     .eq("status", "pending")
     .order("created_at", { ascending: true });
 

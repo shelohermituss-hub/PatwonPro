@@ -6,11 +6,23 @@
 // still *opens* offline. It never touches Supabase/API responses — Dexie
 // (src/lib/db) is the source of truth for offline data, this worker only
 // makes sure the UI that reads Dexie can load with no network at all.
-const CACHE_VERSION = "patwonpro-v1";
+const CACHE_VERSION = "patwonpro-v2";
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const ASSET_CACHE = `${CACHE_VERSION}-assets`;
 
 const PRECACHE_URLS = ["/", "/manifest.json", "/icons/icon-192.png", "/icons/icon-512.png"];
+
+// Mirrors src/lib/supabase/middleware.ts's PUBLIC_PATHS — keep in sync.
+// Everything else is behind auth, so it's a candidate for the "app shell"
+// offline fallback below rather than the marketing landing page.
+const PUBLIC_PATHS = new Set(["/", "/login", "/register"]);
+
+// Cache key (not a real route) holding the most recently visited
+// authenticated page's HTML — used as the offline fallback for any
+// authenticated route that was never itself visited with a full page
+// load, so losing connection lands the user back in the app (sidebar +
+// Dexie-backed pages) instead of on the public landing page.
+const APP_SHELL_FALLBACK_KEY = new Request("/__app-shell-fallback__");
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -56,20 +68,30 @@ self.addEventListener("fetch", (event) => {
   }
 
   // App-shell navigations: network-first so an online user always sees
-  // fresh HTML, falling back to whatever was last cached (or "/") when
-  // there's no connection at all — the client-side Dexie-backed UI takes
-  // it from there.
+  // fresh HTML. Offline fallback order: (1) this exact URL if it was
+  // ever hard-navigated to before, (2) the last authenticated page's
+  // shell — so reopening the app offline lands back in the dashboard,
+  // not the marketing page, even for a route that was only ever reached
+  // by client-side navigation, (3) "/" as the last resort for a signed-
+  // out visitor with nothing cached yet.
   if (request.mode === "navigate") {
+    const isAuthenticatedRoute = !PUBLIC_PATHS.has(url.pathname);
     event.respondWith(
       fetch(request)
         .then((response) => {
           const copy = response.clone();
-          void caches.open(SHELL_CACHE).then((cache) => cache.put(request, copy));
+          void caches.open(SHELL_CACHE).then((cache) => {
+            cache.put(request, copy.clone());
+            if (isAuthenticatedRoute && response.ok) {
+              cache.put(APP_SHELL_FALLBACK_KEY, copy);
+            }
+          });
           return response;
         })
         .catch(
           async () =>
             (await caches.match(request)) ??
+            (await caches.match(APP_SHELL_FALLBACK_KEY)) ??
             (await caches.match("/")) ??
             Response.error(),
         ),
