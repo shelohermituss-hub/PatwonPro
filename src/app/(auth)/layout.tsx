@@ -4,10 +4,10 @@ import { Logo, Wordmark } from "@/components/Logo";
 /**
  * Split-screen shell for /login and /register. Deliberately not a copy
  * of design-system/'s illustration (generic SaaS kit, not PatwonPro —
- * see docs/DESIGN_AUDIT.md §5/§6). The hero panel is the one place the
- * brand gradient (public/brand/) gets used at full strength — everywhere
- * else in the app stays solid --primary, per docs/CLAUDE.md's "pas de
- * gradients excessifs".
+ * see docs/DESIGN_AUDIT.md §5/§6). The hero panel is plain white with a
+ * border separating it from the form column — the user explicitly asked
+ * to drop the earlier brand-gradient treatment in favor of a plain
+ * background, so the gradient/aurora/blob decoration is gone here.
  */
 export default function AuthLayout({
   children,
@@ -20,24 +20,14 @@ export default function AuthLayout({
         <div className="w-full max-w-sm">{children}</div>
       </div>
 
-      <div className="relative hidden w-[42%] shrink-0 overflow-hidden bg-gradient-to-br from-brand-gradient-start via-brand-gradient-via to-brand-gradient-end bg-[length:200%_200%] motion-safe:animate-[auth-hero-aurora_16s_ease-in-out_infinite] md:flex md:flex-col md:justify-between md:p-12">
-        <div
-          className="absolute -right-24 -top-24 size-96 rounded-full bg-white/10 motion-safe:animate-[auth-hero-blob-a_11s_ease-in-out_infinite]"
-          aria-hidden
-        />
-        <div
-          className="absolute -bottom-32 -left-16 size-72 rounded-full bg-white/10 motion-safe:animate-[auth-hero-blob-b_9s_ease-in-out_infinite]"
-          style={{ animationDelay: "-3s" }}
-          aria-hidden
-        />
-
-        <div className="relative flex items-center gap-2 text-white">
-          <Logo size={28} tone="white" />
-          <Wordmark tone="white" className="text-lg" />
+      <div className="hidden w-[42%] shrink-0 border-l border-border bg-surface md:flex md:flex-col md:justify-between md:p-12">
+        <div className="flex items-center gap-2 text-foreground">
+          <Logo size={28} />
+          <Wordmark className="text-lg" />
         </div>
 
-        <div className="relative flex flex-1 items-center justify-center py-6">
-          <div className="w-52 overflow-hidden rounded-3xl border border-white/20 shadow-2xl shadow-black/30 motion-safe:animate-[auth-hero-card_6s_ease-in-out_infinite]">
+        <div className="flex flex-1 items-center justify-center py-6">
+          <div className="w-52 overflow-hidden rounded-3xl border border-border shadow-lg motion-safe:animate-[auth-hero-card_6s_ease-in-out_infinite]">
             <Image
               src="/images/auth/shop-owner-phone.jpg"
               alt="Yon kòmèsan k ap konsilte telefòn li nan boutik li"
@@ -49,11 +39,11 @@ export default function AuthLayout({
           </div>
         </div>
 
-        <div className="relative flex flex-col gap-2 text-white">
+        <div className="flex flex-col gap-2 text-foreground">
           <p className="text-3xl font-extrabold leading-tight">
             Jere boutik ou san pran tèt.
           </p>
-          <p className="max-w-xs text-base text-white/80">
+          <p className="max-w-xs text-base text-text-secondary">
             Vant, stòk, ak kredi kliyan — menm san entènèt.
           </p>
         </div>
