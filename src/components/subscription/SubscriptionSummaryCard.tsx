@@ -2,8 +2,10 @@ import {
   SUBSCRIPTION_PLAN_LABELS,
   SUBSCRIPTION_STATUS_LABELS,
 } from "@/lib/subscription/labels";
+import { computeDaysLate } from "@/lib/admin/queries/subscriptions";
 import { formatCurrencyHTG, formatDateTime } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
+import { PaymentDialog } from "@/components/subscription/PaymentDialog";
 import type { Subscription } from "@/types";
 
 const STATUS_VARIANT: Record<Subscription["status"], "default" | "secondary" | "destructive"> = {
@@ -27,6 +29,10 @@ export function SubscriptionSummaryCard({
       </div>
     );
   }
+
+  const daysLate = computeDaysLate(subscription.status, subscription.current_period_end);
+  const amountDueHtg =
+    subscription.status === "suspended" || daysLate > 0 ? (subscription.price_htg ?? 0) : 0;
 
   return (
     <div className="flex max-w-lg flex-col gap-3 rounded-lg border border-border p-4">
@@ -53,7 +59,20 @@ export function SubscriptionSummaryCard({
             </dd>
           </>
         )}
+        {amountDueHtg > 0 && (
+          <>
+            <dt>Montan an reta</dt>
+            <dd className="font-semibold text-danger">{formatCurrencyHTG(amountDueHtg)}</dd>
+          </>
+        )}
       </dl>
+      {subscription.price_htg !== null && subscription.price_htg > 0 && (
+        <PaymentDialog
+          kind="subscription"
+          amountHtg={amountDueHtg > 0 ? amountDueHtg : subscription.price_htg}
+          triggerLabel="Peye Abònman"
+        />
+      )}
     </div>
   );
 }

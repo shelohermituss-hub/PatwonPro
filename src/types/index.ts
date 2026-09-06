@@ -31,6 +31,24 @@ export type DeviceStatus =
 
 export type SupportTicketStatus = "open" | "in_progress" | "resolved" | "closed";
 
+export type DepositStatus =
+  | "pending"
+  | "received"
+  | "held"
+  | "eligible_for_refund"
+  | "refund_requested"
+  | "refunded"
+  | "partially_retained"
+  | "fully_retained";
+
+export type DepositPaymentMode = "lump_sum" | "monthly_installment";
+
+export type SubscriptionPaymentKind = "subscription" | "deposit";
+
+export type SubscriptionPaymentStatus = "pending" | "paid" | "failed";
+
+export type ReplacementRequestStatus = "pending" | "approved" | "rejected" | "completed";
+
 export type SyncStatus = "pending" | "synced";
 
 export type StockEntryType = "restock" | "correction" | "adjustment";
@@ -217,4 +235,42 @@ export interface SupportTicket {
   status: SupportTicketStatus;
   created_at: string;
   updated_at: string;
+}
+
+export interface Deposit {
+  id: string;
+  store_id: string;
+  device_id: string;
+  amount_htg: number;
+  amount_paid_htg: number;
+  payment_mode: DepositPaymentMode;
+  monthly_installment_htg: number | null;
+  status: DepositStatus;
+  created_at: string;
+}
+
+export interface SubscriptionPayment {
+  id: string;
+  store_id: string;
+  kind: SubscriptionPaymentKind;
+  deposit_id: string | null;
+  amount_htg: number;
+  method: "moncash" | "natcash";
+  gateway_transaction_id: string | null;
+  status: SubscriptionPaymentStatus;
+  paid_at: string | null;
+  created_at: string;
+}
+
+export interface ReplacementRequest {
+  id: string;
+  store_id: string;
+  device_id: string;
+  reason: string;
+  status: ReplacementRequestStatus;
+  replacement_device_id: string | null;
+  resolution_note: string | null;
+  resolved_by: string | null;
+  resolved_at: string | null;
+  created_at: string;
 }

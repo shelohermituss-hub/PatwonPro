@@ -3,6 +3,8 @@ import type {
   SubscriptionStatus,
   DeviceStatus,
   SupportTicketStatus,
+  DepositStatus,
+  DepositPaymentMode,
 } from "@/types";
 
 export const SUBSCRIPTION_PLAN_LABELS: Record<SubscriptionPlan, string> = {
@@ -37,4 +39,20 @@ export const SUPPORT_TICKET_STATUS_LABELS: Record<SupportTicketStatus, string> =
   in_progress: "An Kou",
   resolved: "Rezoud",
   closed: "Fèmen",
+};
+
+export const DEPOSIT_STATUS_LABELS: Record<DepositStatus, string> = {
+  pending: "An Atant Peman",
+  received: "Resevwa",
+  held: "Kenbe",
+  eligible_for_refund: "Elijib pou Ranbousman",
+  refund_requested: "Ranbousman Mande",
+  refunded: "Ranbouse",
+  partially_retained: "Yon Pati Kenbe",
+  fully_retained: "Tout Kenbe",
+};
+
+export const DEPOSIT_PAYMENT_MODE_LABELS: Record<DepositPaymentMode, string> = {
+  lump_sum: "Yon sèl fwa",
+  monthly_installment: "Mansyalite fiks",
 };

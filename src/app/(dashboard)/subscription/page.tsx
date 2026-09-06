@@ -3,6 +3,7 @@ import { getCurrentProfile } from "@/lib/supabase/profile";
 import { fetchSubscriptionData } from "@/lib/subscription/queries";
 import { SubscriptionSummaryCard } from "@/components/subscription/SubscriptionSummaryCard";
 import { DeviceList } from "@/components/subscription/DeviceList";
+import { TabletDepositCard } from "@/components/subscription/TabletDepositCard";
 import { SupportTicketList } from "@/components/subscription/SupportTicketList";
 import { NewSupportTicketSheet } from "@/components/subscription/NewSupportTicketSheet";
 
@@ -13,7 +14,7 @@ export default async function SubscriptionPage() {
     redirect("/dashboard");
   }
 
-  const { subscription, devices, tickets } = await fetchSubscriptionData(
+  const { subscription, devices, tickets, deposits } = await fetchSubscriptionData(
     profile.store_id,
   );
 
@@ -37,6 +38,21 @@ export default async function SubscriptionPage() {
         <h2 className="text-lg font-semibold text-foreground">Tablèt</h2>
         <DeviceList devices={devices} />
       </div>
+
+      {deposits.length > 0 && (
+        <div className="flex flex-col gap-3">
+          <h2 className="text-lg font-semibold text-foreground">Kosyon Tablèt</h2>
+          <div className="flex flex-col gap-4">
+            {deposits.map((deposit) => (
+              <TabletDepositCard
+                key={deposit.id}
+                deposit={deposit}
+                device={devices.find((d) => d.id === deposit.device_id)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
