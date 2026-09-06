@@ -15,8 +15,9 @@ import {
 } from "@/components/ui/select";
 import { formatCurrency } from "@/lib/format";
 import { PAYMENT_METHOD_LABELS } from "@/lib/pos/labels";
+import { NewCustomerDialog } from "@/components/NewCustomerDialog";
 import type { CartLine } from "@/hooks/useCart";
-import type { Customer, PaymentMethod } from "@/types";
+import type { Customer, PaymentMethod, Profile } from "@/types";
 
 const PAYMENT_METHODS: PaymentMethod[] = ["cash", "moncash", "natcash", "credit"];
 
@@ -30,6 +31,9 @@ export function CartPanel({
   customers,
   customerId,
   onCustomerChange,
+  onCustomerCreated,
+  profile,
+  storeId,
   paymentMethod,
   onPaymentMethodChange,
   cashReceived,
@@ -46,6 +50,9 @@ export function CartPanel({
   customers: Customer[] | undefined;
   customerId: string | null;
   onCustomerChange: (id: string | null) => void;
+  onCustomerCreated: (customer: Customer) => void;
+  profile: Profile | null;
+  storeId: string | null;
   paymentMethod: PaymentMethod;
   onPaymentMethodChange: (method: PaymentMethod) => void;
   cashReceived: string;
@@ -141,7 +148,10 @@ export function CartPanel({
 
         <div className="mt-5 flex flex-col gap-4">
           <Field>
-            <FieldLabel htmlFor="customerId">Kliyan (opsyonèl)</FieldLabel>
+            <div className="flex items-center justify-between gap-2">
+              <FieldLabel htmlFor="customerId">Kliyan (opsyonèl)</FieldLabel>
+              {storeId && <NewCustomerDialog profile={profile} storeId={storeId} onCreated={onCustomerCreated} />}
+            </div>
             <Select
               value={customerId ?? "none"}
               onValueChange={(value) =>

@@ -36,6 +36,15 @@ detaye pa pwodwi). De chemen sa yo parèt ansanm nan menm lis la.
      montan, kreye yon `Sale` san `sale_items` (`src/lib/credits/createCredit.ts`).
    - Montre yon avètisman (non-bloklan) si sa ta fè balans kliyan an depase
      `credit_limit`.
+   - **Kreye yon nouvo kliyan** — `NewCustomerDialog`
+     (`src/components/NewCustomerDialog.tsx`, `src/lib/customers/createCustomer.ts`)
+     bò kote chwa kliyan an, sou POS (`/sales/new`) tou. Rezève a `owner`
+     (RLS `customers_write_owner`, migration 007) — yon anplwaye wè bouton
+     an dezaktive ak yon enfobil ki mande l pale ak pwopriyetè a. Chak
+     nouvo kliyan resevwa menm avatar default la otomatikman
+     (`src/components/CustomerAvatar.tsx`,
+     `public/images/default-customer-avatar.svg`) — pa gen foto kliyan
+     pèsonalize, kidonk pa gen kolòn `avatar_url` nan baz done a.
 
 3. **Detay kredi + vèsman**
    - `(dashboard)/credits/[id]/page.tsx` — enfòmasyon kredi a, istorik
@@ -78,6 +87,7 @@ detaye pa pwodwi). De chemen sa yo parèt ansanm nan menm lis la.
 - [x] Yon vèsman diminye `credit_balance` kòrèkteman (trigger, apre sync).
 - [x] Avètisman limit kredi parèt san bloke vant lan.
 - [x] Fonksyonalite a mache offline e sync apre.
+- [x] Yon `owner` ka kreye yon nouvo kliyan dirèkteman soti nan chwa kliyan an (`/credits/new` ak `/sales/new`), ak yon avatar default otomatik.
 
 ## Pwochen etap
 

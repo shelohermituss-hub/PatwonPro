@@ -161,6 +161,8 @@ export interface AdminDevice {
   serialNumber: string;
   brand: string;
   model: string;
+  /** Shared by every unit of this brand/model, set when the batch was registered. */
+  modelPhotoUrl: string | null;
   importBatch: string;
   actualCostHtg: number;
   purchaseDate: string;

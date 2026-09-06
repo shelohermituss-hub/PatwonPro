@@ -175,6 +175,7 @@ egziste `in_stock`/`reserved` anvan li asiyen.
 | device_identifier | text nullable | |
 | device_code | text unique | Kòd lizib `JB-HT-######`, jenere pa yon sekans |
 | serial_number, brand, model, import_batch | text nullable | |
+| model_photo_url | text nullable | URL piblik nan bucket Storage `device-photos` (gade seksyon Storage anba) — pataje pa tout inite ki gen menm mak/modèl, ranpli lè yo anrejistre kòm yon "modèl" (kantite) sou `/admin/devices` |
 | actual_cost_htg | numeric nullable | |
 | purchase_date, installed_at, returned_at | date nullable | |
 | contract_number | text nullable | |
@@ -319,21 +320,26 @@ Jounal odit — append-only, okenn policy update/delete (menm prensip ke
 
 ## Storage (Supabase Storage)
 
-Twa bucket piblik-li-sèlman, menm patwon toude
+Kat bucket piblik-li-sèlman
 (`00000000000010_storage_logos_and_product_images.sql`,
-`00000000000029_stores_mobile_payment_config.sql`) :
+`00000000000029_stores_mobile_payment_config.sql`,
+`00000000000030_devices_model_photo.sql`) :
 
 | Bucket | Kolòn ki referanse l | Politik |
 |---|---|---|
 | `store-logos` | `stores.logo_url` | Lekti piblik ; ekriti rezève pou `owner` nan pwòp chemen `{store_id}/...` li |
 | `product-images` | `products.image_url` | Lekti piblik ; ekriti rezève pou `owner` nan pwòp chemen `{store_id}/...` li |
 | `payment-qr-codes` | `stores.moncash_qr_url` / `stores.natcash_qr_url` | Lekti piblik ; ekriti rezève pou `owner` nan pwòp chemen `{store_id}/...` li |
+| `device-photos` | `devices.model_photo_url` | Lekti piblik ; ekriti rezève dirèkteman a `admin_can('manage_devices')` — pa gen chemen `{store_id}/...` paske yon modèl tablèt egziste anvan nenpòt asiyasyon |
 
-Chemen objè yo toujou prefikse pa `{store_id}/` — se sou baz sa a RLS
-(`storage.foldername(name))[1] = my_store_id()::text` konbine ak
-`is_owner()`) izole ekriti pa boutik san bezwen yon tab metadata separe.
-Upload fèt kliyan-kote (`src/lib/storage/uploadImage.ts`), lekti a piblik
-paske yon lojo/foto pwodwi pa done sansib.
+Twa premye bucket yo gen chemen objè prefikse pa `{store_id}/` — se sou
+baz sa a RLS (`storage.foldername(name))[1] = my_store_id()::text`
+konbine ak `is_owner()`) izole ekriti pa boutik san bezwen yon tab
+metadata separe. `device-photos` se envantè platfòm (pa gen `store_id`),
+kidonk politik li a tcheke `admin_can('manage_devices')` dirèkteman, menm
+jan ak ekriti sou tab `devices` li menm. Upload fèt kliyan-kote
+(`src/lib/storage/uploadImage.ts`, `src/lib/storage/uploadDevicePhoto.ts`),
+lekti a piblik paske yon lojo/foto pwodwi/aparèy pa done sansib.
 
 ## Relasyon kle
 

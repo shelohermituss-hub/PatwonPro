@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Avatar kliyan default">
+  <circle cx="100" cy="100" r="100" fill="#DBEAFE"/>
+  <clipPath id="circle-clip">
+    <circle cx="100" cy="100" r="100"/>
+  </clipPath>
+  <g clip-path="url(#circle-clip)">
+    <circle cx="100" cy="82" r="34" fill="#0F172A"/>
+    <path d="M32 210c0-45 30.5-72 68-72s68 27 68 72v10H32z" fill="#0F172A"/>
+    <path d="M74 150c8 8 18 12 26 12s18-4 26-12l6 8c-9 10-20 15-32 15s-23-5-32-15z" fill="#DBEAFE"/>
+  </g>
+</svg>

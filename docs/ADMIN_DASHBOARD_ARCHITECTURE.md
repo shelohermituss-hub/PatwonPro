@@ -99,7 +99,12 @@ Tout 15 wout yo li de vrè tab. Sa ki gen aksyon reyèl konfime pa
 - `/admin/subscriptions` — relans/sispann reyèl.
 - `/admin/deposits` — fòm ajoute + Sheet pwosesis ki ekri estati reyèl.
 - `/admin/devices` — envantè reyèl (`device_code` lizib, `store_id`
-  aksepte null pou tablèt `in_stock` anvan asiyasyon).
+  aksepte null pou tablèt `in_stock` anvan asiyasyon). "Ajoute Tablèt"
+  (Sheet) anrejistre yon modèl an antye an yon sèl kout : mak, modèl,
+  foto (bucket `device-photos`, migration 030), ak kantite — chak inite
+  vin yon liy `devices` separe, `in_stock`. Dyalòg "Asiyen a yon boutik"
+  (menm patwon ke "Konvèti" lead) chanje `store_id`/`status` pou yon
+  tablèt ki poko asiyen.
 - `/admin/installations` — fòm planifikasyon + chèklis entèraktif
   pèsistan.
 - `/admin/support` — tablo + Kanban sou vrè `support_tickets`.

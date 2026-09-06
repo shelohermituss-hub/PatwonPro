@@ -7,6 +7,7 @@ interface DeviceRow {
   serial_number: string | null;
   brand: string | null;
   model: string | null;
+  model_photo_url: string | null;
   import_batch: string | null;
   actual_cost_htg: number | null;
   purchase_date: string | null;
@@ -41,6 +42,7 @@ export async function fetchAdminDevices(): Promise<AdminDevice[]> {
       serialNumber: row.serial_number ?? "—",
       brand: row.brand ?? "—",
       model: row.model ?? "—",
+      modelPhotoUrl: row.model_photo_url,
       importBatch: row.import_batch ?? "—",
       actualCostHtg: row.actual_cost_htg ?? 0,
       purchaseDate: row.purchase_date ?? "",

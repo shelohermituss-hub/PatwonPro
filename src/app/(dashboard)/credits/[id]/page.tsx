@@ -16,6 +16,7 @@ import { useCurrentProfile } from "@/hooks/useCurrentProfile";
 import { formatCurrency, formatDateTime } from "@/lib/format";
 import { PAYMENT_METHOD_LABELS } from "@/lib/pos/labels";
 import { CreditStatusBadge } from "@/components/CreditStatusBadge";
+import { CustomerAvatar } from "@/components/CustomerAvatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -154,6 +155,7 @@ export default function CreditDetailPage({
   return (
     <div className="flex flex-col gap-6 p-6">
       <div className="flex items-center gap-3">
+        <CustomerAvatar size="lg" />
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-extrabold text-foreground">
             {customer?.full_name ?? "Kliyan"}

@@ -123,6 +123,9 @@ export default function NewSalePage() {
         customers={customers}
         customerId={customerId}
         onCustomerChange={setCustomerId}
+        onCustomerCreated={(customer) => setCustomerId(customer.id)}
+        profile={profile}
+        storeId={profile?.store_id ?? null}
         paymentMethod={paymentMethod}
         onPaymentMethodChange={setPaymentMethod}
         cashReceived={cashReceived}

@@ -13,6 +13,7 @@ import { createCredit } from "@/lib/credits/createCredit";
 import { useCurrentProfile } from "@/hooks/useCurrentProfile";
 import { creditSchema, type CreditFormInput, type CreditFormOutput } from "@/lib/validations/credit";
 import { formatCurrency } from "@/lib/format";
+import { NewCustomerDialog } from "@/components/NewCustomerDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -40,6 +41,7 @@ export default function NewCreditPage() {
     control,
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<CreditFormInput, unknown, CreditFormOutput>({
     resolver: zodResolver(creditSchema),
@@ -85,7 +87,16 @@ export default function NewCreditPage() {
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="max-w-md">
         <FieldGroup>
           <Field data-invalid={!!errors.customerId || undefined}>
-            <FieldLabel htmlFor="customerId">Kliyan</FieldLabel>
+            <div className="flex items-center justify-between gap-2">
+              <FieldLabel htmlFor="customerId">Kliyan</FieldLabel>
+              {profile?.store_id && (
+                <NewCustomerDialog
+                  profile={profile}
+                  storeId={profile.store_id}
+                  onCreated={(customer) => setValue("customerId", customer.id, { shouldValidate: true })}
+                />
+              )}
+            </div>
             <Controller
               control={control}
               name="customerId"
