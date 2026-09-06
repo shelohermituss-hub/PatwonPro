@@ -39,7 +39,8 @@ export function DeviceList({ devices }: { devices: Device[] }) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Non</TableHead>
+            <TableHead>Aparèy</TableHead>
+            <TableHead>Nimewo Seri</TableHead>
             <TableHead>Estati</TableHead>
             <TableHead>Dènye fwa li aktif</TableHead>
           </TableRow>
@@ -47,7 +48,25 @@ export function DeviceList({ devices }: { devices: Device[] }) {
         <TableBody>
           {devices.map((device) => (
             <TableRow key={device.id}>
-              <TableCell className="font-medium text-foreground">{device.name}</TableCell>
+              <TableCell>
+                <div className="flex items-center gap-3">
+                  <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border bg-muted">
+                    {device.model_photo_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element -- Supabase Storage URLs aren't in next.config's image domains.
+                      <img src={device.model_photo_url} alt="" className="size-full object-cover" />
+                    ) : (
+                      <span className="text-[9px] text-text-secondary">—</span>
+                    )}
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-medium text-foreground">{device.name}</span>
+                    <span className="text-xs text-text-secondary">
+                      {[device.brand, device.model].filter(Boolean).join(" ") || device.device_code || "—"}
+                    </span>
+                  </div>
+                </div>
+              </TableCell>
+              <TableCell className="text-text-secondary">{device.serial_number ?? "—"}</TableCell>
               <TableCell>
                 <Badge variant={STATUS_VARIANT[device.status]}>
                   {DEVICE_STATUS_LABELS[device.status]}

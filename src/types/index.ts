@@ -197,6 +197,11 @@ export interface Device {
   store_id: string;
   name: string;
   device_identifier: string | null;
+  device_code: string | null;
+  serial_number: string | null;
+  brand: string | null;
+  model: string | null;
+  model_photo_url: string | null;
   status: DeviceStatus;
   last_seen_at: string | null;
   created_at: string;
