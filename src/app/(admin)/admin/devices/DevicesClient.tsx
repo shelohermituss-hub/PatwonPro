@@ -4,7 +4,7 @@ import { useRef, Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronDown, LoaderCircle, PackageCheck, Plus, Wrench, AlertTriangle, RotateCcw, PackageMinus } from "lucide-react";
+import { ChevronDown, LoaderCircle, PackageCheck, Plus, Wrench, AlertTriangle, RotateCcw, PackageMinus, Check, X } from "lucide-react";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AdminDataTable, type AdminColumn, type AdminFilter } from "@/components/admin/AdminDataTable";
@@ -58,10 +58,11 @@ import {
   assignDeviceToStore,
   unassignDeviceFromStore,
 } from "@/lib/admin/mutations/devices";
+import { resolveReplacementRequest } from "@/lib/admin/mutations/replacementRequests";
 import { uploadDevicePhoto } from "@/lib/storage/uploadDevicePhoto";
 import { deviceBatchSchema, type DeviceBatchFormInput, type DeviceBatchFormOutput } from "@/lib/validations/device";
-import { formatCurrencyHTG } from "@/lib/format";
-import type { AdminDevice, DeviceStatusAdmin } from "@/types/admin";
+import { formatCurrencyHTG, formatDateTime } from "@/lib/format";
+import type { AdminDevice, AdminReplacementRequest, DeviceStatusAdmin } from "@/types/admin";
 
 type ActionKind = "mark_ready" | "reserve" | "lost" | "unassign";
 
@@ -462,14 +463,90 @@ function RepairDeviceDialog({
   );
 }
 
+function ResolveReplacementDialog({
+  request,
+  action,
+  onOpenChange,
+  onDone,
+}: {
+  request: AdminReplacementRequest | null;
+  action: "approved" | "rejected" | null;
+  onOpenChange: (open: boolean) => void;
+  onDone: () => void;
+}) {
+  const actor = useAdminActor();
+  const [note, setNote] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  async function handleConfirm() {
+    if (!request || !action) return;
+    setSubmitting(true);
+    try {
+      await resolveReplacementRequest(request.id, {
+        status: action,
+        resolutionNote: note.trim() || null,
+        resolvedBy: actor.id,
+      });
+      await recordAuditEvent({
+        actorId: actor.id,
+        actorRole: actor.role,
+        action: action === "approved" ? "replacement_request.approved" : "replacement_request.rejected",
+        resourceType: "replacement_request",
+        resourceId: request.id,
+        storeId: request.storeId,
+        metadata: { deviceCode: request.deviceCode, note: note.trim() || null },
+      });
+      toast.success(action === "approved" ? "Demand apwouve." : "Demand rejte.");
+      setNote("");
+      onOpenChange(false);
+      onDone();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Yon erè fèt.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <Dialog open={!!request && !!action} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            {action === "approved" ? "Apwouve" : "Rejte"} demand ranplasman — {request?.deviceCode}
+          </DialogTitle>
+          <DialogDescription>
+            {action === "approved"
+              ? "Apre apwouve, asiyen yon nouvo tablèt bay boutik la atravè aksyon \"Asiyen a yon boutik\" nòmal la."
+              : "Boutik la ap wè demand lan make rejte."}
+          </DialogDescription>
+        </DialogHeader>
+        <FieldGroup>
+          <Field>
+            <FieldLabel htmlFor="resolution-note">Nòt (opsyonèl)</FieldLabel>
+            <Input id="resolution-note" value={note} onChange={(e) => setNote(e.target.value)} />
+          </Field>
+        </FieldGroup>
+        <DialogFooter>
+          <Button type="button" disabled={submitting} onClick={handleConfirm}>
+            {submitting && <LoaderCircle className="animate-spin" data-icon="inline-start" aria-hidden />}
+            Konfime
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function DevicesContent({
   devices,
   storeOptions,
   defaultDepositAmountHtg,
+  replacementRequests,
 }: {
   devices: AdminDevice[];
   storeOptions: { id: string; name: string }[];
   defaultDepositAmountHtg: number;
+  replacementRequests: AdminReplacementRequest[];
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -479,6 +556,10 @@ function DevicesContent({
   const initialStatus = rawStatus === "deployed" ? "deployed_active" : rawStatus;
   const [pending, setPending] = useState<{ device: AdminDevice; kind: ActionKind } | null>(null);
   const [repairTarget, setRepairTarget] = useState<AdminDevice | null>(null);
+  const [replacementResolve, setReplacementResolve] = useState<{
+    request: AdminReplacementRequest;
+    action: "approved" | "rejected";
+  } | null>(null);
 
   const STATUS_OPTIONS = Object.entries(DEVICE_STATUS_LABELS).map(([value, meta]) => ({ value, label: meta.label }));
   const BRAND_OPTIONS = Array.from(new Set(devices.map((d) => d.brand))).map((b) => ({ value: b, label: b }));
@@ -595,6 +676,68 @@ function DevicesContent({
         onOpenChange={(open) => !open && setRepairTarget(null)}
         onDone={() => { setRepairTarget(null); router.refresh(); }}
       />
+
+      {replacementRequests.length > 0 && (
+        <div className="flex flex-col gap-3">
+          <AdminPageHeader
+            title="Demand Ranplasman"
+            description="Demand kòmèsan yo fè pou yon tablèt defektye — an atant desizyon."
+          />
+          <div className="overflow-x-auto rounded-lg border border-border">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border text-left text-text-secondary">
+                  <th className="p-3 font-medium">Tablèt</th>
+                  <th className="p-3 font-medium">Boutik</th>
+                  <th className="p-3 font-medium">Rezon</th>
+                  <th className="p-3 font-medium">Dat</th>
+                  <th className="p-3 font-medium">Aksyon</th>
+                </tr>
+              </thead>
+              <tbody>
+                {replacementRequests.map((r) => (
+                  <tr key={r.id} className="border-b border-border last:border-0">
+                    <td className="p-3 font-medium">{r.deviceCode}</td>
+                    <td className="p-3">{r.storeName}</td>
+                    <td className="max-w-xs p-3 text-text-secondary">{r.reason}</td>
+                    <td className="p-3 text-text-secondary">{formatDateTime(r.createdAt)}</td>
+                    <td className="p-3">
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          disabled={readOnly}
+                          onClick={() => setReplacementResolve({ request: r, action: "approved" })}
+                        >
+                          <Check data-icon="inline-start" aria-hidden />
+                          Apwouve
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          disabled={readOnly}
+                          onClick={() => setReplacementResolve({ request: r, action: "rejected" })}
+                        >
+                          <X data-icon="inline-start" aria-hidden />
+                          Rejte
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      <ResolveReplacementDialog
+        request={replacementResolve?.request ?? null}
+        action={replacementResolve?.action ?? null}
+        onOpenChange={(open) => !open && setReplacementResolve(null)}
+        onDone={() => { setReplacementResolve(null); router.refresh(); }}
+      />
     </div>
   );
 }
@@ -603,10 +746,12 @@ export function DevicesClient({
   devices,
   storeOptions,
   defaultDepositAmountHtg,
+  replacementRequests,
 }: {
   devices: AdminDevice[];
   storeOptions: { id: string; name: string }[];
   defaultDepositAmountHtg: number;
+  replacementRequests: AdminReplacementRequest[];
 }) {
   return (
     <Suspense>
@@ -614,6 +759,7 @@ export function DevicesClient({
         devices={devices}
         storeOptions={storeOptions}
         defaultDepositAmountHtg={defaultDepositAmountHtg}
+        replacementRequests={replacementRequests}
       />
     </Suspense>
   );

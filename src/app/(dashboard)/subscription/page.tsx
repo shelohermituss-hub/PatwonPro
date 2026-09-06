@@ -36,7 +36,7 @@ export default async function SubscriptionPage() {
 
       <div className="flex flex-col gap-3">
         <h2 className="text-lg font-semibold text-foreground">Tablèt</h2>
-        <DeviceList devices={devices} />
+        <DeviceList devices={devices} storeId={profile.store_id} />
       </div>
 
       {deposits.length > 0 && (

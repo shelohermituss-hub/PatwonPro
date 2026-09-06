@@ -180,6 +180,16 @@ export interface AdminDevice {
   returnedAt: string | null;
 }
 
+export interface AdminReplacementRequest {
+  id: string;
+  storeId: string;
+  storeName: string;
+  deviceDbId: string;
+  deviceCode: string;
+  reason: string;
+  createdAt: string;
+}
+
 export type InstallationStatus = "scheduled" | "en_route" | "installed" | "postponed" | "cancelled";
 
 export interface InstallationChecklistItem {

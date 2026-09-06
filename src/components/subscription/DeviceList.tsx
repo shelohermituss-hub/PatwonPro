@@ -2,6 +2,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { DEVICE_STATUS_LABELS } from "@/lib/subscription/labels";
 import { formatDateTime } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
+import { RequestReplacementSheet } from "@/components/subscription/RequestReplacementSheet";
 import {
   Table,
   TableBody,
@@ -24,7 +25,7 @@ const STATUS_VARIANT: Record<Device["status"], "default" | "secondary" | "destru
   retired: "destructive",
 };
 
-export function DeviceList({ devices }: { devices: Device[] }) {
+export function DeviceList({ devices, storeId }: { devices: Device[]; storeId: string }) {
   if (devices.length === 0) {
     return (
       <EmptyState
@@ -43,6 +44,7 @@ export function DeviceList({ devices }: { devices: Device[] }) {
             <TableHead>Nimewo Seri</TableHead>
             <TableHead>Estati</TableHead>
             <TableHead>Dènye fwa li aktif</TableHead>
+            <TableHead>Aksyon</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -74,6 +76,13 @@ export function DeviceList({ devices }: { devices: Device[] }) {
               </TableCell>
               <TableCell className="text-text-secondary">
                 {device.last_seen_at ? formatDateTime(device.last_seen_at) : "—"}
+              </TableCell>
+              <TableCell>
+                <RequestReplacementSheet
+                  storeId={storeId}
+                  deviceId={device.id}
+                  deviceName={device.name}
+                />
               </TableCell>
             </TableRow>
           ))}
