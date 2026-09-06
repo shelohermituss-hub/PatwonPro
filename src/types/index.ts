@@ -43,6 +43,10 @@ export interface Store {
   address: string | null;
   phone: string | null;
   logo_url: string | null;
+  moncash_phone: string | null;
+  moncash_qr_url: string | null;
+  natcash_phone: string | null;
+  natcash_qr_url: string | null;
   created_at: string;
   updated_at: string;
 }

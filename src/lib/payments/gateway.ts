@@ -1,23 +1,26 @@
 /**
- * Client for the "PLOP PLOP" merchant payment gateway
- * (API Paiement & Retrait Marchand v1.4, base URL
- * https://plopplop.solutionip.app/) — the real, documented API behind
- * both MonCash and NatCash in this app. One unified endpoint creates a
- * payment for either provider (`payment_method: "moncash" | "natcash"`)
- * and one unified endpoint verifies it, so a single client file covers
- * both — there is no separate MonCash-specific or NatCash-specific
- * contract the way there was with MonCash's own direct Digicel API.
+ * Client for the "PLOP PLOP" (Pay'm) merchant payment gateway (API
+ * Paiement & Retrait Marchand v1.4, base URL
+ * https://plopplop.solutionip.app/) — a real, documented API covering
+ * both MonCash and NatCash behind one contract
+ * (`payment_method: "moncash" | "natcash"`).
  *
- * The client_id is only ever read server-side (route handler) — never
- * bundle it into client code. Payment creation itself needs only the
- * client_id (no secret), per the documented contract; the gateway's
- * separate merchant *withdrawal* API (client_secret + HMAC-signed
- * tokens) is a distinct capability, not implemented here.
+ * **Not used by POS checkout** — a store's customer paying at the point
+ * of sale pays directly into the store's own MonCash/NatCash account
+ * (phone number + QR code the store configures on `/settings`), and the
+ * cashier confirms manually after checking their own phone (see
+ * `src/components/pos/MobilePaymentConfirmDialog.tsx`). This gateway's
+ * real remaining use is the other direction: a store paying **its own**
+ * monthly subscription to Jere Boutik. No UI calls this yet — the
+ * client_id is already configurable
+ * (`platform_settings.payment_gateway_client_id`,
+ * `/admin/settings`) so it's ready when that flow is built.
  *
- * Resolved from `platform_settings.payment_gateway_client_id`
- * (configurable by a super_admin on `/admin/settings`) first, falling
- * back to `PAYMENT_GATEWAY_CLIENT_ID` for deployments that haven't set
- * it via the dashboard yet.
+ * The client_id is only ever read server-side — never bundle it into
+ * client code. Payment creation itself needs only the client_id (no
+ * secret), per the documented contract; the gateway's separate merchant
+ * *withdrawal* API (client_secret + HMAC-signed tokens) is a distinct
+ * capability, not implemented here.
  */
 
 import { createAdminClient } from "@/lib/supabase/admin";

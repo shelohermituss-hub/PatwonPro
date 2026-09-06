@@ -2,10 +2,16 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import type { PaymentTransaction } from "@/types";
 
 /**
- * Every call to a payment provider (create, status check, webhook
- * receipt) should have a corresponding row here — this table is the
- * audit trail for reconciliation and disputes. Uses the service-role
- * client since webhook deliveries have no user session to write as.
+ * `payment_transactions` audit-trail helpers for the Pay'm PLOP PLOP
+ * gateway (`src/lib/payments/gateway.ts`). Not currently called from
+ * anywhere — POS MonCash/NatCash payments moved to a manual
+ * store-configured QR/phone confirmation (no gateway call at all, see
+ * `src/components/pos/MobilePaymentConfirmDialog.tsx`). Kept for the
+ * gateway's real remaining use: a store paying its own Jere Boutik
+ * subscription (`platform_settings.payment_gateway_client_id`) — a
+ * future route can reuse these to record/track that payment. Uses the
+ * service-role client since there's no user session guaranteed at the
+ * point a gateway status changes.
  */
 
 export interface RecordPaymentTransactionInput {

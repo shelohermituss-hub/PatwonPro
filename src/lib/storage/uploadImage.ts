@@ -10,10 +10,12 @@ export interface UploadImageResult {
 
 /**
  * Uploads an image to a public Supabase Storage bucket under
- * `{storeId}/...` — the path prefix both `store-logos` and
- * `product-images` RLS policies key off (00000000000010_storage_logos_and_product_images.sql).
- * `upsert: true` + a fixed file name per entity means re-uploading a logo/
- * photo replaces the old object instead of accumulating orphans.
+ * `{storeId}/...` — the path prefix `store-logos`, `product-images`
+ * (00000000000010_storage_logos_and_product_images.sql) and
+ * `payment-qr-codes` (00000000000029_stores_mobile_payment_config.sql)
+ * RLS policies all key off. `upsert: true` + a fixed file name per
+ * entity means re-uploading a logo/photo/QR replaces the old object
+ * instead of accumulating orphans.
  */
 export async function uploadImage({
   bucket,
@@ -21,7 +23,7 @@ export async function uploadImage({
   fileName,
   file,
 }: {
-  bucket: "store-logos" | "product-images";
+  bucket: "store-logos" | "product-images" | "payment-qr-codes";
   storeId: string;
   fileName: string;
   file: File;

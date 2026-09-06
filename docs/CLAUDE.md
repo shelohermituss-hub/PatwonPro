@@ -114,7 +114,9 @@ Avant toute nouvelle interface importante :
 - Ajouter ensuite une opération à la sync queue.
 - Synchroniser avec Supabase au retour du réseau.
 - Les ventes cash doivent fonctionner entièrement hors ligne.
-- Les paiements MonCash et NatCash ne doivent être confirmés qu'après webhook serveur validé.
+- Les paiements MonCash et NatCash au point de vente n'utilisent aucune API : chaque boutique
+  configure son propre numéro et QR code, et la vente n'est complétée qu'après confirmation
+  manuelle du caissier ayant vérifié la réception sur son propre téléphone (voir section Paiements).
 - Afficher constamment l'état réseau et sync :
   - Online · Synced il y a X min.
   - Offline · X actions en attente.
@@ -122,12 +124,17 @@ Avant toute nouvelle interface importante :
 
 ## Paiements
 
-- Ne jamais marquer un paiement MonCash ou NatCash comme payé à partir du frontend seul.
-- Les confirmations viennent d'une vérification côté serveur (`GET /api/payments/status/[id]`,
-  qui interroge le gateway de paiement) — celui-ci ne documente aucun webhook/IPN,
-  le "poll" est donc le mécanisme de confirmation, pas un repli.
-- Stocker le provider, le transaction ID, le montant, le statut, les timestamps et l'événement brut sécurisé.
-- Prévoir les états `pending`, `paid`, `failed`, `cancelled`, `expired`.
+- Au point de vente, MonCash et NatCash ne passent par **aucune API/gateway** : chaque boutique
+  configure son propre numéro et QR code sur `/settings` (`MobilePaymentConfigForm`), le client
+  paie directement dans le compte mobile money de la boutique, et le caissier confirme
+  manuellement (`MobilePaymentConfirmDialog`) seulement après avoir vérifié la réception sur son
+  propre téléphone. Dès la confirmation, la vente est complétée exactement comme un paiement cash
+  (`payment_status: "paid"` immédiat) — voir `docs/PROMPTS/07-payments.md`.
+- Le gateway Pay'm PLOP PLOP (`src/lib/payments/gateway.ts`, client_id configurable sur
+  `/admin/settings`) n'est **jamais** utilisé pour une vente Pwen Vant. Sa seule raison d'être est
+  une fonctionnalité future distincte : une boutique payant son propre abonnement Jere Boutik.
+
+
 
 ## Convention de code
 

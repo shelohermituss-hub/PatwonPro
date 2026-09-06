@@ -8,3 +8,11 @@ export const storeProfileSchema = z.object({
 
 export type StoreProfileFormInput = z.input<typeof storeProfileSchema>;
 export type StoreProfileFormOutput = z.output<typeof storeProfileSchema>;
+
+export const mobilePaymentConfigSchema = z.object({
+  moncashPhone: z.string().trim().max(30, "Nimewo a twò long.").optional(),
+  natcashPhone: z.string().trim().max(30, "Nimewo a twò long.").optional(),
+});
+
+export type MobilePaymentConfigFormInput = z.input<typeof mobilePaymentConfigSchema>;
+export type MobilePaymentConfigFormOutput = z.output<typeof mobilePaymentConfigSchema>;

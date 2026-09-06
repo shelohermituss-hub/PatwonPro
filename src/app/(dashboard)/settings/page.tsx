@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { isOwner } from "@/lib/auth/roles";
 import { InviteEmployeeForm } from "@/components/InviteEmployeeForm";
 import { StoreProfileForm } from "@/components/StoreProfileForm";
+import { MobilePaymentConfigForm } from "@/components/MobilePaymentConfigForm";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -53,6 +54,8 @@ export default async function SettingsPage() {
       </div>
 
       <StoreProfileForm store={store} />
+
+      <MobilePaymentConfigForm store={store} />
 
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Icons } from "@/lib/icons";
@@ -11,10 +11,10 @@ import { pullCustomers } from "@/lib/sync/customers";
 import { checkoutSale } from "@/lib/pos/checkout";
 import { useCurrentProfile } from "@/hooks/useCurrentProfile";
 import { useCart } from "@/hooks/useCart";
-import { usePaymentGateway } from "@/hooks/usePaymentGateway";
+import { useStorePaymentConfig } from "@/hooks/useStorePaymentConfig";
 import { ProductGrid } from "@/components/pos/ProductGrid";
 import { CartPanel } from "@/components/pos/CartPanel";
-import { PaymentGatewayDialog } from "@/components/pos/PaymentGatewayDialog";
+import { MobilePaymentConfirmDialog } from "@/components/pos/MobilePaymentConfirmDialog";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -26,19 +26,21 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { formatCurrency } from "@/lib/format";
+import type { GatewayPaymentMethod } from "@/lib/payments/gateway";
 import type { PaymentMethod, Sale } from "@/types";
 
 export default function NewSalePage() {
   const { profile } = useCurrentProfile();
   const cart = useCart();
   const customers = useLiveQuery(() => db.customers.toArray(), []);
-  const paymentGateway = usePaymentGateway();
+  const { config: paymentConfig } = useStorePaymentConfig(profile?.store_id);
 
   const [discount, setDiscount] = useState(0);
   const [customerId, setCustomerId] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
   const [cashReceived, setCashReceived] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pendingMobileMethod, setPendingMobileMethod] = useState<GatewayPaymentMethod | null>(null);
   const [completedSale, setCompletedSale] = useState<
     (Sale & { change: number | null }) | null
   >(null);
@@ -49,7 +51,7 @@ export default function NewSalePage() {
     void pullCustomers(profile.store_id);
   }, [profile?.store_id]);
 
-  async function completeSale(method: PaymentMethod, linkTransactionId?: string) {
+  async function completeSale(method: PaymentMethod) {
     if (!profile?.store_id) {
       toast.error("Nou pa t ka jwenn boutik ou. Rekonekte epi eseye ankò.");
       return;
@@ -69,17 +71,13 @@ export default function NewSalePage() {
         paymentMethod: method,
       });
 
-      if (linkTransactionId) {
-        void paymentGateway.linkSale(linkTransactionId, sale.id);
-      }
-
       setCompletedSale({ ...sale, change });
       cart.clear();
       setDiscount(0);
       setCustomerId(null);
       setCashReceived("");
       setPaymentMethod("cash");
-      paymentGateway.reset();
+      setPendingMobileMethod(null);
     } catch {
       toast.error("Nou pa t ka kompete vant lan. Eseye ankò.");
     } finally {
@@ -87,31 +85,18 @@ export default function NewSalePage() {
     }
   }
 
-  async function handleCheckout() {
+  function handleCheckout() {
     if (paymentMethod === "moncash" || paymentMethod === "natcash") {
-      const total = Math.max(cart.subtotal - discount, 0);
-      void paymentGateway.start(paymentMethod, total);
+      setPendingMobileMethod(paymentMethod);
       return;
     }
-    await completeSale(paymentMethod);
+    void completeSale(paymentMethod);
   }
 
-  // The payment gateway has no webhook (docs/PROMPTS/07-payments.md) —
-  // confirmation arrives via usePaymentGateway's polling, surfaced here
-  // as a state transition rather than a direct callback. The
-  // processed-id guard keeps a re-render from re-running checkoutSale
-  // for the same payment.
-  const processedTransactionRef = useRef<string | null>(null);
-  useEffect(() => {
-    if (
-      paymentGateway.state.status === "confirmed" &&
-      processedTransactionRef.current !== paymentGateway.state.transactionId
-    ) {
-      processedTransactionRef.current = paymentGateway.state.transactionId;
-      void completeSale(paymentGateway.state.method, paymentGateway.state.transactionId);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- completeSale intentionally reads current state at call time, not effect-tracked
-  }, [paymentGateway.state]);
+  const mobilePhone =
+    pendingMobileMethod === "moncash" ? paymentConfig?.moncashPhone ?? null : paymentConfig?.natcashPhone ?? null;
+  const mobileQrUrl =
+    pendingMobileMethod === "moncash" ? paymentConfig?.moncashQrUrl ?? null : paymentConfig?.natcashQrUrl ?? null;
 
   return (
     <div className="grid h-full grid-cols-[1fr_400px] overflow-hidden">
@@ -146,17 +131,14 @@ export default function NewSalePage() {
         isSubmitting={isSubmitting}
       />
 
-      <PaymentGatewayDialog
-        state={paymentGateway.state}
+      <MobilePaymentConfirmDialog
+        method={pendingMobileMethod}
         amount={Math.max(cart.subtotal - discount, 0)}
-        onManualCheck={paymentGateway.manualCheck}
-        onCancel={() => void paymentGateway.cancel()}
-        onRetry={() => {
-          if (paymentMethod === "moncash" || paymentMethod === "natcash") {
-            void paymentGateway.start(paymentMethod, Math.max(cart.subtotal - discount, 0));
-          }
-        }}
-        onClose={paymentGateway.reset}
+        phone={mobilePhone}
+        qrUrl={mobileQrUrl}
+        isSubmitting={isSubmitting}
+        onConfirm={() => pendingMobileMethod && void completeSale(pendingMobileMethod)}
+        onCancel={() => setPendingMobileMethod(null)}
       />
 
       <Dialog

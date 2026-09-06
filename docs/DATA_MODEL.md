@@ -15,6 +15,10 @@ Boutik la (tenant).
 | address | text | |
 | phone | text | |
 | logo_url | text nullable | URL piblik nan bucket Storage `store-logos` (gade seksyon Storage anba) |
+| moncash_phone | text nullable | Nimewo MonCash **pwòp boutik la** — kliyan peye dirèkteman ladan l, konfigire sou `/settings` |
+| moncash_qr_url | text nullable | URL piblik nan bucket Storage `payment-qr-codes` (gade seksyon Storage anba) |
+| natcash_phone | text nullable | Nimewo NatCash **pwòp boutik la** |
+| natcash_qr_url | text nullable | URL piblik nan bucket Storage `payment-qr-codes` |
 | created_at | timestamptz | |
 | updated_at | timestamptz | Ajou otomatikman pa trigger |
 
@@ -117,11 +121,12 @@ Kliyan k ap peye yon dèt kredi pa vèsman.
 | created_at | timestamptz |
 
 ### `payment_transactions`
-Rejis apèl API MonCash/NatCash (pou odit ak rekonsilyasyon), atravè yon
-sèl gateway peman (`src/lib/payments/gateway.ts`). **Pa janm konfime yon
-`sale.payment_status` kòm `paid` sou baz sa a sèlman san yon verifikasyon
-sèvè-kote reyisi** (`GET /api/payments/status/[id]`, ki entèwoje gateway
-a — pa gen webhook dokimante) — gade `docs/PROMPTS/07-payments.md`.
+Tab pou rejis apèl gateway Pay'm PLOP PLOP (`src/lib/payments/gateway.ts`).
+**Pa gen okenn liy ki kreye kounye a** — vant MonCash/NatCash nan Pwen
+Vant pa pase pa gateway a ditou (chak boutik konfigire pwòp nimewo/kòd QR
+li, kesye a konfime manyèlman, gade `docs/PROMPTS/07-payments.md`). Tab
+la rete pou sèl rezon gateway a rete itil : yon boutik k ap peye **pwòp
+abònman li** bay Jere Boutik — yon fonksyonalite ki poko bati.
 | Chan | Tip | Deskripsyon |
 |---|---|---|
 | id | uuid PK | |
@@ -287,11 +292,13 @@ delè gras, SLA P1, Client ID gateway peman).
 
 `payment_gateway_client_id` (jsonb string, ajoute apre migration 023 —
 pa nan seed inisyal la, kreye pa premye `upsert` soti nan
-`/admin/settings`) : Client ID gateway Pay'm PLOP PLOP la
-(MonCash + NatCash). `src/lib/payments/gateway.ts` li valè sa a via
-service-role client (checkout se yon `owner`/`employee`, ki pa gen
-dwa RLS `is_platform_admin()` sou tab sa a) anvan li tonbe sou
-varyab anviwònman `PAYMENT_GATEWAY_CLIENT_ID` si vid.
+`/admin/settings`) : Client ID gateway Pay'm PLOP PLOP la. **Sèvi sèlman
+pou yon boutik k ap peye pwòp abònman li bay Jere Boutik** (fonksyonalite
+ki poko bati) — pa itilize pou okenn vant Pwen Vant, ki pa janm pase pa
+gateway a (gade `payment_transactions` pi wo ak
+`docs/PROMPTS/07-payments.md`). `src/lib/payments/gateway.ts` li valè sa
+a via service-role client anvan li tonbe sou varyab anviwònman
+`PAYMENT_GATEWAY_CLIENT_ID` si vid.
 
 ### `audit_logs`
 Jounal odit — append-only, okenn policy update/delete (menm prensip ke
@@ -312,12 +319,15 @@ Jounal odit — append-only, okenn policy update/delete (menm prensip ke
 
 ## Storage (Supabase Storage)
 
-De bucket piblik-li-sèlman (`00000000000010_storage_logos_and_product_images.sql`) :
+Twa bucket piblik-li-sèlman, menm patwon toude
+(`00000000000010_storage_logos_and_product_images.sql`,
+`00000000000029_stores_mobile_payment_config.sql`) :
 
 | Bucket | Kolòn ki referanse l | Politik |
 |---|---|---|
 | `store-logos` | `stores.logo_url` | Lekti piblik ; ekriti rezève pou `owner` nan pwòp chemen `{store_id}/...` li |
 | `product-images` | `products.image_url` | Lekti piblik ; ekriti rezève pou `owner` nan pwòp chemen `{store_id}/...` li |
+| `payment-qr-codes` | `stores.moncash_qr_url` / `stores.natcash_qr_url` | Lekti piblik ; ekriti rezève pou `owner` nan pwòp chemen `{store_id}/...` li |
 
 Chemen objè yo toujou prefikse pa `{store_id}/` — se sou baz sa a RLS
 (`storage.foldername(name))[1] = my_store_id()::text` konbine ak
