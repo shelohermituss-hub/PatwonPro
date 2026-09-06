@@ -19,13 +19,14 @@ export default function AuthLayout({
         <div className="w-full max-w-sm">{children}</div>
       </div>
 
-      <div className="relative hidden w-[42%] shrink-0 overflow-hidden bg-gradient-to-br from-brand-gradient-start via-brand-gradient-via to-brand-gradient-start md:flex md:flex-col md:justify-between md:p-12">
+      <div className="relative hidden w-[42%] shrink-0 overflow-hidden bg-gradient-to-br from-brand-gradient-start via-brand-gradient-via to-brand-gradient-end bg-[length:200%_200%] motion-safe:animate-[auth-hero-aurora_16s_ease-in-out_infinite] md:flex md:flex-col md:justify-between md:p-12">
         <div
-          className="absolute -right-24 -top-24 size-96 rounded-full bg-white/10"
+          className="absolute -right-24 -top-24 size-96 rounded-full bg-white/10 motion-safe:animate-[auth-hero-blob-a_11s_ease-in-out_infinite]"
           aria-hidden
         />
         <div
-          className="absolute -bottom-32 -left-16 size-72 rounded-full bg-white/10"
+          className="absolute -bottom-32 -left-16 size-72 rounded-full bg-white/10 motion-safe:animate-[auth-hero-blob-b_9s_ease-in-out_infinite]"
+          style={{ animationDelay: "-3s" }}
           aria-hidden
         />
 

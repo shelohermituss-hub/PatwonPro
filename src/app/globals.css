@@ -169,6 +169,31 @@
 }
 
 /**
+ * Ambient motion for the /login and /register hero panel
+ * ((auth)/layout.tsx) — the one place the full-strength brand gradient
+ * is allowed (docs/CLAUDE.md "pas de gradients excessifs"). Keeps the
+ * exact same colors/shapes already there, just gives the gradient a
+ * slow diagonal drift and the two decorative circles an asynchronous
+ * float so the panel doesn't read as a static screenshot. `motion-safe:`
+ * on every usage means `prefers-reduced-motion` users simply get the
+ * original static panel — no separate fallback needed.
+ */
+@keyframes auth-hero-aurora {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes auth-hero-blob-a {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-1.5rem, 1.5rem) scale(1.12); }
+}
+
+@keyframes auth-hero-blob-b {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(1.25rem, -1rem) scale(1.08); }
+}
+
+/**
  * Jere Boutik Admin (`/admin`, AdminShell.tsx) — a dark-navy sidebar so
  * the internal team immediately sees they're in the back-office, not the
  * merchant app. Scoped to only the `--sidebar*` tokens on purpose: the
