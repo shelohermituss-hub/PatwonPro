@@ -142,7 +142,19 @@ Tout 15 wout yo li de vrè tab. Sa ki gen aksyon reyèl konfime pa
   foto (bucket `device-photos`, migration 030), ak kantite — chak inite
   vin yon liy `devices` separe, `in_stock`. Dyalòg "Asiyen a yon boutik"
   (menm patwon ke "Konvèti" lead) chanje `store_id`/`status` pou yon
-  tablèt ki poko asiyen.
+  tablèt ki poko asiyen — depi migration 036, li kreye anmenmtan an yon
+  liy `deposits` (`status: "pending"`) ak montan/mòd peman (yon sèl fwa
+  oswa mansyalite) chwazi pa admin la, idanpotan (pa doub kreye si yon
+  kosyon non-tèminal deja egziste pou aparèy la). Aksyon "Dezasiyen"
+  (`ConfirmActionDialog`, sèlman vizib si aparèy la deja asiyen) fè
+  chemen envès la (`store_id`/`installed_at` retounen `null`, `status`
+  retounen `in_stock`) san touche kosyon an — ranbousman rete jere
+  separeman sou `/admin/deposits`. Yon seksyon "Demand Ranplasman" anba
+  tablo prensipal la liste `replacement_requests` an atant (kreye pa
+  kòmèsan an sou `/subscription`), ak "Apwouve"/"Rejte"
+  (`resolveReplacementRequest` + nòt opsyonèl) — apwouve pa asiyen yon
+  nouvo tablèt otomatikman, admin toujou itilize dyalòg "Asiyen a yon
+  boutik" nòmal la separeman.
 - `/admin/installations` — fòm planifikasyon + chèklis entèraktif
   pèsistan.
 - `/admin/support` — tablo + Kanban sou vrè `support_tickets`, ak vrè

@@ -236,16 +236,21 @@ Pipeline lead/esè — okenn ekivalan reyèl anvan migration 018.
 
 ### `deposits`
 Kosyon materyèl — separe de revni Jere Boutik (yon obligasyon
-potansyèl, pa yon vant).
+potansyèl, pa yon vant). Kreye otomatikman pa `assignDeviceToStore()`
+lè yon admin asiyen yon tablèt a yon boutik (montan/mòd peman
+chwazi pa admin la nan moman sa a) — pa yon aksyon separe ankò.
 | Chan | Tip | Deskripsyon |
 |---|---|---|
 | id | uuid PK | |
 | store_id | uuid FK | |
 | device_id | uuid FK -> devices, nullable | |
 | contract_number | text nullable | |
-| amount_htg | numeric | |
+| amount_htg | numeric | Montan sib total kosyon an |
+| amount_paid_htg | numeric, default 0 | Ensideman pa `confirmSubscriptionPayment` (`createAdminClient()`) chak fwa yon peman kosyon konfime |
+| payment_mode | text, default `lump_sum` | `lump_sum` (yon sèl fwa nan enstalasyon) \| `monthly_installment` (mansyalite fiks), chwazi pa admin lè asiyasyon |
+| monthly_installment_htg | numeric nullable | Sèlman ranpli si `payment_mode = monthly_installment` |
 | received_date | date | |
-| status | text | 7 valè, `received` → `refunded`/`partially_retained`/`fully_retained` |
+| status | text | 8 valè, `pending` (kreye, poko peye) → `received` → `refunded`/`partially_retained`/`fully_retained` |
 | eligible_refund_date | date nullable | |
 | device_condition | text nullable | |
 | amount_to_return_htg, amount_retained_htg | numeric nullable | |
@@ -253,6 +258,54 @@ potansyèl, pa yon vant).
 | refund_proof_url | text nullable | |
 | finance_agent_id | uuid FK -> profiles, nullable | |
 | created_at, updated_at | timestamptz | |
+
+`deposits_select_member` (migration 036, additif a
+`deposits_select_admin`) bay manm boutik la dwa **li** pwòp kosyon
+li — ekriti rete 100% rezève admin, sof efè segondè yon peman
+konfime (gade `subscription_payments` anba).
+
+### `subscription_payments`
+Tantativ peman kòmèsan (pa yon fil datant admin) pou pwòp
+abònman/kosyon li, via gateway Pay'm PLOP PLOP. Chemen "kontan" an
+antyèman otomatik : kòmèsan an kreye pwòp liy li lè li kòmanse yon
+peman (`startSubscriptionPayment`, RLS otorize `store_id =
+my_store_id()`), epi menm sèvè aksyon an fè yon "verify" ki soti swa
+`pending` swa `paid`. Sèl lè li vin `paid` ke `confirmSubscriptionPayment`
+bascule sou `createAdminClient()` (menm jistifikasyon ke yon webhook
+founisè peman) pou modifye `subscriptions`/`deposits` ak ekri
+`platform_transactions` — kòmèsan an pa janm ekri sa yo dirèkteman.
+| Chan | Tip | Deskripsyon |
+|---|---|---|
+| id | uuid PK | Sèvi kòm `referenceId` gateway a |
+| store_id | uuid FK | |
+| kind | text | `subscription` \| `deposit` |
+| deposit_id | uuid FK -> deposits, nullable | Egzije si `kind = deposit`, `null` si `kind = subscription` (check contrent) |
+| amount_htg | numeric | |
+| method | text | `moncash` \| `natcash` |
+| gateway_transaction_id | text nullable | |
+| status | text, default `pending` | `pending` \| `paid` \| `failed` |
+| paid_at | timestamptz nullable | |
+| created_at | timestamptz | |
+
+### `replacement_requests`
+Demand ranplasman tablèt — menm patwon RLS ke `support_tickets` :
+kòmèsan kreye/li pwòp demand li pou yon tablèt defektye, sèlman admin
+(`admin_can('manage_devices')`) ka apwouve/rejte. Apwouve pa asiyen
+otomatikman yon nouvo tablèt — admin toujou pase pa flux
+`AssignDeviceDialog` nòmal la separeman, yon jès de tan volontèman
+senp.
+| Chan | Tip | Deskripsyon |
+|---|---|---|
+| id | uuid PK | |
+| store_id | uuid FK | |
+| device_id | uuid FK -> devices | |
+| reason | text | |
+| status | text, default `pending` | `pending` \| `approved` \| `rejected` \| `completed` |
+| replacement_device_id | uuid FK -> devices, nullable | |
+| resolution_note | text nullable | |
+| resolved_by | uuid FK -> profiles, nullable | |
+| resolved_at | timestamptz nullable | |
+| created_at | timestamptz | |
 
 ### `installations`
 Enstalasyon teren. `store_id`/`lead_id` nullable paske yon enstalasyon
@@ -304,12 +357,13 @@ delè gras, SLA P1, Client ID gateway peman).
 `payment_gateway_client_id` (jsonb string, ajoute apre migration 023 —
 pa nan seed inisyal la, kreye pa premye `upsert` soti nan
 `/admin/settings`) : Client ID gateway Pay'm PLOP PLOP la. **Sèvi sèlman
-pou yon boutik k ap peye pwòp abònman li bay Jere Boutik** (fonksyonalite
-ki poko bati) — pa itilize pou okenn vant Pwen Vant, ki pa janm pase pa
-gateway a (gade `payment_transactions` pi wo ak
-`docs/PROMPTS/07-payments.md`). `src/lib/payments/gateway.ts` li valè sa
-a via service-role client anvan li tonbe sou varyab anviwònman
-`PAYMENT_GATEWAY_CLIENT_ID` si vid.
+pou yon boutik k ap peye pwòp abònman li oswa kosyon tablèt li bay Jere
+Boutik**, depi `/subscription` (`startSubscriptionPayment`/
+`confirmSubscriptionPayment`, `src/lib/subscription/actions/payments.ts`)
+— pa itilize pou okenn vant Pwen Vant, ki pa janm pase pa gateway a
+(gade `payment_transactions` pi wo ak `docs/PROMPTS/07-payments.md`).
+`src/lib/payments/gateway.ts` li valè sa a via service-role client anvan
+li tonbe sou varyab anviwònman `PAYMENT_GATEWAY_CLIENT_ID` si vid.
 
 ### `audit_logs`
 Jounal odit — append-only, okenn policy update/delete (menm prensip ke
@@ -367,6 +421,9 @@ stores 1───n support_tickets
 leads n───1 stores (converted_store_id, nullable)
 leads/installations n───1 devices (nullable)
 stores 1───n deposits ──n:1── devices (nullable)
+deposits 1───n subscription_payments (nullable, sèlman kind=deposit)
+stores 1───n subscription_payments
+stores 1───n replacement_requests ──n:1── devices
 stores 1───n installations (store_id/lead_id nullable)
 stores 1───n platform_transactions (nullable — kèk san boutik)
 ```
@@ -403,6 +460,15 @@ paske chak aksyon dwe kite yon tras kèlkeswa ki wòl fè l).
 Distenksyon `owner` (aksè total sou pwòp boutik) vs `employee` (limite a
 vant/kredi) poko enplemante kòm politik RLS pa-wòl nan migrasyon inisyal
 la — sa vin fèt nan `docs/PROMPTS/02-auth.md`.
+
+`subscription_payments` ak `replacement_requests` (migrasyon 037/038)
+swiv yon twazyèm patwon, pou tab kote **kòmèsan an ekri pwòp liy li**
+(pa jis li) san admin: `INSERT`/`SELECT` louvri a `store_id =
+my_store_id() or is_platform_admin()`, men `UPDATE`/`DELETE` rezève
+sèlman admin (`is_platform_admin()` pou `subscription_payments` — chak
+chanjman estati pase pa `createAdminClient()` ; `admin_can('manage_devices')`
+pou `replacement_requests`, menm règ ke `support_tickets`). Kòmèsan an
+pa janm gen yon chemen `UPDATE` sou youn nan de tab sa yo.
 
 ## Konvansyon
 

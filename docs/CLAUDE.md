@@ -135,8 +135,12 @@ Avant toute nouvelle interface importante :
   propre téléphone. Dès la confirmation, la vente est complétée exactement comme un paiement cash
   (`payment_status: "paid"` immédiat) — voir `docs/PROMPTS/07-payments.md`.
 - Le gateway Pay'm PLOP PLOP (`src/lib/payments/gateway.ts`, client_id configurable sur
-  `/admin/settings`) n'est **jamais** utilisé pour une vente Pwen Vant. Sa seule raison d'être est
-  une fonctionnalité future distincte : une boutique payant son propre abonnement Jere Boutik.
+  `/admin/settings`) n'est **jamais** utilisé pour une vente Pwen Vant. Son usage réel est une
+  boutique payant son propre abonnement Jere Boutik ou la caution de sa tablette, depuis
+  `/subscription` (`PaymentDialog` + `usePaymentPolling`, Server Actions
+  `src/lib/subscription/actions/payments.ts`) — confirmation uniquement par polling (le gateway n'a
+  pas de webhook), les effets (prolongation d'abonnement, crédit de caution) appliqués via
+  `createAdminClient()` une fois le paiement confirmé.
 
 
 
