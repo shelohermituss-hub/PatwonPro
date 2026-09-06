@@ -44,7 +44,7 @@ export function TrialsClient({ activeTrials }: { activeTrials: Lead[] }) {
     <div className="flex flex-col gap-6 p-6">
       <AdminPageHeader
         title="Esè"
-        description="Boutik ki nan 30 jou gratis la — rapèl J-7 relans WhatsApp, J-3 apèl obligatwa, J-1 vizit oswa konvèsyon."
+        description="Lis boutik ki nan peryòd esè gratis 30 jou a, klase pa jou ki rete anvan fen esè a."
       />
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">

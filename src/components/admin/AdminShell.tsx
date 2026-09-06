@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Bell, LogOut, Search } from "lucide-react";
 import {
@@ -30,9 +31,10 @@ function initials(name: string) {
     .join("");
 }
 
-function AdminHeader() {
+function AdminHeader({ alertCount }: { alertCount: number }) {
   const router = useRouter();
   const actor = useAdminActor();
+  const [query, setQuery] = useState("");
 
   async function handleSignOut() {
     const supabase = createClient();
@@ -41,20 +43,41 @@ function AdminHeader() {
     router.refresh();
   }
 
+  function handleSearchSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    const trimmed = query.trim();
+    if (!trimmed) return;
+    router.push(`/admin/stores?q=${encodeURIComponent(trimmed)}`);
+  }
+
   return (
     <header className="flex h-14 shrink-0 items-center gap-3 border-b border-border px-4">
       <SidebarTrigger />
       <Separator orientation="vertical" className="h-4!" />
 
-      <div className="relative max-w-sm flex-1">
+      <form onSubmit={handleSearchSubmit} className="relative max-w-sm flex-1">
         <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary" aria-hidden />
-        <Input placeholder="Chèche yon boutik, tikè, aparèy..." className="pl-9" />
-      </div>
+        <Input
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Chèche yon boutik, pwopriyetè oswa telefòn..."
+          className="pl-9"
+        />
+      </form>
 
       <div className="ml-auto flex items-center gap-2">
-        <Button type="button" variant="ghost" size="icon" aria-label="Notifikasyon" className="relative">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          aria-label={alertCount > 0 ? `${alertCount} alèt aktif` : "Notifikasyon"}
+          className="relative"
+          onClick={() => router.push("/admin/support?status=open")}
+        >
           <Bell aria-hidden />
-          <span className="absolute right-1.5 top-1.5 size-2 rounded-full bg-danger" aria-hidden />
+          {alertCount > 0 && (
+            <span className="absolute right-1.5 top-1.5 size-2 rounded-full bg-danger" aria-hidden />
+          )}
         </Button>
 
         <div className="flex items-center gap-2 rounded-md border border-border px-2 py-1.5">
@@ -91,9 +114,11 @@ function AdminHeader() {
  */
 export function AdminShell({
   actor,
+  alertCount,
   children,
 }: {
   actor: AdminActor;
+  alertCount: number;
   children: React.ReactNode;
 }) {
   return (
@@ -121,7 +146,7 @@ export function AdminShell({
           </Sidebar>
 
           <SidebarInset className="min-h-0">
-            <AdminHeader />
+            <AdminHeader alertCount={alertCount} />
             <div className="min-h-0 flex-1 overflow-y-auto bg-background">{children}</div>
           </SidebarInset>
         </SidebarProvider>

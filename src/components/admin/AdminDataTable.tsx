@@ -84,6 +84,7 @@ export function AdminDataTable<T>({
   errorMessage = "Nou pa t ka chaje done yo. Eseye ankò.",
   exportFilename = "export.csv",
   initialFilterValues,
+  initialSearch,
 }: {
   data: T[];
   columns: AdminColumn<T>[];
@@ -99,8 +100,10 @@ export function AdminDataTable<T>({
   exportFilename?: string;
   /** Pre-selects a filter dropdown — used to deep-link from a KPI tile straight into a filtered list. */
   initialFilterValues?: Record<string, string>;
+  /** Pre-fills the search box — used to deep-link from the header search into a filtered list. */
+  initialSearch?: string;
 }) {
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(initialSearch ?? "");
   const [filterValues, setFilterValues] = useState<Record<string, string>>(initialFilterValues ?? {});
   const [page, setPage] = useState(1);
 

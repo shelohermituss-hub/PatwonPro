@@ -41,14 +41,18 @@ import {
 import { Field, FieldGroup, FieldLabel, FieldError } from "@/components/ui/field";
 import { leadSchema, type LeadFormInput, type LeadFormOutput } from "@/lib/validations/lead";
 import { createLead, updateLeadStage, convertLeadToStore } from "@/lib/admin/mutations/leads";
+import { useAdminActor } from "@/components/admin/AdminSessionProvider";
+import { can } from "@/lib/admin/permissions";
+import { recordAuditEvent } from "@/lib/admin/auditLog";
 import { LEAD_STAGE_LABELS } from "@/lib/admin/labels";
 import { formatDateTime } from "@/lib/format";
 import type { Lead, LeadStage } from "@/types/admin";
 
 const STAGE_OPTIONS = Object.entries(LEAD_STAGE_LABELS).map(([value, meta]) => ({ value, label: meta.label }));
 
-function AddLeadSheet() {
+function AddLeadSheet({ disabled }: { disabled: boolean }) {
   const router = useRouter();
+  const actor = useAdminActor();
   const [open, setOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const {
@@ -64,7 +68,14 @@ function AddLeadSheet() {
   async function onSubmit(values: LeadFormOutput) {
     setFormError(null);
     try {
-      await createLead(values);
+      const leadId = await createLead(values);
+      await recordAuditEvent({
+        actorId: actor.id,
+        actorRole: actor.role,
+        action: "lead.created",
+        resourceType: "lead",
+        resourceId: leadId,
+      });
       toast.success("Lead ajoute.");
       reset();
       setOpen(false);
@@ -76,7 +87,7 @@ function AddLeadSheet() {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger render={<Button type="button" />}>
+      <SheetTrigger render={<Button type="button" disabled={disabled} />}>
         <Plus data-icon="inline-start" aria-hidden />
         Ajoute Lead
       </SheetTrigger>
@@ -149,7 +160,8 @@ function AddLeadSheet() {
   );
 }
 
-function ConvertDialog({ lead, storeOptions, onDone }: { lead: Lead; storeOptions: { id: string; name: string }[]; onDone: () => void }) {
+function ConvertDialog({ lead, storeOptions, disabled, onDone }: { lead: Lead; storeOptions: { id: string; name: string }[]; disabled: boolean; onDone: () => void }) {
+  const actor = useAdminActor();
   const [open, setOpen] = useState(false);
   const [storeId, setStoreId] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -159,6 +171,14 @@ function ConvertDialog({ lead, storeOptions, onDone }: { lead: Lead; storeOption
     setSubmitting(true);
     try {
       await convertLeadToStore(lead.id, storeId);
+      await recordAuditEvent({
+        actorId: actor.id,
+        actorRole: actor.role,
+        action: "lead.converted",
+        resourceType: "lead",
+        resourceId: lead.id,
+        storeId,
+      });
       toast.success(`${lead.storeName} konvèti.`);
       setOpen(false);
       onDone();
@@ -171,7 +191,7 @@ function ConvertDialog({ lead, storeOptions, onDone }: { lead: Lead; storeOption
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button type="button" variant="outline" size="sm" />}>
+      <DialogTrigger render={<Button type="button" variant="outline" size="sm" disabled={disabled} />}>
         Konvèti
       </DialogTrigger>
       <DialogContent>
@@ -208,6 +228,8 @@ function ConvertDialog({ lead, storeOptions, onDone }: { lead: Lead; storeOption
 
 export function LeadsClient({ leads, storeOptions }: { leads: Lead[]; storeOptions: { id: string; name: string }[] }) {
   const router = useRouter();
+  const actor = useAdminActor();
+  const readOnly = !can(actor.role, "manage_leads");
   const AGENT_OPTIONS = Array.from(new Set(leads.map((l) => l.agentName))).map((a) => ({ value: a, label: a }));
 
   const FILTERS: AdminFilter<Lead>[] = [
@@ -218,6 +240,14 @@ export function LeadsClient({ leads, storeOptions }: { leads: Lead[]; storeOptio
   async function handleStageChange(lead: Lead, stage: LeadStage) {
     try {
       await updateLeadStage(lead.id, stage);
+      await recordAuditEvent({
+        actorId: actor.id,
+        actorRole: actor.role,
+        action: "lead.stage_changed",
+        resourceType: "lead",
+        resourceId: lead.id,
+        metadata: { from: lead.stage, to: stage },
+      });
       router.refresh();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Yon erè fèt.");
@@ -235,7 +265,7 @@ export function LeadsClient({ leads, storeOptions }: { leads: Lead[]; storeOptio
     { id: "zone", header: "Zòn", csvValue: (r) => r.zone, cell: (r) => r.zone },
     { id: "type", header: "Tip Komès", csvValue: (r) => r.businessType, cell: (r) => r.businessType },
     { id: "stage", header: "Etap Pipeline", csvValue: (r) => LEAD_STAGE_LABELS[r.stage].label, cell: (r) => (
-      <Select value={r.stage} onValueChange={(v) => v && handleStageChange(r, v as LeadStage)}>
+      <Select value={r.stage} onValueChange={(v) => v && handleStageChange(r, v as LeadStage)} disabled={readOnly}>
         <SelectTrigger className="w-[190px]">
           <SelectValue>{(value: string) => LEAD_STAGE_LABELS[value as LeadStage].label}</SelectValue>
         </SelectTrigger>
@@ -254,7 +284,7 @@ export function LeadsClient({ leads, storeOptions }: { leads: Lead[]; storeOptio
     { id: "lastInteraction", header: "Dènye Kontak", csvValue: (r) => r.lastInteractionAt, cell: (r) => formatDateTime(r.lastInteractionAt) },
     { id: "actions", header: "Aksyon", cell: (r) => (
       r.stage !== "converted" && r.stage !== "lost" ? (
-        <ConvertDialog lead={r} storeOptions={storeOptions} onDone={() => router.refresh()} />
+        <ConvertDialog lead={r} storeOptions={storeOptions} disabled={readOnly} onDone={() => router.refresh()} />
       ) : (
         <StatusBadge {...LEAD_STAGE_LABELS[r.stage]} />
       )
@@ -266,7 +296,7 @@ export function LeadsClient({ leads, storeOptions }: { leads: Lead[]; storeOptio
       <AdminPageHeader
         title="Lead"
         description="Pipeline konplè: Lead → Kontakte → Demo → Esè → Konvèti/Pèdi."
-        actions={<AddLeadSheet />}
+        actions={<AddLeadSheet disabled={readOnly} />}
       />
 
       <AdminDataTable

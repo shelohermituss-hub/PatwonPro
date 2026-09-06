@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { SyncHealthRow } from "@/types/admin";
 
 interface DeviceRow {
+  id: string;
   device_code: string;
   store_id: string | null;
   last_seen_at: string | null;
@@ -16,7 +17,7 @@ export async function fetchSyncHealth(): Promise<SyncHealthRow[]> {
 
   const { data, error } = await supabase
     .from("devices")
-    .select("device_code, store_id, last_seen_at, pending_actions, sync_errors, store:stores(name)")
+    .select("id, device_code, store_id, last_seen_at, pending_actions, sync_errors, store:stores(name)")
     .not("store_id", "is", null);
 
   if (error) {
@@ -31,6 +32,7 @@ export async function fetchSyncHealth(): Promise<SyncHealthRow[]> {
         storeId: row.store_id,
         storeName: store?.name ?? "—",
         deviceId: row.device_code,
+        deviceDbId: row.id,
         lastSyncAt: row.last_seen_at,
         pendingActions: row.pending_actions,
         errors: row.sync_errors,

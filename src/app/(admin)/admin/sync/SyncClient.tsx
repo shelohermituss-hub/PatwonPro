@@ -9,7 +9,8 @@ import { ConfirmActionDialog } from "@/components/admin/ConfirmActionDialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAdminActor } from "@/components/admin/AdminSessionProvider";
-import { createSyncTicket } from "@/lib/admin/mutations/sync";
+import { can } from "@/lib/admin/permissions";
+import { createSyncTicket, requestDeviceResync } from "@/lib/admin/mutations/sync";
 import { formatDateTime } from "@/lib/format";
 import type { SyncHealthRow } from "@/types/admin";
 
@@ -21,6 +22,8 @@ function daysSince(iso: string | null): number | null {
 export function SyncClient({ rows }: { rows: SyncHealthRow[] }) {
   const router = useRouter();
   const actor = useAdminActor();
+  const canCreateTicket = can(actor.role, "manage_support");
+  const canResync = can(actor.role, "manage_devices");
   const [pending, setPending] = useState<{ row: SyncHealthRow; kind: "ticket" | "resync" } | null>(null);
 
   const syncedLast24h = rows.filter((r) => (daysSince(r.lastSyncAt) ?? Infinity) < 1).length;
@@ -44,12 +47,12 @@ export function SyncClient({ rows }: { rows: SyncHealthRow[] }) {
     { id: "action", header: "Aksyon", cell: (r) => (
       <div className="flex gap-1.5">
         {r.errors > 0 ? (
-          <Button type="button" variant="outline" size="sm" onClick={() => setPending({ row: r, kind: "ticket" })}>
+          <Button type="button" variant="outline" size="sm" disabled={!canCreateTicket} onClick={() => setPending({ row: r, kind: "ticket" })}>
             <Ticket data-icon="inline-start" aria-hidden />
             Kreye Tikè
           </Button>
         ) : (
-          <Button type="button" variant="outline" size="sm" onClick={() => setPending({ row: r, kind: "resync" })}>
+          <Button type="button" variant="outline" size="sm" disabled={!canResync} onClick={() => setPending({ row: r, kind: "resync" })}>
             <RefreshCw data-icon="inline-start" aria-hidden />
             Relanse Sync
           </Button>
@@ -99,7 +102,7 @@ export function SyncClient({ rows }: { rows: SyncHealthRow[] }) {
           onConfirm={
             pending.kind === "ticket"
               ? () => createSyncTicket(pending.row.storeId, pending.row.deviceId, actor.id)
-              : undefined
+              : () => requestDeviceResync(pending.row.deviceDbId)
           }
           onConfirmed={() => { setPending(null); router.refresh(); }}
         />

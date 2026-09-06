@@ -2,21 +2,26 @@ import { createClient } from "@/lib/supabase/client";
 import type { LeadFormOutput } from "@/lib/validations/lead";
 import type { LeadStage } from "@/types/admin";
 
-export async function createLead(input: LeadFormOutput) {
+export async function createLead(input: LeadFormOutput): Promise<string> {
   const supabase = createClient();
-  const { error } = await supabase.from("leads").insert({
-    store_name: input.storeName,
-    owner_name: input.ownerName,
-    phone: input.phone || null,
-    whatsapp: input.whatsapp || null,
-    address: input.address || null,
-    zone: input.zone || null,
-    business_type: input.businessType || null,
-    estimated_product_count: input.estimatedProductCount ?? null,
-    seller_count: input.sellerCount ?? null,
-    uses_mobile_money: input.usesMobileMoney,
-  });
+  const { data, error } = await supabase
+    .from("leads")
+    .insert({
+      store_name: input.storeName,
+      owner_name: input.ownerName,
+      phone: input.phone || null,
+      whatsapp: input.whatsapp || null,
+      address: input.address || null,
+      zone: input.zone || null,
+      business_type: input.businessType || null,
+      estimated_product_count: input.estimatedProductCount ?? null,
+      seller_count: input.sellerCount ?? null,
+      uses_mobile_money: input.usesMobileMoney,
+    })
+    .select("id")
+    .single();
   if (error) throw new Error(error.message);
+  return data.id as string;
 }
 
 export async function updateLeadStage(leadId: string, stage: LeadStage) {

@@ -2,8 +2,10 @@ import { fetchDeposits } from "@/lib/admin/queries/deposits";
 import { fetchStoreOptions } from "@/lib/admin/queries/stores";
 import { fetchAdminDevices } from "@/lib/admin/queries/devices";
 import { DepositsClient } from "./DepositsClient";
+import { requireNavAccess } from "@/lib/admin/guardNav";
 
 export default async function DepositsPage() {
+  await requireNavAccess("deposits");
   const [deposits, storeOptions, devices] = await Promise.all([
     fetchDeposits(),
     fetchStoreOptions(),

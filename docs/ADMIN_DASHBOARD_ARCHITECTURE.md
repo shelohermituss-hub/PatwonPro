@@ -10,23 +10,43 @@ Back-office interne sou `/admin`, konplètman separe de l'app komèsan
 peye, konbyen esè ap fini, MRR atann, lajan an reta, tablèt disponib,
 tikè pou trete jodi a. Wè `docs/CLAUDE.md` pou kontèks pwodwi jeneral.
 
-## Rezo aksè — 3 kouch, tout reyèl
+## Rezo aksè — 4 kouch, tout reyèl
 
-1. **Gate wout la** (`(admin)/layout.tsx`, sèvè) : `isPlatformAdmin(profile)`
-   sou pwofil Supabase la — yon `owner`/`employee` pa ka rive sou
-   `/admin` menm si li tape URL la dirèkteman.
-2. **7 wòl admin reyèl** (`profiles.admin_role`, migration 011) :
+1. **Gate back-office la** (`(admin)/layout.tsx`, sèvè) :
+   `isPlatformAdmin(profile)` sou pwofil Supabase la — yon
+   `owner`/`employee` pa ka rive sou `/admin` menm si li tape URL la
+   dirèkteman.
+2. **Gate chak paj espesifikman** (`src/lib/admin/guardNav.ts`,
+   `requireNavAccess(nav)`) : chak nan 14 paj ki pa dashboard la rele l
+   an premye — si `canSeeNav(profile.admin_role, nav)` fo (menm si
+   `isPlatformAdmin` vre), redireksyon `/admin`. Avan sa, nenpòt
+   sou-wòl te ka navige pa URL sou nenpòt paj menm si nav la kache —
+   koulye a sa fèmen.
+3. **7 wòl admin reyèl** (`profiles.admin_role`, migration 011) :
    `super_admin`, `operations_manager`, `sales_agent`, `field_agent`,
    `support_agent`, `finance_agent`, `read_only` — sèlman poze lè
    `role = 'platform_admin'` (contrainte). `AdminSessionProvider`
    (`src/components/admin/AdminSessionProvider.tsx`) pa mock ankò : li
    resevwa yon `AdminActor` konstwi sèvè-kote nan `(admin)/layout.tsx`
    soti nan `getCurrentProfile()`.
-3. **De miwa pèmisyon ki dwe rete senkwonize manyèlman** :
+4. **De miwa pèmisyon ki dwe rete senkwonize manyèlman** :
    `src/lib/admin/permissions.ts` (`can(role, action)`, kontwòl UI —
-   ki bouton/lyen parèt) ak `admin_can(action text)` (fonksyon SQL,
-   migration 011 — **se sèl vrè baryè**, RLS chèk li sou chak tab
-   admin). Si youn chanje, chanje lòt la.
+   ki bouton/lyen parèt, e depi migrasyon 031/032/035/151 tout paj ki
+   gen aksyon ekriti dezaktive kontwòl yo lè `can()` reponn fo, olye
+   kite RLS bloke aksyon an twò ta) ak `admin_can(action text)`
+   (fonksyon SQL, migration 011 — **se sèl vrè baryè**, RLS chèk li sou
+   chak tab admin). Si youn chanje, chanje lòt la.
+
+`stores` ak `profiles` te gen yon twou reyèl jiska migrasyon
+031/032/035 : politik `stores_all_platform_admin`/
+`profiles_all_platform_admin` orijinal yo te bay nenpòt sou-wòl (menm
+`read_only`) dwa ekri kèlkeswa `admin_can()`, e yon **dezyèm** politik
+`stores_update_owner` (FOR UPDATE) te gen menm twou a poukont li (RLS
+konbine tout politik pèmisiv ak OR — sere youn pa sere lòt la). Twa
+migrasyon sa yo egzije `admin_can('manage_stores')`/
+`admin_can('manage_team')` sou chak branch `is_platform_admin()`,
+verifye pa yon seri tès impèsonasyon (`read_only` bloke sou UPDATE,
+`super_admin`/pwopriyetè toujou reyisi).
 
 ## Relasyon ak done reyèl yo
 
@@ -55,28 +75,42 @@ src/lib/admin/
   permissions.ts                 — matris nav/aksyon pa wòl (miwa admin_can())
   labels.ts                      — dictionè estati → {label, tone}
   auditLog.ts                    — insert Supabase reyèl (audit_logs)
+  guardNav.ts                    — `requireNavAccess(nav)`, gad pa paj
   installationChecklist.ts       — chèklis fiks sèd nouvo enstalasyon
   queries/*.ts                   — yon lekti pa domèn (stores, leads,
                                     deposits, installations, devices,
                                     subscriptions, support, transactions,
                                     sync, team, settings, analytics,
-                                    auditLog, storeDetail)
+                                    auditLog, storeDetail, alerts)
   mutations/*.ts                 — ekriti client-side (`.update()`/
-                                    `.insert()` filtre pa RLS)
+                                    `.insert()` filtre pa RLS), ladan
+                                    `mutations/support.ts` (estati/
+                                    priyorite/asiyasyon tikè)
   actions/*.ts                   — Server Actions ki bezwen service-role
-                                    (inviteAdmin, resetOwnerPassword)
+                                    oswa yon sekrè sèvè (inviteAdmin,
+                                    resetOwnerPassword,
+                                    sendSubscriptionReminder — Twilio)
 src/components/admin/
-  AdminShell.tsx                 — sidebar sonm + header (rechèch,
-                                    notifikasyon, wòl reyèl, dekoneksyon)
+  AdminShell.tsx                 — sidebar sonm + header (rechèch reyèl
+                                    → `/admin/stores?q=...`, konpayè
+                                    notifikasyon ki reflete yon vrè
+                                    konte alèt, wòl reyèl, dekoneksyon)
   AdminNav.tsx                   — lyen sidebar yo, filtre pa wòl reyèl
   AdminSessionProvider.tsx       — Context sou vrè AdminActor
-  AdminDataTable.tsx             — tablo jenerik: rechèch + filt +
+  AdminDataTable.tsx             — tablo jenerik: rechèch (ak
+                                    `initialSearch` pou pre-ranpli soti
+                                    nan yon paramèt URL) + filt +
                                     paginasyon + ekspòte CSV + eta
                                     loading/vid/erè — itilize pa tout
                                     paj lis yo
   AdminPageHeader.tsx, KpiStat.tsx, StatusBadge.tsx,
   ConfirmActionDialog.tsx        — konfimasyon jenerik ak `onConfirm`
-                                    (mutasyon reyèl) + audit_logs insert
+                                    **obligatwa** (pa gen aksyon fantòm
+                                    ki ekri yon fo antre odit ankò) +
+                                    audit_logs insert (skippab pa
+                                    `skipAutoAudit` lè mutasyon an deja
+                                    ekri pwòp antre l, tankou rapèl
+                                    Twilio)
   StoreGrowthChart.tsx, MrrChart.tsx — grafik Recharts sou vrè agrega
 src/app/(admin)/admin/           — 15 wout yo, chak Server Component
                                     (fetch) + yon `*Client.tsx` (UI/état)
@@ -96,7 +130,11 @@ Tout 15 wout yo li de vrè tab. Sa ki gen aksyon reyèl konfime pa
   klotire kontra) ekri sou `subscriptions` reyèl.
 - `/admin/leads`, `/admin/trials` — pipeline reyèl, fòm ajoute lead,
   chanjman etap, Dialog "Konvèti" (lye a yon vrè boutik ki egziste).
-- `/admin/subscriptions` — relans/sispann reyèl.
+- `/admin/subscriptions` — sispann reyèl + rapèl reyèl SMS/WhatsApp
+  (Twilio, `actions/sendSubscriptionReminder.ts`, sèvè-kote paske li
+  bezwen `TWILIO_AUTH_TOKEN`) : voye toude kanal an paralèl, siksè si
+  omwen youn pase, `last_reminder_at` sèlman mete ajou si yon kanal
+  reyisi, erè klè si boutik la pa gen telefòn.
 - `/admin/deposits` — fòm ajoute + Sheet pwosesis ki ekri estati reyèl.
 - `/admin/devices` — envantè reyèl (`device_code` lizib, `store_id`
   aksepte null pou tablèt `in_stock` anvan asiyasyon). "Ajoute Tablèt"
@@ -107,12 +145,21 @@ Tout 15 wout yo li de vrè tab. Sa ki gen aksyon reyèl konfime pa
   tablèt ki poko asiyen.
 - `/admin/installations` — fòm planifikasyon + chèklis entèraktif
   pèsistan.
-- `/admin/support` — tablo + Kanban sou vrè `support_tickets`.
+- `/admin/support` — tablo + Kanban sou vrè `support_tickets`, ak vrè
+  ekriti (`mutations/support.ts`) : chanje estati/priyorite (`Select` →
+  `ConfirmActionDialog`) ak asiyen yon ajan (`AssignTicketDialog`,
+  menm patwon ke "Asiyen a yon boutik" sou `/admin/devices`) — chak
+  chanjman ekri `audit_logs`.
 - `/admin/transactions` — "Finans Jere Boutik" (`platform_transactions`)
   vs "Tranzaksyon Boutik" (fizyon `sales` + `payment_transactions`).
 - `/admin/sync` — sante reyèl (`devices.last_seen_at`/`pending_actions`/
   `sync_errors`, ranpli pa heartbeat la), "Kreye Tikè" kreye yon vrè
-  tikè P1.
+  tikè P1. "Relanse Sync" se yon vrè mekanis kounye a (pa t genyen anvan
+  — te ekri yon fo antre odit san fè anyen) : li poze
+  `devices.resync_requested_at`, valè sa a retounen nan repons
+  `POST /api/sync/heartbeat` pou boutik la, e `src/lib/sync/index.ts`
+  konpare l ak dènye valè li te sonje nan localStorage pou deklannche
+  yon sèl relans fòse `syncAllPending({isForcedResync:true})`.
 - `/admin/analytics` — agrega SQL, ak "Poko gen ase done" onèt kote
   pa gen siyal reyèl (retansyon pa kohòt, kou akizisyon kliyan).
 - `/admin/team` — wozèt `profiles` reyèl + imèl/dènye koneksyon
@@ -143,12 +190,26 @@ Tout 15 wout yo li de vrè tab. Sa ki gen aksyon reyèl konfime pa
 - **Pa gen istorik MRR** : grafik "Lajan Antre pa Mwa" sèlman chate
   `platform_transactions` reyèl (yon vrè seri tan) — MRR se yon chif
   "kounye a" (KPI), pa yon tandans envante san istorik reyèl dèyè li.
+- **Dezaktive olye kite RLS bloke ta** : chak paj ki gen yon aksyon
+  ekriti kalkile `const readOnly = !can(actor.role, "manage_xxx")` yon
+  sèl fwa an tèt fichye a, epi pase `disabled={readOnly}` bay chak
+  kontwòl konsène (bouton, `Select`, Sheet/Dialog trigger) — patwon
+  etabli pa `SettingsClient.tsx`, kounye a repwodwi sou tout paj
+  ekriti yo (`subscriptions`, `deposits`, `devices`, `leads`,
+  `installations`, `sync`, `team`). RLS (`admin_can()`) rete sèl vrè
+  baryè — sa a se yon konvenyans UX, pa yon ranplasman.
 
 ## Sa ki rete pou yon pwochen faz (pa `MOCK_*`, men limit reyèl kounye a)
 
 - Retansyon pa kohòt ak kou akizisyon kliyan — pa gen ase istorik/done
   maketing pou kalkile yo.
 - Aksyon "Chanje plan/pri", "Asiyen/ranplase tablèt", "Anrejistre yon
-  peman", "Kreye yon tikè", "Ajoute nòt entèn" sou fich boutik la rete
-  dezaktive (`disabled`) — pa gen ase workflow espesifye pou yo ankò.
+  peman", "Ajoute nòt entèn" sou fich boutik la (`/admin/stores/[id]`)
+  rete dezaktive (`disabled`) — pa gen ase workflow espesifye pou yo
+  ankò. ("Kreye yon tikè" soti nan lis sa a — li reyèl kounye a sou
+  `/admin/sync` ak `/admin/support`.)
 - Export CSV rete client-side (limit pa volim reyèl aktyèl la, ki fèb).
+- `manage_transactions`/`delete_resource` : `manage_transactions` egziste
+  nan matris la san UI ki itilize l ankò pou kounye a (pa gen aksyon
+  ekriti sou `/admin/transactions`) ; `delete_resource` te retire
+  antyèman (kòd mò — jamè yon vrè apèl ni yon RLS ki tcheke l).

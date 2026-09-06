@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/supabase/profile";
 import { isPlatformAdmin } from "@/lib/auth/roles";
 import { AdminShell } from "@/components/admin/AdminShell";
+import { fetchAdminAlertCount } from "@/lib/admin/queries/alerts";
 import type { AdminActor } from "@/types/admin";
 
 export default async function AdminLayout({
@@ -21,5 +22,11 @@ export default async function AdminLayout({
     role: profile.admin_role ?? "read_only",
   };
 
-  return <AdminShell actor={actor}>{children}</AdminShell>;
+  const alertCount = await fetchAdminAlertCount();
+
+  return (
+    <AdminShell actor={actor} alertCount={alertCount}>
+      {children}
+    </AdminShell>
+  );
 }

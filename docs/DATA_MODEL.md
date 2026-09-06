@@ -40,7 +40,13 @@ Ekstansyon `auth.users` pou jere wòl.
 - `platform_admin` — ekip PatwonPro la, jere abònman/tablèt/sipò/kont
   **atravè tout boutik** (gade `stores_all_platform_admin` ak politik
   RLS parèy nan migrasyon an — chak politik izolasyon-pa-boutik gen yon
-  `or is_platform_admin()` ki bay wòl sa a aksè global).
+  branch `is_platform_admin()` ki bay wòl sa a aksè global). Depi
+  migrasyon 031/032/035, `stores` ak `profiles` swiv menm règ ke tout
+  lòt tab admin: branch sa a egzije tou `admin_can('manage_stores')` /
+  `admin_can('manage_team')` (pou `profiles`, sèlman lè w ap chanje
+  yon lòt `platform_admin` — modifye yon `owner`/`employee` toujou
+  louvri a tout admin) — yon sou-wòl tankou `read_only` pa ka ekri
+  ankò sou `stores`/`profiles` san pèmisyon eksplisit.
 
 ### `categories`
 | Chan | Tip |
@@ -184,13 +190,17 @@ egziste `in_stock`/`reserved` anvan li asiyen.
 | status | text | `in_stock` \| `reserved` \| `deployed_trial` \| `deployed_active` \| `repair` \| `returned` \| `refurbished` \| `lost` \| `retired` |
 | last_seen_at | timestamptz nullable | Ranpli pa `POST /api/sync/heartbeat` |
 | pending_actions, sync_errors | integer | Sante sync, ranpli pa menm heartbeat la |
+| resync_requested_at | timestamptz nullable | Poze pa yon admin (`/admin/sync` — "Relanse Sync", `admin_can('manage_devices')`). Retounen nan repons `POST /api/sync/heartbeat` — si li pi resan pase dènye valè kliyan an te sonje (localStorage), tablèt la fè yon relans fòse `syncAllPending({isForcedResync:true})` yon sèl fwa (drapo a anpeche bouk enfini) |
 | created_at | timestamptz | |
 | updated_at | timestamptz | Ajou otomatikman pa trigger |
 
 ### `support_tickets`
 Tikè sipò — mesaj inisyal sèlman pou kounye a. Manm boutik la ka
 kreye/li tikè pwòp boutik li; `platform_admin` (ak
-`admin_can('manage_support')` pou modifye/efase) wè/jere tout tikè.
+`admin_can('manage_support')` pou kreye/modifye/efase) wè/jere tout
+tikè — politik `insert` egzije `admin_can('manage_support')` menm pou
+`platform_admin` (pa jis `is_platform_admin()`), menm règ ke tout lòt
+tab admin yo.
 | Chan | Tip | Deskripsyon |
 |---|---|---|
 | id | uuid PK | |

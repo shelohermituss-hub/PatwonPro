@@ -3,6 +3,7 @@ import { AdminDataTable, type AdminColumn } from "@/components/admin/AdminDataTa
 import { fetchAuditLog } from "@/lib/admin/queries/auditLog";
 import { ADMIN_ROLE_LABELS } from "@/lib/admin/permissions";
 import { formatDateTime } from "@/lib/format";
+import { requireNavAccess } from "@/lib/admin/guardNav";
 import type { AdminRole, AuditLogEntry } from "@/types/admin";
 
 function roleLabel(role: AuditLogEntry["actor_role"]) {
@@ -24,6 +25,7 @@ const COLUMNS: AdminColumn<AuditLogEntry>[] = [
 ];
 
 export default async function AuditLogPage() {
+  await requireNavAccess("auditLog");
   const entries = await fetchAuditLog();
 
   return (

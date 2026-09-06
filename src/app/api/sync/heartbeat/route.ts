@@ -8,6 +8,12 @@ import { createClient } from "@/lib/supabase/server";
  * caller's store — most stores have exactly one tablet, so this is the
  * simplest real source without building per-physical-device
  * fingerprinting (out of scope for this phase).
+ *
+ * Also returns `resyncRequestedAt` — an admin's "Relanse Sync"
+ * (`requestDeviceResync`, `/admin/sync`) sets this on the device row;
+ * the caller (`src/lib/sync/index.ts`) compares it to what it last
+ * handled and forces an immediate `syncAllPending()` pass if it's new,
+ * instead of a separate poll endpoint.
  */
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -46,5 +52,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Nou pa t ka anrejistre eta sync la." }, { status: 500 });
   }
 
-  return NextResponse.json({ ok: true });
+  const { data: latestResync } = await supabase
+    .from("devices")
+    .select("resync_requested_at")
+    .eq("store_id", profile.store_id)
+    .order("resync_requested_at", { ascending: false, nullsFirst: false })
+    .limit(1)
+    .maybeSingle();
+
+  return NextResponse.json({ ok: true, resyncRequestedAt: latestResync?.resync_requested_at ?? null });
 }

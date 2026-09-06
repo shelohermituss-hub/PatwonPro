@@ -11,6 +11,7 @@ interface TicketRow {
   created_at: string;
   updated_at: string;
   sla_deadline: string | null;
+  assigned_agent_id: string | null;
   store: { name: string } | { name: string }[] | null;
   agent: { full_name: string } | { full_name: string }[] | null;
 }
@@ -43,6 +44,7 @@ export async function fetchAdminSupportTickets(): Promise<AdminSupportTicket[]> 
       createdAt: row.created_at,
       updatedAt: row.updated_at,
       assignedAgent: agent?.full_name ?? "Pa asiyen",
+      assignedAgentId: row.assigned_agent_id,
       slaDeadline: row.sla_deadline ?? row.created_at,
     };
   });

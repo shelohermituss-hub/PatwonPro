@@ -36,8 +36,7 @@ export type AdminAction =
   | "manage_leads"
   | "manage_transactions"
   | "manage_team"
-  | "manage_settings"
-  | "delete_resource";
+  | "manage_settings";
 
 const ALL_NAV: AdminNavId[] = [
   "overview",
@@ -89,7 +88,6 @@ const ACTION_PERMISSIONS: Record<AdminRole, Set<AdminAction>> = {
     "manage_transactions",
     "manage_team",
     "manage_settings",
-    "delete_resource",
   ]),
   operations_manager: new Set([
     "manage_stores",

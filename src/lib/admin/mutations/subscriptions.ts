@@ -4,17 +4,11 @@ import { createClient } from "@/lib/supabase/client";
  * Client-side mutations for `/admin/subscriptions` and the store detail
  * page's "Abònman" tab. RLS (`admin_can('manage_subscriptions')`) is the
  * real gate — an admin role without it gets a Postgres error here, which
- * `ConfirmActionDialog` surfaces as a toast.
+ * `ConfirmActionDialog` surfaces as a toast. The reminder itself is a
+ * Server Action (`src/lib/admin/actions/sendSubscriptionReminder.ts`) —
+ * it needs the Twilio secret auth token, which must never reach the
+ * browser.
  */
-export async function sendSubscriptionReminder(subscriptionId: string) {
-  const supabase = createClient();
-  const { error } = await supabase
-    .from("subscriptions")
-    .update({ last_reminder_at: new Date().toISOString() })
-    .eq("id", subscriptionId);
-  if (error) throw new Error(error.message);
-}
-
 export async function suspendSubscription(subscriptionId: string) {
   const supabase = createClient();
   const { error } = await supabase

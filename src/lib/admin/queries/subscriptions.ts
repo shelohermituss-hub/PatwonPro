@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import type { AdminSubscription } from "@/types/admin";
 
-function computeDaysLate(status: string, currentPeriodEnd: string | null): number {
+export function computeDaysLate(status: string, currentPeriodEnd: string | null): number {
   if ((status === "past_due" || status === "suspended") && currentPeriodEnd) {
     const diffMs = Date.now() - new Date(currentPeriodEnd).getTime();
     return Math.max(0, Math.floor(diffMs / 86_400_000));
@@ -36,19 +36,39 @@ interface SubscriptionRow {
  * `daysLate`/`amountDueHtg` are computed here from `current_period_end`,
  * mirroring the SQL `subscription_days_late()` function, rather than
  * stored anywhere (single source of truth: migration 014's own decision).
+ * `lastPaymentDate` comes from the most recent `platform_transactions`
+ * row of type `subscription_payment` for that store — there's no
+ * dedicated payments table for this.
  */
 export async function fetchAdminSubscriptions(): Promise<AdminSubscription[]> {
   const supabase = await createClient();
 
-  const { data, error } = await supabase
-    .from("subscriptions")
-    .select(
-      "*, store:stores(name), agent:profiles!subscriptions_collection_agent_id_fkey(full_name)",
-    )
-    .order("current_period_end", { ascending: true });
+  const [{ data, error }, { data: payments, error: paymentsError }] = await Promise.all([
+    supabase
+      .from("subscriptions")
+      .select(
+        "*, store:stores(name), agent:profiles!subscriptions_collection_agent_id_fkey(full_name)",
+      )
+      .order("current_period_end", { ascending: true }),
+    supabase
+      .from("platform_transactions")
+      .select("store_id, occurred_at")
+      .eq("type", "subscription_payment")
+      .order("occurred_at", { ascending: false }),
+  ]);
 
   if (error) {
     throw new Error(`Pa t kapab chaje abònman yo: ${error.message}`);
+  }
+  if (paymentsError) {
+    throw new Error(`Pa t kapab chaje istorik peman yo: ${paymentsError.message}`);
+  }
+
+  const lastPaymentByStore = new Map<string, string>();
+  for (const payment of payments ?? []) {
+    if (!lastPaymentByStore.has(payment.store_id)) {
+      lastPaymentByStore.set(payment.store_id, payment.occurred_at);
+    }
   }
 
   return ((data ?? []) as SubscriptionRow[]).map((row) => {
@@ -66,7 +86,7 @@ export async function fetchAdminSubscriptions(): Promise<AdminSubscription[]> {
       status,
       startDate: row.current_period_start ?? row.created_at,
       nextDueDate: row.current_period_end ?? "",
-      lastPaymentDate: null,
+      lastPaymentDate: lastPaymentByStore.get(row.store_id) ?? null,
       amountDueHtg: status === "suspended" || daysLate > 0 ? (row.price_htg ?? 0) : 0,
       daysLate,
       collectionAgent: agent?.full_name ?? "Pa asiyen",

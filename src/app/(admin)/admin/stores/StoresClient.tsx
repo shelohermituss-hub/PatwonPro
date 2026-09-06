@@ -107,6 +107,7 @@ function StoresPageContent({ stores }: { stores: AdminStore[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialStatus = searchParams.get("status");
+  const initialQuery = searchParams.get("q");
 
   const ZONE_OPTIONS = Array.from(new Set(stores.map((s) => s.zone).filter((z) => z !== "—"))).map((zone) => ({
     value: zone,
@@ -132,6 +133,7 @@ function StoresPageContent({ stores }: { stores: AdminStore[] }) {
         columns={COLUMNS}
         filters={FILTERS}
         initialFilterValues={initialStatus ? { status: initialStatus } : undefined}
+        initialSearch={initialQuery ?? undefined}
         searchPlaceholder="Chèche pa non boutik, pwopriyetè oswa telefòn..."
         searchPredicate={(row, q) =>
           row.name.toLowerCase().includes(q) ||

@@ -12,6 +12,23 @@ export { syncPendingCreditPayments, pullCreditPayments } from "./creditPayments"
 export { syncPendingStockEntries, pullStockEntries } from "./stockEntries";
 
 const STUCK_THRESHOLD_MS = 15 * 60_000;
+const LAST_RESYNC_HANDLED_KEY = "patwonpro:lastResyncHandledAt";
+
+function getLastResyncHandledAt(): string | null {
+  try {
+    return localStorage.getItem(LAST_RESYNC_HANDLED_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function setLastResyncHandledAt(iso: string) {
+  try {
+    localStorage.setItem(LAST_RESYNC_HANDLED_KEY, iso);
+  } catch {
+    // Private browsing / storage disabled — worst case we re-force a sync next heartbeat.
+  }
+}
 
 /**
  * Reports this device's sync health to `/api/sync/heartbeat` so the admin
@@ -19,9 +36,11 @@ const STUCK_THRESHOLD_MS = 15 * 60_000;
  * never updated by anything before this). `errorCount` is a heuristic —
  * there's no per-row retry counter — a row still `pending` after 15
  * minutes has already exhausted several backoff attempts (capped at 5
- * min), so it's a reasonable proxy for "stuck".
+ * min), so it's a reasonable proxy for "stuck". Returns
+ * `resyncRequestedAt` (an admin's "Relanse Sync") so `syncAllPending()`
+ * can react to it — best-effort `null` on any network failure.
  */
-async function reportSyncHeartbeat() {
+async function reportSyncHeartbeat(): Promise<{ resyncRequestedAt: string | null }> {
   const cutoff = new Date(Date.now() - STUCK_THRESHOLD_MS).toISOString();
 
   const [sales, products, creditPayments, stockEntries] = await Promise.all([
@@ -38,24 +57,39 @@ async function reportSyncHeartbeat() {
   ).length;
 
   try {
-    await fetch("/api/sync/heartbeat", {
+    const response = await fetch("/api/sync/heartbeat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ pendingCount, errorCount }),
     });
+    const data = (await response.json().catch(() => null)) as { resyncRequestedAt?: string | null } | null;
+    return { resyncRequestedAt: data?.resyncRequestedAt ?? null };
   } catch {
     // Best-effort — no network is exactly the state this reports on.
+    return { resyncRequestedAt: null };
   }
 }
 
-async function syncAllPending() {
+/**
+ * `isForcedResync` guards against looping: an admin-requested resync
+ * recurses into this function once (with the flag set) to run
+ * immediately rather than waiting for the next interval tick; the
+ * recursive call's own heartbeat sees `resyncRequestedAt` already
+ * matches what was just recorded as handled, so it doesn't recurse again.
+ */
+async function syncAllPending(opts?: { isForcedResync?: boolean }) {
   await Promise.all([
     syncPendingSales(),
     syncPendingProducts(),
     syncPendingCreditPayments(),
     syncPendingStockEntries(),
   ]);
-  await reportSyncHeartbeat();
+  const { resyncRequestedAt } = await reportSyncHeartbeat();
+
+  if (!opts?.isForcedResync && resyncRequestedAt && resyncRequestedAt > (getLastResyncHandledAt() ?? "")) {
+    setLastResyncHandledAt(resyncRequestedAt);
+    await syncAllPending({ isForcedResync: true });
+  }
 }
 
 /**

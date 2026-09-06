@@ -1,13 +1,15 @@
 /**
  * Domain types for the internal Jere Boutik Admin back-office
  * (`/admin`) — entirely separate from the merchant-facing `Profile`/
- * `UserRole` model in `src/types/index.ts`. This phase is UI + mock
- * data only (see docs/ADMIN_DASHBOARD_ARCHITECTURE.md): `AdminDevice`,
- * `AdminSubscription` and `AdminSupportTicket` are richer versions of
- * the real `devices`/`subscriptions`/`support_tickets` tables — a
- * future backend phase should extend those tables, not duplicate them.
- * Everything else here (leads, deposits, installations, sync, audit,
- * team) has no real table yet.
+ * `UserRole` model in `src/types/index.ts`. Every type here is backed
+ * by a real Supabase table (see docs/ADMIN_DASHBOARD_ARCHITECTURE.md
+ * and docs/DATA_MODEL.md for the full schema): `AdminDevice`,
+ * `AdminSubscription` and `AdminSupportTicket` map onto the enriched
+ * `devices`/`subscriptions`/`support_tickets` tables, and `Lead`,
+ * `Deposit`, `Installation`, `AdminTransaction`, `SyncHealthRow`,
+ * `AuditLogEntry` and `TeamMember` map onto their own dedicated tables
+ * (`leads`, `deposits`, `installations`, `platform_transactions`,
+ * `devices`, `audit_logs`, `profiles`).
  */
 
 export type AdminRole =
@@ -230,6 +232,7 @@ export interface AdminSupportTicket {
   createdAt: string;
   updatedAt: string;
   assignedAgent: string;
+  assignedAgentId: string | null;
   slaDeadline: string;
 }
 
@@ -278,6 +281,8 @@ export interface SyncHealthRow {
   storeId: string;
   storeName: string;
   deviceId: string;
+  /** Real `devices.id` UUID — use this for writes (device_code above is display-only). */
+  deviceDbId: string;
   lastSyncAt: string | null;
   pendingActions: number;
   errors: number;

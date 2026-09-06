@@ -19,9 +19,12 @@ import { recordAuditEvent } from "@/lib/admin/auditLog";
 /**
  * Generic confirmation for every sensitive admin action (financial,
  * destructive, suspension, device change — per the spec). Confirming
- * runs `onConfirm` (the real mutation, if given) then always appends a
- * real `audit_logs` entry — if `onConfirm` throws (e.g. RLS denies the
- * write for this admin's role), no audit entry is written either.
+ * runs `onConfirm` (the real mutation — required, never a silent
+ * no-op) then appends a real `audit_logs` entry — if `onConfirm`
+ * throws (e.g. RLS denies the write for this admin's role), no audit
+ * entry is written either. Pass `skipAutoAudit` only when `onConfirm`
+ * already writes its own, more detailed audit row itself (e.g. a
+ * server action that can't use the client-only `recordAuditEvent`).
  */
 export function ConfirmActionDialog({
   open,
@@ -37,6 +40,7 @@ export function ConfirmActionDialog({
   successMessage,
   onConfirm,
   onConfirmed,
+  skipAutoAudit = false,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -50,8 +54,10 @@ export function ConfirmActionDialog({
   storeId?: string | null;
   successMessage: string;
   /** Performs the real mutation. Runs before the audit log write. */
-  onConfirm?: () => Promise<void>;
+  onConfirm: () => Promise<void>;
   onConfirmed?: () => void;
+  /** Skip this dialog's own audit write — `onConfirm` already wrote one. */
+  skipAutoAudit?: boolean;
 }) {
   const actor = useAdminActor();
   const [submitting, setSubmitting] = useState(false);
@@ -59,15 +65,17 @@ export function ConfirmActionDialog({
   async function handleConfirm() {
     setSubmitting(true);
     try {
-      await onConfirm?.();
-      await recordAuditEvent({
-        actorId: actor.id,
-        actorRole: actor.role,
-        action,
-        resourceType,
-        resourceId,
-        storeId,
-      });
+      await onConfirm();
+      if (!skipAutoAudit) {
+        await recordAuditEvent({
+          actorId: actor.id,
+          actorRole: actor.role,
+          action,
+          resourceType,
+          resourceId,
+          storeId,
+        });
+      }
       onOpenChange(false);
       toast.success(successMessage);
       onConfirmed?.();

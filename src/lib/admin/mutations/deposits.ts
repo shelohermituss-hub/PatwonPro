@@ -2,16 +2,21 @@ import { createClient } from "@/lib/supabase/client";
 import type { DepositFormOutput } from "@/lib/validations/deposit";
 import type { DepositStatus } from "@/types/admin";
 
-export async function createDeposit(input: DepositFormOutput) {
+export async function createDeposit(input: DepositFormOutput): Promise<string> {
   const supabase = createClient();
-  const { error } = await supabase.from("deposits").insert({
-    store_id: input.storeId,
-    device_id: input.deviceId || null,
-    contract_number: input.contractNumber || null,
-    amount_htg: input.amountHtg,
-    received_date: input.receivedDate,
-  });
+  const { data, error } = await supabase
+    .from("deposits")
+    .insert({
+      store_id: input.storeId,
+      device_id: input.deviceId || null,
+      contract_number: input.contractNumber || null,
+      amount_htg: input.amountHtg,
+      received_date: input.receivedDate,
+    })
+    .select("id")
+    .single();
   if (error) throw new Error(error.message);
+  return data.id as string;
 }
 
 export async function updateDepositStatus(

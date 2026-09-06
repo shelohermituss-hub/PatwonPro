@@ -7,10 +7,13 @@ import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AdminDataTable, type AdminColumn, type AdminFilter } from "@/components/admin/AdminDataTable";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { ConfirmActionDialog } from "@/components/admin/ConfirmActionDialog";
+import { useAdminActor } from "@/components/admin/AdminSessionProvider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { can } from "@/lib/admin/permissions";
 import { SUBSCRIPTION_STATUS_LABELS } from "@/lib/admin/labels";
-import { sendSubscriptionReminder, suspendSubscription } from "@/lib/admin/mutations/subscriptions";
+import { suspendSubscription } from "@/lib/admin/mutations/subscriptions";
+import { sendSubscriptionReminder } from "@/lib/admin/actions/sendSubscriptionReminder";
 import { formatCurrencyHTG } from "@/lib/format";
 import type { AdminSubscription, AdminSubscriptionStatus } from "@/types/admin";
 
@@ -32,6 +35,8 @@ function SubscriptionsContent({ subscriptions }: { subscriptions: AdminSubscript
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialStatus = searchParams.get("status");
+  const actor = useAdminActor();
+  const readOnly = !can(actor.role, "manage_subscriptions");
   const [pending, setPending] = useState<AdminSubscription | null>(null);
   const [pendingKind, setPendingKind] = useState<"remind" | "suspend" | null>(null);
 
@@ -51,12 +56,12 @@ function SubscriptionsContent({ subscriptions }: { subscriptions: AdminSubscript
     { id: "agent", header: "Ajan", csvValue: (r) => r.collectionAgent, cell: (r) => r.collectionAgent },
     { id: "action", header: "Aksyon", cell: (r) => (
       <div className="flex gap-1.5">
-        <Button type="button" variant="outline" size="sm" onClick={() => { setPending(r); setPendingKind("remind"); }}>
+        <Button type="button" variant="outline" size="sm" disabled={readOnly} onClick={() => { setPending(r); setPendingKind("remind"); }}>
           <Send data-icon="inline-start" aria-hidden />
           Relanse
         </Button>
         {r.status !== "suspended" && r.status !== "canceled" && (
-          <Button type="button" variant="outline" size="sm" onClick={() => { setPending(r); setPendingKind("suspend"); }}>
+          <Button type="button" variant="outline" size="sm" disabled={readOnly} onClick={() => { setPending(r); setPendingKind("suspend"); }}>
             <Pause data-icon="inline-start" aria-hidden />
             Sispann
           </Button>
@@ -104,7 +109,11 @@ function SubscriptionsContent({ subscriptions }: { subscriptions: AdminSubscript
           resourceId={pending.id}
           storeId={pending.storeId}
           successMessage="Relans voye."
-          onConfirm={() => sendSubscriptionReminder(pending.id)}
+          skipAutoAudit
+          onConfirm={async () => {
+            const { error } = await sendSubscriptionReminder(pending.id);
+            if (error) throw new Error(error);
+          }}
           onConfirmed={() => { setPendingKind(null); router.refresh(); }}
         />
       )}

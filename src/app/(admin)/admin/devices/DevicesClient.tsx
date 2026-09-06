@@ -11,6 +11,7 @@ import { AdminDataTable, type AdminColumn, type AdminFilter } from "@/components
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { ConfirmActionDialog } from "@/components/admin/ConfirmActionDialog";
 import { useAdminActor } from "@/components/admin/AdminSessionProvider";
+import { can } from "@/lib/admin/permissions";
 import { recordAuditEvent } from "@/lib/admin/auditLog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -61,7 +62,7 @@ import { deviceBatchSchema, type DeviceBatchFormInput, type DeviceBatchFormOutpu
 import { formatCurrencyHTG } from "@/lib/format";
 import type { AdminDevice, DeviceStatusAdmin } from "@/types/admin";
 
-type ActionKind = "mark_ready" | "reserve" | "repair" | "lost";
+type ActionKind = "mark_ready" | "reserve" | "lost";
 
 const ACTION_CONFIG: Record<ActionKind, { title: string; description: string; confirmLabel: string; destructive?: boolean; auditAction: string; successMessage: string; mutate: (dbId: string) => Promise<void> }> = {
   mark_ready: {
@@ -80,14 +81,6 @@ const ACTION_CONFIG: Record<ActionKind, { title: string; description: string; co
     successMessage: "Tablèt rezève.",
     mutate: reserveDevice,
   },
-  repair: {
-    title: "Anrejistre yon reparasyon",
-    description: "Tablèt la ap pase an estati 'An reparasyon'.",
-    confirmLabel: "Konfime",
-    auditAction: "device.repair_logged",
-    successMessage: "Reparasyon anrejistre.",
-    mutate: logDeviceRepair,
-  },
   lost: {
     title: "Siyale vòl oswa pèt",
     description: "Aksyon sa a make tablèt la kòm pèdi de fason pèmanan nan envantè a.",
@@ -99,7 +92,7 @@ const ACTION_CONFIG: Record<ActionKind, { title: string; description: string; co
   },
 };
 
-function AddDevicesSheet() {
+function AddDevicesSheet({ disabled }: { disabled: boolean }) {
   const router = useRouter();
   const actor = useAdminActor();
   const [open, setOpen] = useState(false);
@@ -163,7 +156,7 @@ function AddDevicesSheet() {
 
   return (
     <Sheet open={open} onOpenChange={(next) => { setOpen(next); if (!next) resetForm(); }}>
-      <SheetTrigger render={<Button type="button" />}>
+      <SheetTrigger render={<Button type="button" disabled={disabled} />}>
         <Plus data-icon="inline-start" aria-hidden />
         Ajoute Tablèt
       </SheetTrigger>
@@ -251,10 +244,12 @@ function AddDevicesSheet() {
 function AssignDeviceDialog({
   device,
   storeOptions,
+  disabled,
   onDone,
 }: {
   device: AdminDevice;
   storeOptions: { id: string; name: string }[];
+  disabled: boolean;
   onDone: () => void;
 }) {
   const actor = useAdminActor();
@@ -287,7 +282,7 @@ function AssignDeviceDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button type="button" variant="outline" size="sm" />}>
+      <DialogTrigger render={<Button type="button" variant="outline" size="sm" disabled={disabled} />}>
         Asiyen a yon boutik
       </DialogTrigger>
       <DialogContent>
@@ -322,12 +317,83 @@ function AssignDeviceDialog({
   );
 }
 
+function RepairDeviceDialog({
+  device,
+  onOpenChange,
+  onDone,
+}: {
+  device: AdminDevice | null;
+  onOpenChange: (open: boolean) => void;
+  onDone: () => void;
+}) {
+  const actor = useAdminActor();
+  const [issue, setIssue] = useState("");
+  const [cost, setCost] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  async function handleConfirm() {
+    if (!device || !issue.trim()) return;
+    setSubmitting(true);
+    try {
+      await logDeviceRepair(device.dbId, { issue: issue.trim(), cost: Number(cost) || 0 });
+      await recordAuditEvent({
+        actorId: actor.id,
+        actorRole: actor.role,
+        action: "device.repair_logged",
+        resourceType: "device",
+        resourceId: device.id,
+        storeId: device.assignedStoreId,
+        metadata: { issue: issue.trim(), cost: Number(cost) || 0 },
+      });
+      toast.success("Reparasyon anrejistre.");
+      setIssue("");
+      setCost("");
+      onOpenChange(false);
+      onDone();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Yon erè fèt.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <Dialog open={!!device} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Anrejistre yon reparasyon — {device?.id}</DialogTitle>
+          <DialogDescription>Tablèt la ap pase an estati &quot;An reparasyon&quot;.</DialogDescription>
+        </DialogHeader>
+        <FieldGroup>
+          <Field data-invalid={!issue.trim() || undefined}>
+            <FieldLabel htmlFor="repairIssue">Pwoblèm</FieldLabel>
+            <Input id="repairIssue" value={issue} onChange={(e) => setIssue(e.target.value)} placeholder="Ex: Ekran fele" />
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="repairCost">Kou Reparasyon (HTG)</FieldLabel>
+            <Input id="repairCost" type="number" min={0} step="0.01" value={cost} onChange={(e) => setCost(e.target.value)} />
+          </Field>
+        </FieldGroup>
+        <DialogFooter>
+          <Button type="button" disabled={!issue.trim() || submitting} onClick={handleConfirm}>
+            {submitting && <LoaderCircle className="animate-spin" data-icon="inline-start" aria-hidden />}
+            Konfime
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function DevicesContent({ devices, storeOptions }: { devices: AdminDevice[]; storeOptions: { id: string; name: string }[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const actor = useAdminActor();
+  const readOnly = !can(actor.role, "manage_devices");
   const rawStatus = searchParams.get("status");
   const initialStatus = rawStatus === "deployed" ? "deployed_active" : rawStatus;
   const [pending, setPending] = useState<{ device: AdminDevice; kind: ActionKind } | null>(null);
+  const [repairTarget, setRepairTarget] = useState<AdminDevice | null>(null);
 
   const STATUS_OPTIONS = Object.entries(DEVICE_STATUS_LABELS).map(([value, meta]) => ({ value, label: meta.label }));
   const BRAND_OPTIONS = Array.from(new Set(devices.map((d) => d.brand))).map((b) => ({ value: b, label: b }));
@@ -353,7 +419,7 @@ function DevicesContent({ devices, storeOptions }: { devices: AdminDevice[]; sto
     { id: "status", header: "Estati", csvValue: (r) => DEVICE_STATUS_LABELS[r.status].label, cell: (r) => <StatusBadge {...DEVICE_STATUS_LABELS[r.status]} /> },
     { id: "store", header: "Boutik Asiyen", csvValue: (r) => r.assignedStoreName ?? "—", cell: (r) => (
       r.assignedStoreName ?? (
-        <AssignDeviceDialog device={r} storeOptions={storeOptions} onDone={() => router.refresh()} />
+        <AssignDeviceDialog device={r} storeOptions={storeOptions} disabled={readOnly} onDone={() => router.refresh()} />
       )
     ) },
     { id: "cost", header: "Kou Reyèl", csvValue: (r) => r.actualCostHtg, cell: (r) => formatCurrencyHTG(r.actualCostHtg) },
@@ -361,7 +427,7 @@ function DevicesContent({ devices, storeOptions }: { devices: AdminDevice[]; sto
     { id: "repairs", header: "Reparasyon", csvValue: (r) => r.repairHistory.length, cell: (r) => (r.repairHistory.length > 0 ? `${r.repairHistory.length}` : "—") },
     { id: "actions", header: "Aksyon", cell: (r) => (
       <DropdownMenu>
-        <DropdownMenuTrigger render={<Button variant="outline" size="sm" />}>
+        <DropdownMenuTrigger render={<Button variant="outline" size="sm" disabled={readOnly} />}>
           Aksyon
           <ChevronDown data-icon="inline-end" aria-hidden />
         </DropdownMenuTrigger>
@@ -374,7 +440,7 @@ function DevicesContent({ devices, storeOptions }: { devices: AdminDevice[]; sto
             <RotateCcw data-icon="inline-start" aria-hidden />
             Rezève pou esè
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setPending({ device: r, kind: "repair" })}>
+          <DropdownMenuItem onClick={() => setRepairTarget(r)}>
             <Wrench data-icon="inline-start" aria-hidden />
             Anrejistre reparasyon
           </DropdownMenuItem>
@@ -394,7 +460,7 @@ function DevicesContent({ devices, storeOptions }: { devices: AdminDevice[]; sto
       <AdminPageHeader
         title="Aparèy"
         description="Pak tablèt yo — enstalasyon, rezèv, reparasyon, ak pèt."
-        actions={<AddDevicesSheet />}
+        actions={<AddDevicesSheet disabled={readOnly} />}
       />
 
       <AdminDataTable
@@ -426,6 +492,12 @@ function DevicesContent({ devices, storeOptions }: { devices: AdminDevice[]; sto
           onConfirmed={() => { setPending(null); router.refresh(); }}
         />
       )}
+
+      <RepairDeviceDialog
+        device={repairTarget}
+        onOpenChange={(open) => !open && setRepairTarget(null)}
+        onDone={() => { setRepairTarget(null); router.refresh(); }}
+      />
     </div>
   );
 }

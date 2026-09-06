@@ -10,7 +10,32 @@ async function setStatus(deviceDbId: string, status: string) {
 export const markDeviceReady = (deviceDbId: string) => setStatus(deviceDbId, "in_stock");
 export const reserveDevice = (deviceDbId: string) => setStatus(deviceDbId, "reserved");
 export const reportDeviceLost = (deviceDbId: string) => setStatus(deviceDbId, "lost");
-export const logDeviceRepair = (deviceDbId: string) => setStatus(deviceDbId, "repair");
+
+/**
+ * Appends a `{date, issue, cost}` entry to `repair_history` and flips
+ * status to "repair" — read-then-write, so two repairs logged on the
+ * same device at the exact same instant could clobber each other; an
+ * acceptable tradeoff given this is a single-admin, low-frequency action.
+ */
+export async function logDeviceRepair(deviceDbId: string, entry: { issue: string; cost: number }) {
+  const supabase = createClient();
+  const { data: current, error: readError } = await supabase
+    .from("devices")
+    .select("repair_history")
+    .eq("id", deviceDbId)
+    .single();
+  if (readError) throw new Error(readError.message);
+
+  const history = Array.isArray(current?.repair_history) ? current.repair_history : [];
+  const { error } = await supabase
+    .from("devices")
+    .update({
+      status: "repair",
+      repair_history: [...history, { date: new Date().toISOString(), issue: entry.issue, cost: entry.cost }],
+    })
+    .eq("id", deviceDbId);
+  if (error) throw new Error(error.message);
+}
 
 /**
  * Registers a tablet model in one go: inserts `quantity` rows sharing

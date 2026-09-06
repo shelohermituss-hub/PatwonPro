@@ -28,8 +28,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Field, FieldGroup, FieldLabel, FieldError } from "@/components/ui/field";
+import { Checkbox } from "@/components/ui/checkbox";
 import { installationSchema, type InstallationFormInput, type InstallationFormOutput } from "@/lib/validations/installation";
-import { createInstallation, updateInstallationChecklist, updateInstallationStatus } from "@/lib/admin/mutations/installations";
+import {
+  createInstallation,
+  updateInstallationChecklist,
+  updateInstallationStatus,
+  updateInstallationPhotoCount,
+  updateInstallationSignature,
+} from "@/lib/admin/mutations/installations";
+import { useAdminActor } from "@/components/admin/AdminSessionProvider";
+import { can } from "@/lib/admin/permissions";
+import { recordAuditEvent } from "@/lib/admin/auditLog";
 import { INSTALLATION_STATUS_LABELS } from "@/lib/admin/labels";
 import { formatDateTime } from "@/lib/format";
 import type { Installation, InstallationStatus } from "@/types/admin";
@@ -43,11 +53,14 @@ const FILTERS: AdminFilter<Installation>[] = [
 function AddInstallationSheet({
   agentOptions,
   deviceOptions,
+  disabled,
 }: {
   agentOptions: { id: string; name: string }[];
   deviceOptions: { id: string; label: string }[];
+  disabled: boolean;
 }) {
   const router = useRouter();
+  const actor = useAdminActor();
   const [open, setOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const {
@@ -63,7 +76,14 @@ function AddInstallationSheet({
   async function onSubmit(values: InstallationFormOutput) {
     setFormError(null);
     try {
-      await createInstallation(values);
+      const installationId = await createInstallation(values);
+      await recordAuditEvent({
+        actorId: actor.id,
+        actorRole: actor.role,
+        action: "installation.created",
+        resourceType: "installation",
+        resourceId: installationId,
+      });
       toast.success("Enstalasyon planifye.");
       reset();
       setOpen(false);
@@ -75,7 +95,7 @@ function AddInstallationSheet({
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger render={<Button type="button" />}>
+      <SheetTrigger render={<Button type="button" disabled={disabled} />}>
         <Plus data-icon="inline-start" aria-hidden />
         Planifye Enstalasyon
       </SheetTrigger>
@@ -159,12 +179,24 @@ export function InstallationsClient({
   deviceOptions: { id: string; label: string }[];
 }) {
   const router = useRouter();
+  const actor = useAdminActor();
+  const readOnly = !can(actor.role, "manage_installations");
   const [selected, setSelected] = useState<Installation | null>(null);
   const [toggling, setToggling] = useState<string | null>(null);
+  const [savingPhotoOrSignature, setSavingPhotoOrSignature] = useState(false);
 
   async function handleStatusChange(installation: Installation, status: InstallationStatus) {
     try {
       await updateInstallationStatus(installation.id, status);
+      await recordAuditEvent({
+        actorId: actor.id,
+        actorRole: actor.role,
+        action: "installation.status_changed",
+        resourceType: "installation",
+        resourceId: installation.id,
+        storeId: installation.storeId,
+        metadata: { from: installation.status, to: status },
+      });
       router.refresh();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Yon erè fèt.");
@@ -179,6 +211,15 @@ export function InstallationsClient({
     );
     try {
       await updateInstallationChecklist(selected.id, updated);
+      await recordAuditEvent({
+        actorId: actor.id,
+        actorRole: actor.role,
+        action: "installation.checklist_updated",
+        resourceType: "installation",
+        resourceId: selected.id,
+        storeId: selected.storeId,
+        metadata: { item: label },
+      });
       setSelected({ ...selected, checklist: updated });
       router.refresh();
     } catch (error) {
@@ -188,13 +229,42 @@ export function InstallationsClient({
     }
   }
 
+  async function handlePhotoCountChange(value: string) {
+    if (!selected) return;
+    const count = Math.max(0, Number(value) || 0);
+    setSavingPhotoOrSignature(true);
+    try {
+      await updateInstallationPhotoCount(selected.id, count);
+      setSelected({ ...selected, photoCount: count });
+      router.refresh();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Yon erè fèt.");
+    } finally {
+      setSavingPhotoOrSignature(false);
+    }
+  }
+
+  async function handleSignatureChange(checked: boolean) {
+    if (!selected) return;
+    setSavingPhotoOrSignature(true);
+    try {
+      await updateInstallationSignature(selected.id, checked);
+      setSelected({ ...selected, clientSignature: checked });
+      router.refresh();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Yon erè fèt.");
+    } finally {
+      setSavingPhotoOrSignature(false);
+    }
+  }
+
   const columns: AdminColumn<Installation>[] = [
     { id: "store", header: "Boutik", csvValue: (r) => r.storeName, cell: (r) => <span className="font-medium">{r.storeName}</span> },
     { id: "contact", header: "Kontak", csvValue: (r) => r.contact, cell: (r) => r.contact },
     { id: "slot", header: "Kreno", csvValue: (r) => r.scheduledAt ?? "—", cell: (r) => (r.scheduledAt ? formatDateTime(r.scheduledAt) : "—") },
     { id: "agent", header: "Ajan", csvValue: (r) => r.agentName, cell: (r) => r.agentName },
     { id: "status", header: "Estati", csvValue: (r) => INSTALLATION_STATUS_LABELS[r.status].label, cell: (r) => (
-      <Select value={r.status} onValueChange={(v) => v && handleStatusChange(r, v as InstallationStatus)}>
+      <Select value={r.status} onValueChange={(v) => v && handleStatusChange(r, v as InstallationStatus)} disabled={readOnly}>
         <SelectTrigger className="w-[160px]">
           <SelectValue>{(value: string) => INSTALLATION_STATUS_LABELS[value as InstallationStatus].label}</SelectValue>
         </SelectTrigger>
@@ -217,7 +287,7 @@ export function InstallationsClient({
       <AdminPageHeader
         title="Enstalasyon Teren"
         description="Chak enstalasyon suiv menm chèklis pou evite erè."
-        actions={<AddInstallationSheet agentOptions={agentOptions} deviceOptions={deviceOptions} />}
+        actions={<AddInstallationSheet agentOptions={agentOptions} deviceOptions={deviceOptions} disabled={readOnly} />}
       />
 
       <AdminDataTable
@@ -244,7 +314,7 @@ export function InstallationsClient({
               <button
                 key={item.label}
                 type="button"
-                disabled={toggling === item.label}
+                disabled={toggling === item.label || readOnly}
                 onClick={() => handleToggleChecklistItem(item.label)}
                 className="flex items-center gap-2.5 text-left"
               >
@@ -262,6 +332,28 @@ export function InstallationsClient({
                 {selected.trainingResult}
               </p>
             )}
+
+            <div className="mt-2 flex flex-col gap-3 border-t border-border pt-4">
+              <Field>
+                <FieldLabel htmlFor="photoCount">Kantite Foto Pran</FieldLabel>
+                <Input
+                  id="photoCount"
+                  type="number"
+                  min={0}
+                  disabled={savingPhotoOrSignature || readOnly}
+                  defaultValue={selected?.photoCount ?? 0}
+                  onBlur={(e) => handlePhotoCountChange(e.target.value)}
+                />
+              </Field>
+              <label className="flex items-center gap-2.5 text-sm text-foreground">
+                <Checkbox
+                  checked={selected?.clientSignature ?? false}
+                  disabled={savingPhotoOrSignature || readOnly}
+                  onCheckedChange={(checked) => handleSignatureChange(checked === true)}
+                />
+                Siyati kliyan resevwa
+              </label>
+            </div>
           </div>
         </SheetContent>
       </Sheet>

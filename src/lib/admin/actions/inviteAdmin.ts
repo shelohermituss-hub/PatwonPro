@@ -2,6 +2,7 @@
 
 import { headers } from "next/headers";
 import { getCurrentProfile } from "@/lib/supabase/profile";
+import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isPlatformAdmin } from "@/lib/auth/roles";
 import { can } from "@/lib/admin/permissions";
@@ -62,6 +63,16 @@ export async function inviteAdmin(input: {
       error: "Envitasyon voye, men nou pa t ka konfigire wòl la. Kontakte sipò.",
     };
   }
+
+  const supabase = await createClient();
+  await supabase.from("audit_logs").insert({
+    actor_id: profile.id,
+    actor_role: profile.admin_role,
+    action: "team.admin_invited",
+    resource_type: "profile_invite",
+    resource_id: data.user.id,
+    metadata: { email: parsed.data.email, adminRole: parsed.data.adminRole },
+  });
 
   return { error: null };
 }

@@ -31,7 +31,9 @@ import { Field, FieldGroup, FieldLabel, FieldError } from "@/components/ui/field
 import { inviteAdminSchema, type InviteAdminInput } from "@/lib/validations/invite";
 import { inviteAdmin } from "@/lib/admin/actions/inviteAdmin";
 import { changeAdminRole } from "@/lib/admin/mutations/team";
-import { ADMIN_ROLE_LABELS } from "@/lib/admin/permissions";
+import { useAdminActor } from "@/components/admin/AdminSessionProvider";
+import { recordAuditEvent } from "@/lib/admin/auditLog";
+import { ADMIN_ROLE_LABELS, can } from "@/lib/admin/permissions";
 import { formatDateTime } from "@/lib/format";
 import type { AdminRole, TeamMember } from "@/types/admin";
 
@@ -41,7 +43,7 @@ const FILTERS: AdminFilter<TeamMember>[] = [
   { id: "role", label: "Wòl", options: ROLE_OPTIONS, predicate: (row, v) => row.role === (v as AdminRole) },
 ];
 
-function InviteAdminSheet() {
+function InviteAdminSheet({ disabled }: { disabled: boolean }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -70,7 +72,7 @@ function InviteAdminSheet() {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger render={<Button type="button" />}>
+      <SheetTrigger render={<Button type="button" disabled={disabled} />}>
         <Plus data-icon="inline-start" aria-hidden />
         Envite Admin
       </SheetTrigger>
@@ -120,10 +122,20 @@ function InviteAdminSheet() {
 
 export function TeamClient({ team }: { team: TeamMember[] }) {
   const router = useRouter();
+  const actor = useAdminActor();
+  const readOnly = !can(actor.role, "manage_team");
 
   async function handleRoleChange(member: TeamMember, role: AdminRole) {
     try {
       await changeAdminRole(member.id, role);
+      await recordAuditEvent({
+        actorId: actor.id,
+        actorRole: actor.role,
+        action: "team.role_changed",
+        resourceType: "profile",
+        resourceId: member.id,
+        metadata: { from: member.role, to: role },
+      });
       toast.success(`Wòl ${member.name} chanje.`);
       router.refresh();
     } catch (error) {
@@ -135,7 +147,7 @@ export function TeamClient({ team }: { team: TeamMember[] }) {
     { id: "name", header: "Non", csvValue: (r) => r.name, cell: (r) => <span className="font-medium">{r.name}</span> },
     { id: "email", header: "Imèl", csvValue: (r) => r.email, cell: (r) => r.email },
     { id: "role", header: "Wòl", csvValue: (r) => ADMIN_ROLE_LABELS[r.role], cell: (r) => (
-      <Select value={r.role} onValueChange={(v) => v && handleRoleChange(r, v as AdminRole)}>
+      <Select value={r.role} onValueChange={(v) => v && handleRoleChange(r, v as AdminRole)} disabled={readOnly}>
         <SelectTrigger className="w-[190px]">
           <SelectValue>{(value: string) => ADMIN_ROLE_LABELS[value as AdminRole]}</SelectValue>
         </SelectTrigger>
@@ -158,7 +170,7 @@ export function TeamClient({ team }: { team: TeamMember[] }) {
       <AdminPageHeader
         title="Ekip & Wòl"
         description="Manm ekip entèn Jere Boutik ak wòl yo."
-        actions={<InviteAdminSheet />}
+        actions={<InviteAdminSheet disabled={readOnly} />}
       />
 
       <AdminDataTable

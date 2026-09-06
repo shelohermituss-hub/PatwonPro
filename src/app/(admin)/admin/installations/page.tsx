@@ -2,8 +2,10 @@ import { fetchInstallations } from "@/lib/admin/queries/installations";
 import { fetchTeamOptions } from "@/lib/admin/queries/team";
 import { fetchAdminDevices } from "@/lib/admin/queries/devices";
 import { InstallationsClient } from "./InstallationsClient";
+import { requireNavAccess } from "@/lib/admin/guardNav";
 
 export default async function InstallationsPage() {
+  await requireNavAccess("installations");
   const [installations, agentOptions, devices] = await Promise.all([
     fetchInstallations(),
     fetchTeamOptions(),

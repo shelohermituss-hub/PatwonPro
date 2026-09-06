@@ -7,8 +7,10 @@ import {
   fetchCollectedSeries,
   fetchAnalyticsReports,
 } from "@/lib/admin/queries/analytics";
+import { requireNavAccess } from "@/lib/admin/guardNav";
 
 export default async function AnalyticsPage() {
+  await requireNavAccess("analytics");
   const [storeGrowth, collected, reports] = await Promise.all([
     fetchStoreGrowthSeries(),
     fetchCollectedSeries(),

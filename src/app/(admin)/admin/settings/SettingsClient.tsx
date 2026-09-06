@@ -10,6 +10,7 @@ import { Field, FieldGroup, FieldLabel, FieldDescription } from "@/components/ui
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { can } from "@/lib/admin/permissions";
+import { recordAuditEvent } from "@/lib/admin/auditLog";
 import { savePlatformSettings } from "@/lib/admin/mutations/settings";
 import type { PlatformSettingsData } from "@/lib/admin/queries/settings";
 
@@ -34,7 +35,7 @@ export function SettingsClient({
   async function handleSave() {
     setSaving(true);
     try {
-      await savePlatformSettings({
+      const nextValues = {
         planPricesHtg: {
           starter: Number(starterPrice) || 0,
           standard: Number(standardPrice) || 0,
@@ -44,6 +45,15 @@ export function SettingsClient({
         gracePeriodDays: Number(gracePeriodDays) || 0,
         slaP1Label: p1Sla,
         paymentGatewayClientId: paymentGatewayClientId.trim(),
+      };
+      await savePlatformSettings(nextValues);
+      await recordAuditEvent({
+        actorId: actor.id,
+        actorRole: actor.role,
+        action: "settings.updated",
+        resourceType: "platform_settings",
+        resourceId: "platform_settings",
+        metadata: nextValues,
       });
       toast.success("Paramèt platfòm anrejistre.");
     } catch (error) {

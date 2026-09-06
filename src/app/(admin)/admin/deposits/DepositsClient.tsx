@@ -31,6 +31,9 @@ import {
 import { Field, FieldGroup, FieldLabel, FieldError } from "@/components/ui/field";
 import { depositSchema, type DepositFormInput, type DepositFormOutput } from "@/lib/validations/deposit";
 import { createDeposit, updateDepositStatus } from "@/lib/admin/mutations/deposits";
+import { useAdminActor } from "@/components/admin/AdminSessionProvider";
+import { can } from "@/lib/admin/permissions";
+import { recordAuditEvent } from "@/lib/admin/auditLog";
 import { DEPOSIT_STATUS_LABELS } from "@/lib/admin/labels";
 import { formatCurrencyHTG, formatDateTime } from "@/lib/format";
 import type { Deposit, DepositStatus } from "@/types/admin";
@@ -69,8 +72,9 @@ const FILTERS: AdminFilter<Deposit>[] = [
   { id: "status", label: "Estati", options: STATUS_OPTIONS, predicate: (row, v) => row.status === v },
 ];
 
-function AddDepositSheet({ storeOptions, deviceOptions }: { storeOptions: { id: string; name: string }[]; deviceOptions: { id: string; label: string }[] }) {
+function AddDepositSheet({ storeOptions, deviceOptions, disabled }: { storeOptions: { id: string; name: string }[]; deviceOptions: { id: string; label: string }[]; disabled: boolean }) {
   const router = useRouter();
+  const actor = useAdminActor();
   const [open, setOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const {
@@ -88,7 +92,15 @@ function AddDepositSheet({ storeOptions, deviceOptions }: { storeOptions: { id: 
   async function onSubmit(values: DepositFormOutput) {
     setFormError(null);
     try {
-      await createDeposit(values);
+      const depositId = await createDeposit(values);
+      await recordAuditEvent({
+        actorId: actor.id,
+        actorRole: actor.role,
+        action: "deposit.created",
+        resourceType: "deposit",
+        resourceId: depositId,
+        storeId: values.storeId,
+      });
       toast.success("Kosyon anrejistre.");
       reset();
       setOpen(false);
@@ -100,7 +112,7 @@ function AddDepositSheet({ storeOptions, deviceOptions }: { storeOptions: { id: 
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger render={<Button type="button" />}>
+      <SheetTrigger render={<Button type="button" disabled={disabled} />}>
         <Plus data-icon="inline-start" aria-hidden />
         Ajoute Kosyon
       </SheetTrigger>
@@ -182,15 +194,44 @@ export function DepositsClient({
   deviceOptions: { id: string; label: string }[];
 }) {
   const router = useRouter();
+  const actor = useAdminActor();
+  const readOnly = !can(actor.role, "manage_deposits");
   const [selected, setSelected] = useState<Deposit | null>(null);
   const [pendingStatus, setPendingStatus] = useState<DepositStatus | null>(null);
+  const [amountToReturnHtg, setAmountToReturnHtg] = useState("");
+  const [amountRetainedHtg, setAmountRetainedHtg] = useState("");
+  const [retentionReason, setRetentionReason] = useState("");
   const [saving, setSaving] = useState(false);
+
+  const showReturnFields = pendingStatus === "refunded" || pendingStatus === "partially_retained";
+  const showRetentionFields = pendingStatus === "partially_retained" || pendingStatus === "fully_retained";
+
+  function openDeposit(deposit: Deposit) {
+    setSelected(deposit);
+    setPendingStatus(deposit.status);
+    setAmountToReturnHtg(deposit.amountToReturnHtg?.toString() ?? "");
+    setAmountRetainedHtg(deposit.amountRetainedHtg?.toString() ?? "");
+    setRetentionReason(deposit.retentionReason ?? "");
+  }
 
   async function handleSaveStatus() {
     if (!selected || !pendingStatus) return;
     setSaving(true);
     try {
-      await updateDepositStatus(selected.id, pendingStatus);
+      await updateDepositStatus(selected.id, pendingStatus, {
+        amountToReturnHtg: showReturnFields && amountToReturnHtg ? Number(amountToReturnHtg) : null,
+        amountRetainedHtg: showRetentionFields && amountRetainedHtg ? Number(amountRetainedHtg) : null,
+        retentionReason: showRetentionFields && retentionReason ? retentionReason : null,
+      });
+      await recordAuditEvent({
+        actorId: actor.id,
+        actorRole: actor.role,
+        action: "deposit.status_changed",
+        resourceType: "deposit",
+        resourceId: selected.id,
+        storeId: selected.storeId,
+        metadata: { from: selected.status, to: pendingStatus, amountToReturnHtg, amountRetainedHtg, retentionReason },
+      });
       toast.success("Estati kosyon mete ajou.");
       setSelected(null);
       setPendingStatus(null);
@@ -211,7 +252,7 @@ export function DepositsClient({
     { id: "status", header: "Estati", csvValue: (r) => DEPOSIT_STATUS_LABELS[r.status].label, cell: (r) => <StatusBadge {...DEPOSIT_STATUS_LABELS[r.status]} /> },
     { id: "return", header: "Montan pou Rann", csvValue: (r) => r.amountToReturnHtg ?? "—", cell: (r) => (r.amountToReturnHtg != null ? formatCurrencyHTG(r.amountToReturnHtg) : "—") },
     { id: "process", header: "Pwosesis", cell: (r) => (
-      <Button type="button" variant="outline" size="sm" onClick={() => { setSelected(r); setPendingStatus(r.status); }}>
+      <Button type="button" variant="outline" size="sm" onClick={() => openDeposit(r)}>
         Wè pwosesis
       </Button>
     ) },
@@ -224,7 +265,7 @@ export function DepositsClient({
       <AdminPageHeader
         title="Kosyon"
         description="Kosyon se yon obligasyon potansyèl anvè kliyan an — separe de revni Jere Boutik."
-        actions={<AddDepositSheet storeOptions={storeOptions} deviceOptions={deviceOptions} />}
+        actions={<AddDepositSheet storeOptions={storeOptions} deviceOptions={deviceOptions} disabled={readOnly} />}
       />
 
       <AdminDataTable
@@ -250,7 +291,7 @@ export function DepositsClient({
           <div className="flex flex-col gap-4 px-4 pb-4">
             <Field>
               <FieldLabel htmlFor="depositStatus">Estati</FieldLabel>
-              <Select value={pendingStatus ?? undefined} onValueChange={(v) => v && setPendingStatus(v as DepositStatus)}>
+              <Select value={pendingStatus ?? undefined} onValueChange={(v) => v && setPendingStatus(v as DepositStatus)} disabled={readOnly}>
                 <SelectTrigger id="depositStatus" className="w-full">
                   <SelectValue>{(value: string) => DEPOSIT_STATUS_LABELS[value as DepositStatus].label}</SelectValue>
                 </SelectTrigger>
@@ -265,7 +306,46 @@ export function DepositsClient({
                 </SelectContent>
               </Select>
             </Field>
-            <Button type="button" size="sm" disabled={saving || pendingStatus === selected?.status} onClick={handleSaveStatus}>
+
+            {showReturnFields && (
+              <Field>
+                <FieldLabel htmlFor="amountToReturnHtg">Montan pou Rann (HTG)</FieldLabel>
+                <Input
+                  id="amountToReturnHtg"
+                  type="number"
+                  step="0.01"
+                  value={amountToReturnHtg}
+                  onChange={(e) => setAmountToReturnHtg(e.target.value)}
+                  disabled={readOnly}
+                />
+              </Field>
+            )}
+            {showRetentionFields && (
+              <>
+                <Field>
+                  <FieldLabel htmlFor="amountRetainedHtg">Montan Retni (HTG)</FieldLabel>
+                  <Input
+                    id="amountRetainedHtg"
+                    type="number"
+                    step="0.01"
+                    value={amountRetainedHtg}
+                    onChange={(e) => setAmountRetainedHtg(e.target.value)}
+                    disabled={readOnly}
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="retentionReason">Rezon Retansyon</FieldLabel>
+                  <Input
+                    id="retentionReason"
+                    value={retentionReason}
+                    onChange={(e) => setRetentionReason(e.target.value)}
+                    disabled={readOnly}
+                  />
+                </Field>
+              </>
+            )}
+
+            <Button type="button" size="sm" disabled={saving || readOnly} onClick={handleSaveStatus}>
               {saving && <LoaderCircle className="animate-spin" data-icon="inline-start" aria-hidden />}
               Anrejistre Estati
             </Button>

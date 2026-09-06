@@ -17,3 +17,19 @@ export async function createSyncTicket(storeId: string, deviceCode: string, acto
   });
   if (error) throw new Error(error.message);
 }
+
+/**
+ * Flags a device for immediate resync — the store's own sync loop
+ * (`src/lib/sync/index.ts`) picks this up on its next heartbeat
+ * (`POST /api/sync/heartbeat` returns `resyncRequestedAt` in its
+ * response) and forces a `syncAllPending()` pass right away instead of
+ * waiting for the background interval.
+ */
+export async function requestDeviceResync(deviceDbId: string) {
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("devices")
+    .update({ resync_requested_at: new Date().toISOString() })
+    .eq("id", deviceDbId);
+  if (error) throw new Error(error.message);
+}
