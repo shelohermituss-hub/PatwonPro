@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Icons } from "@/lib/icons";
 import { EmptyState } from "@/components/EmptyState";
 import { db } from "@/lib/db";
@@ -13,6 +14,7 @@ import { formatCurrency, formatDateTime } from "@/lib/format";
 import { computeCreditStatus, type CreditStatus } from "@/lib/credits/status";
 import { CREDIT_STATUS_LABELS } from "@/lib/credits/labels";
 import { CreditStatusBadge } from "@/components/CreditStatusBadge";
+import { DURATION, staggerContainer, staggerItem } from "@/lib/motion";
 import { buttonVariants } from "@/components/ui/button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +22,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import {
   Table,
-  TableBody,
   TableCell,
   TableHead,
   TableHeader,
@@ -40,6 +41,7 @@ export default function CreditsPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<CreditStatus | "all">("all");
 
+  const shouldReduceMotion = useReducedMotion();
   const { profile } = useCurrentProfile();
   const sales = useLiveQuery(() => db.sales.toArray(), []);
   const payments = useLiveQuery(() => db.creditPayments.toArray(), []);
@@ -111,18 +113,24 @@ export default function CreditsPage() {
         </Link>
       </div>
 
-      {overdue.length > 0 && (
-        <div
-          role="alert"
-          className="flex items-center gap-3 rounded-md border border-danger/30 bg-danger/10 px-4 py-3 text-danger"
-        >
-          <Icons.alert className="size-5 shrink-0" aria-hidden />
-          <p className="text-sm font-medium">
-            {overdue.length} kredi an reta pou yon total{" "}
-            {formatCurrency(overdue.reduce((sum, c) => sum + c.remaining, 0))}.
-          </p>
-        </div>
-      )}
+      <AnimatePresence initial={false}>
+        {overdue.length > 0 && (
+          <motion.div
+            role="alert"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.25 }}
+            className="flex items-center gap-3 overflow-hidden rounded-md border border-danger/30 bg-danger/10 px-4 py-3 text-danger"
+          >
+            <Icons.alert className="size-5 shrink-0" aria-hidden />
+            <p className="text-sm font-medium">
+              {overdue.length} kredi an reta pou yon total{" "}
+              {formatCurrency(overdue.reduce((sum, c) => sum + c.remaining, 0))}.
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative min-w-[240px] flex-1">
@@ -154,28 +162,51 @@ export default function CreditsPage() {
         </div>
       </div>
 
-      {filtered === undefined ? (
-        <div className="flex flex-col gap-2">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-14 w-full" />
-          ))}
-        </div>
-      ) : filtered.length === 0 ? (
-        <EmptyState
-          illustration="credit"
-          title={
-            credits && credits.length > 0
-              ? "Pa gen kredi ki matche filtè yo"
-              : "Ou poko gen kredi"
-          }
-          description={
-            credits && credits.length > 0
-              ? "Eseye chanje filtè yo."
-              : "Kreye premye kredi ou pou swiv dèt kliyan yo."
-          }
-        />
-      ) : (
-        <div className="overflow-x-auto rounded-lg border border-border">
+      <AnimatePresence mode="wait" initial={false}>
+        {filtered === undefined ? (
+          <motion.div
+            key="skeleton"
+            className="flex flex-col gap-2"
+            initial={shouldReduceMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: shouldReduceMotion ? 0 : DURATION.fast }}
+          >
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-14 w-full" />
+            ))}
+          </motion.div>
+        ) : filtered.length === 0 ? (
+          <motion.div
+            key="empty"
+            initial={shouldReduceMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: shouldReduceMotion ? 0 : DURATION.fast }}
+          >
+            <EmptyState
+              illustration={credits && credits.length > 0 ? "search" : "credit"}
+              title={
+                credits && credits.length > 0
+                  ? "Pa gen kredi ki matche filtè yo"
+                  : "Ou poko gen kredi"
+              }
+              description={
+                credits && credits.length > 0
+                  ? "Eseye chanje filtè yo."
+                  : "Kreye premye kredi ou pou swiv dèt kliyan yo."
+              }
+            />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="table"
+            initial={shouldReduceMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: shouldReduceMotion ? 0 : DURATION.fast }}
+            className="overflow-x-auto rounded-lg border border-border"
+          >
           <Table>
             <TableHeader>
               <TableRow>
@@ -190,9 +221,18 @@ export default function CreditsPage() {
                 </TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
+            <motion.tbody
+              className="[&_tr:last-child]:border-0"
+              variants={staggerContainer}
+              initial={shouldReduceMotion ? false : "hidden"}
+              animate="visible"
+            >
               {filtered.map(({ sale, paid, remaining, status }) => (
-                <TableRow key={sale.id}>
+                <motion.tr
+                  key={sale.id}
+                  variants={staggerItem}
+                  className="border-b transition-colors hover:bg-muted/50 has-aria-expanded:bg-muted/50 data-[state=selected]:bg-muted"
+                >
                   <TableCell className="font-medium text-foreground">
                     {sale.customer_id
                       ? customerNameById.get(sale.customer_id) ?? "—"
@@ -218,12 +258,13 @@ export default function CreditsPage() {
                       Wè
                     </Link>
                   </TableCell>
-                </TableRow>
+                </motion.tr>
               ))}
-            </TableBody>
+            </motion.tbody>
           </Table>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

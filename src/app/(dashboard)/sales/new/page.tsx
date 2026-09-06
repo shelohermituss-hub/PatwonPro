@@ -15,6 +15,7 @@ import { useStorePaymentConfig } from "@/hooks/useStorePaymentConfig";
 import { ProductGrid } from "@/components/pos/ProductGrid";
 import { CartPanel } from "@/components/pos/CartPanel";
 import { MobilePaymentConfirmDialog } from "@/components/pos/MobilePaymentConfirmDialog";
+import { SuccessCheck } from "@/components/motion/SuccessCheck";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -149,7 +150,8 @@ export default function NewSalePage() {
         onOpenChange={(open) => !open && setCompletedSale(null)}
       >
         <DialogContent>
-          <DialogHeader>
+          <DialogHeader className="items-center text-center">
+            <SuccessCheck className="mb-2 size-14" />
             <DialogTitle>Vant konplete</DialogTitle>
             <DialogDescription>
               Vant lan anrejistre. Li ap senkwonize otomatikman.

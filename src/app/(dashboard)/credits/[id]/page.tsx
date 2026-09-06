@@ -17,7 +17,9 @@ import { formatCurrency, formatDateTime } from "@/lib/format";
 import { PAYMENT_METHOD_LABELS } from "@/lib/pos/labels";
 import { CreditStatusBadge } from "@/components/CreditStatusBadge";
 import { CustomerAvatar } from "@/components/CustomerAvatar";
-import { Skeleton } from "@/components/ui/skeleton";
+import { DetailSkeleton } from "@/components/DetailSkeleton";
+import { PageFade } from "@/components/motion/PageFade";
+import { motion } from "motion/react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldGroup, FieldLabel, FieldError } from "@/components/ui/field";
@@ -125,12 +127,7 @@ export default function CreditDetailPage({
   }
 
   if (result === undefined) {
-    return (
-      <div className="flex flex-col gap-6 p-6">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-40 w-full" />
-      </div>
-    );
+    return <DetailSkeleton />;
   }
 
   if (!result.found) {
@@ -153,6 +150,7 @@ export default function CreditDetailPage({
   const { sale, customer, payments, paid, remaining, status } = result;
 
   return (
+    <PageFade>
     <div className="flex flex-col gap-6 p-6">
       <div className="flex items-center gap-3">
         <CustomerAvatar size="lg" />
@@ -168,15 +166,18 @@ export default function CreditDetailPage({
       </div>
 
       {status === "overdue" && (
-        <div
+        <motion.div
           role="alert"
-          className="flex items-center gap-3 rounded-md border border-danger/30 bg-danger/10 px-4 py-3 text-danger"
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          transition={{ duration: 0.25 }}
+          className="flex items-center gap-3 overflow-hidden rounded-md border border-danger/30 bg-danger/10 px-4 py-3 text-danger"
         >
           <Icons.alert className="size-5 shrink-0" aria-hidden />
           <p className="text-sm font-medium">
             Dèt sa a an reta — pa gen vèsman depi plis pase 30 jou.
           </p>
-        </div>
+        </motion.div>
       )}
 
       <div className="grid grid-cols-2 gap-4 rounded-lg border border-border bg-surface p-4 sm:grid-cols-4">
@@ -324,5 +325,6 @@ export default function CreditDetailPage({
         </DialogContent>
       </Dialog>
     </div>
+    </PageFade>
   );
 }

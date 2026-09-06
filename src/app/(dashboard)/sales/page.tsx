@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Icons } from "@/lib/icons";
 import { EmptyState } from "@/components/EmptyState";
 import { db } from "@/lib/db";
@@ -10,6 +11,7 @@ import { pullCustomers } from "@/lib/sync/customers";
 import { useCurrentProfile } from "@/hooks/useCurrentProfile";
 import { formatCurrency, formatDateTime } from "@/lib/format";
 import { PAYMENT_METHOD_LABELS, PAYMENT_STATUS_LABELS } from "@/lib/pos/labels";
+import { DURATION, staggerContainer, staggerItem } from "@/lib/motion";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +27,6 @@ import {
 } from "@/components/ui/select";
 import {
   Table,
-  TableBody,
   TableCell,
   TableHead,
   TableHeader,
@@ -63,6 +64,7 @@ export default function SalesHistoryPage() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | "all">("all");
   const [dateRange, setDateRange] = useState<DateRange>("today");
 
+  const shouldReduceMotion = useReducedMotion();
   const { profile } = useCurrentProfile();
   const sales = useLiveQuery(
     () => db.sales.orderBy("created_at").reverse().toArray(),
@@ -175,27 +177,51 @@ export default function SalesHistoryPage() {
         </Select>
       </div>
 
-      {filtered === undefined ? (
-        <div className="flex flex-col gap-2">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-14 w-full" />
-          ))}
-        </div>
-      ) : filtered.length === 0 ? (
-        <EmptyState
-          title={
-            sales && sales.length > 0
-              ? "Pa gen vant ki matche filtè yo"
-              : "Ou poko gen vant"
-          }
-          description={
-            sales && sales.length > 0
-              ? "Eseye chanje filtè yo."
-              : "Fè premye vant ou nan Pwen Vant lan."
-          }
-        />
-      ) : (
-        <div className="overflow-x-auto rounded-lg border border-border">
+      <AnimatePresence mode="wait" initial={false}>
+        {filtered === undefined ? (
+          <motion.div
+            key="skeleton"
+            className="flex flex-col gap-2"
+            initial={shouldReduceMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: shouldReduceMotion ? 0 : DURATION.fast }}
+          >
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-14 w-full" />
+            ))}
+          </motion.div>
+        ) : filtered.length === 0 ? (
+          <motion.div
+            key="empty"
+            initial={shouldReduceMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: shouldReduceMotion ? 0 : DURATION.fast }}
+          >
+            <EmptyState
+              illustration={sales && sales.length > 0 ? "search" : "sales"}
+              title={
+                sales && sales.length > 0
+                  ? "Pa gen vant ki matche filtè yo"
+                  : "Ou poko gen vant"
+              }
+              description={
+                sales && sales.length > 0
+                  ? "Eseye chanje filtè yo."
+                  : "Fè premye vant ou nan Pwen Vant lan."
+              }
+            />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="table"
+            initial={shouldReduceMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: shouldReduceMotion ? 0 : DURATION.fast }}
+            className="overflow-x-auto rounded-lg border border-border"
+          >
           <Table>
             <TableHeader>
               <TableRow>
@@ -209,9 +235,18 @@ export default function SalesHistoryPage() {
                 </TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
+            <motion.tbody
+              className="[&_tr:last-child]:border-0"
+              variants={staggerContainer}
+              initial={shouldReduceMotion ? false : "hidden"}
+              animate="visible"
+            >
               {filtered.map((sale) => (
-                <TableRow key={sale.id}>
+                <motion.tr
+                  key={sale.id}
+                  variants={staggerItem}
+                  className="border-b transition-colors hover:bg-muted/50 has-aria-expanded:bg-muted/50 data-[state=selected]:bg-muted"
+                >
                   <TableCell className="text-text-secondary">
                     {formatDateTime(sale.created_at)}
                   </TableCell>
@@ -241,12 +276,13 @@ export default function SalesHistoryPage() {
                       <Icons.next className="size-4" aria-hidden />
                     </Link>
                   </TableCell>
-                </TableRow>
+                </motion.tr>
               ))}
-            </TableBody>
+            </motion.tbody>
           </Table>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

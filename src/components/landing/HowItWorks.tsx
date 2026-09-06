@@ -1,4 +1,9 @@
+"use client";
+
+import { motion } from "motion/react";
 import { Icons } from "@/lib/icons";
+import { Reveal, RevealGroup } from "@/components/motion/Reveal";
+import { staggerItem } from "@/lib/motion";
 
 const STEPS = [
   {
@@ -28,18 +33,22 @@ export function HowItWorks() {
       className="border-y border-border bg-surface px-4 py-16 sm:px-6 md:py-24"
     >
       <div className="mx-auto max-w-6xl">
-        <div className="mx-auto max-w-2xl text-center">
+        <Reveal className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
             Kòman li mache
           </h2>
           <p className="mt-3 text-lg text-text-secondary">
             Twa etap, epi boutik ou pare pou vann.
           </p>
-        </div>
+        </Reveal>
 
-        <div className="mt-12 grid gap-8 md:grid-cols-3">
+        <RevealGroup className="mt-12 grid gap-8 md:grid-cols-3">
           {STEPS.map((step) => (
-            <div key={step.number} className="flex flex-col items-center gap-3 text-center">
+            <motion.div
+              key={step.number}
+              variants={staggerItem}
+              className="flex flex-col items-center gap-3 text-center"
+            >
               <div className="relative">
                 <step.icon className="size-12" aria-hidden />
                 <span className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
@@ -48,9 +57,9 @@ export function HowItWorks() {
               </div>
               <h3 className="text-lg font-semibold text-foreground">{step.title}</h3>
               <p className="max-w-xs text-sm text-text-secondary">{step.description}</p>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </RevealGroup>
       </div>
     </section>
   );

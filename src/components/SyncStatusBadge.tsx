@@ -39,11 +39,15 @@ export function SyncStatusBadge() {
       ? `Ap senkwonize · ${summary.total} aksyon`
       : "Anliy · Tout bagay senkwonize";
 
-  const dotColor = !isOnline ? "bg-danger" : summary.total > 0 ? "bg-warning" : "bg-success";
+  const isSyncing = isOnline && summary.total > 0;
+  const dotColor = !isOnline ? "bg-danger" : isSyncing ? "bg-warning" : "bg-success";
 
   const pill = (
     <span className="flex items-center gap-1.5 rounded-full bg-surface px-2.5 py-1 text-xs text-text-secondary">
-      <span className={`h-2 w-2 rounded-full ${dotColor}`} aria-hidden />
+      <span
+        className={`h-2 w-2 rounded-full ${dotColor} ${isSyncing ? "animate-pulse" : ""}`}
+        aria-hidden
+      />
       {label}
     </span>
   );

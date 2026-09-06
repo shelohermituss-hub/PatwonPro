@@ -1,4 +1,9 @@
+"use client";
+
+import { motion } from "motion/react";
 import { Icons } from "@/lib/icons";
+import { Reveal, RevealGroup } from "@/components/motion/Reveal";
+import { staggerItem } from "@/lib/motion";
 
 const FEATURES = [
   {
@@ -36,7 +41,7 @@ const FEATURES = [
 export function Features() {
   return (
     <section id="fonksyonalite" className="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-24">
-      <div className="mx-auto max-w-2xl text-center">
+      <Reveal className="mx-auto max-w-2xl text-center">
         <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
           Tout sa yon boutik bezwen, nan yon sèl app
         </h2>
@@ -44,20 +49,23 @@ export function Features() {
           Pa gen plizyè zouti pou jere — PatwonPro regwoupe vant, envantè, ak
           kredi nan yon sèl kote.
         </p>
-      </div>
+      </Reveal>
 
-      <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <RevealGroup className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {FEATURES.map((feature) => (
-          <div
+          <motion.div
             key={feature.title}
-            className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-6"
+            variants={staggerItem}
+            whileHover={{ y: -4 }}
+            transition={{ duration: 0.2 }}
+            className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-6 shadow-sm hover:shadow-md"
           >
             <feature.icon className="size-9" aria-hidden />
             <h3 className="text-lg font-semibold text-foreground">{feature.title}</h3>
             <p className="text-sm text-text-secondary">{feature.description}</p>
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </RevealGroup>
     </section>
   );
 }

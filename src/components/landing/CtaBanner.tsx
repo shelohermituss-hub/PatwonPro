@@ -1,17 +1,19 @@
 import Link from "next/link";
+import { Reveal } from "@/components/motion/Reveal";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export function CtaBanner() {
   return (
     <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-24">
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-gradient-start via-brand-gradient-via to-brand-gradient-start px-8 py-12 sm:px-14 sm:py-16">
+      <Reveal className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-gradient-start via-brand-gradient-via to-brand-gradient-start px-8 py-12 sm:px-14 sm:py-16">
         <div
-          className="absolute -right-16 -top-16 size-64 rounded-full bg-brand-gradient-end/20"
+          className="absolute -right-16 -top-16 size-64 rounded-full bg-brand-gradient-end/20 motion-safe:animate-[auth-hero-blob-a_11s_ease-in-out_infinite]"
           aria-hidden
         />
         <div
-          className="absolute -bottom-20 -left-10 size-56 rounded-full bg-brand-gradient-end/10"
+          className="absolute -bottom-20 -left-10 size-56 rounded-full bg-brand-gradient-end/10 motion-safe:animate-[auth-hero-blob-b_9s_ease-in-out_infinite]"
+          style={{ animationDelay: "-3s" }}
           aria-hidden
         />
         <div className="relative flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:justify-between">
@@ -34,7 +36,7 @@ export function CtaBanner() {
             Kòmanse gratis
           </Link>
         </div>
-      </div>
+      </Reveal>
     </section>
   );
 }

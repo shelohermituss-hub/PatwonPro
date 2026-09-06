@@ -17,10 +17,12 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { loginSchema, type LoginInput } from "@/lib/validations/auth";
 import { SocialAuthButtons } from "@/components/auth/SocialAuthButtons";
+import { FormError } from "@/components/motion/FormError";
+import { AuthFormSkeleton } from "@/components/auth/AuthFormSkeleton";
 
 export default function LoginPage() {
   return (
-    <Suspense>
+    <Suspense fallback={<AuthFormSkeleton />}>
       <LoginForm />
     </Suspense>
   );
@@ -99,11 +101,7 @@ function LoginForm() {
           <FieldError errors={[errors.password]} />
         </Field>
 
-        {formError && (
-          <p role="alert" className="text-sm font-medium text-danger">
-            {formError}
-          </p>
-        )}
+        <FormError message={formError} />
 
         <Button type="submit" disabled={isSubmitting} className="min-h-12 w-full">
           {isSubmitting && (

@@ -1,11 +1,19 @@
+"use client";
+
 import Image from "next/image";
+import { motion, useReducedMotion } from "motion/react";
+import { DURATION } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 const ILLUSTRATIONS = {
-  generic: "/illustrations/empty-generic.png",
-  credit: "/illustrations/empty-credit.png",
-  support: "/illustrations/empty-support.png",
-  network: "/illustrations/empty-network.png",
+  generic: "/illustrations/empty-generic.jpg",
+  credit: "/illustrations/empty-credit.jpg",
+  support: "/illustrations/empty-support.jpg",
+  network: "/illustrations/empty-network.jpg",
+  products: "/illustrations/empty-products.jpg",
+  sales: "/illustrations/empty-sales.jpg",
+  team: "/illustrations/empty-team.jpg",
+  search: "/illustrations/empty-search.jpg",
 } as const;
 
 export type EmptyStateIllustration = keyof typeof ILLUSTRATIONS;
@@ -31,8 +39,13 @@ export function EmptyState({
   compact?: boolean;
   className?: string;
 }) {
+  const shouldReduceMotion = useReducedMotion();
+
   return (
-    <div
+    <motion.div
+      initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.96 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: DURATION.base }}
       className={cn(
         "flex flex-col items-center rounded-lg border border-dashed border-border text-center",
         compact ? "gap-2 py-10" : "gap-3 py-16",
@@ -55,6 +68,6 @@ export function EmptyState({
         </div>
       )}
       {action}
-    </div>
+    </motion.div>
   );
 }

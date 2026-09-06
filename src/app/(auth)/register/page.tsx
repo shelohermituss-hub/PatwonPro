@@ -18,6 +18,7 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { registerSchema, type RegisterInput } from "@/lib/validations/auth";
 import { SocialAuthButtons } from "@/components/auth/SocialAuthButtons";
+import { FormError } from "@/components/motion/FormError";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -139,11 +140,7 @@ export default function RegisterPage() {
           <FieldError errors={[errors.password]} />
         </Field>
 
-        {formError && (
-          <p role="alert" className="text-sm font-medium text-danger">
-            {formError}
-          </p>
-        )}
+        <FormError message={formError} />
 
         <Button type="submit" disabled={isSubmitting} className="min-h-12 w-full">
           {isSubmitting && (

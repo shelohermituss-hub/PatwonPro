@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/field";
 import { createClient } from "@/lib/supabase/client";
 import { onboardingSchema, type OnboardingInput } from "@/lib/validations/auth";
+import { FormError } from "@/components/motion/FormError";
 
 export function OnboardingForm({ defaultFullName }: { defaultFullName: string }) {
   const router = useRouter();
@@ -80,11 +81,7 @@ export function OnboardingForm({ defaultFullName }: { defaultFullName: string })
           <FieldError errors={[errors.fullName]} />
         </Field>
 
-        {formError && (
-          <p role="alert" className="text-sm font-medium text-danger">
-            {formError}
-          </p>
-        )}
+        <FormError message={formError} />
 
         <Button type="submit" disabled={isSubmitting} className="min-h-12 w-full">
           {isSubmitting && (

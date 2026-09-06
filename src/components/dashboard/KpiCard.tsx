@@ -1,5 +1,6 @@
 import type { AppIconComponent } from "@/lib/icons";
 import { Card, CardContent } from "@/components/ui/card";
+import { AnimatedNumber } from "@/components/motion/AnimatedNumber";
 import { cn } from "@/lib/utils";
 
 export interface KpiTrend {
@@ -27,12 +28,15 @@ const TONE_CLASSES: Record<KpiTrend["tone"], string> = {
 export function KpiCard({
   label,
   value,
+  format = (n) => String(n),
   icon: Icon,
   trend,
   detail,
 }: {
   label: string;
-  value: string;
+  /** Raw numeric value — animated as a count-up and re-formatted every frame via `format`. */
+  value: number;
+  format?: (n: number) => string;
   icon: AppIconComponent;
   trend: KpiTrend;
   detail: string;
@@ -49,7 +53,9 @@ export function KpiCard({
           </div>
         </div>
 
-        <p className="text-3xl font-extrabold tracking-tight text-foreground">{value}</p>
+        <p className="text-3xl font-extrabold tracking-tight text-foreground">
+          <AnimatedNumber value={value} format={format} />
+        </p>
 
         <div className="flex flex-wrap items-center gap-2">
           <span

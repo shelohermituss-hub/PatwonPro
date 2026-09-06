@@ -1,6 +1,7 @@
 "use client";
 
 import { Minus, Plus, Trash2, LoaderCircle } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { Icons } from "@/lib/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { AnimatedNumber } from "@/components/motion/AnimatedNumber";
+import { DURATION } from "@/lib/motion";
 import { formatCurrency } from "@/lib/format";
 import { PAYMENT_METHOD_LABELS } from "@/lib/pos/labels";
 import { NewCustomerDialog } from "@/components/NewCustomerDialog";
@@ -90,11 +93,17 @@ export function CartPanel({
           </p>
         ) : (
           <ul className="flex flex-col gap-3">
-            {lines.map((line) => (
-              <li
-                key={line.productId}
-                className="flex flex-col gap-2 rounded-lg border border-border p-3"
-              >
+            <AnimatePresence initial={false}>
+              {lines.map((line) => (
+                <motion.li
+                  key={line.productId}
+                  layout
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: DURATION.base }}
+                  className="flex flex-col gap-2 overflow-hidden rounded-lg border border-border p-3"
+                >
                 <div className="flex items-start justify-between gap-2">
                   <span className="text-sm font-medium text-foreground">
                     {line.name}
@@ -141,8 +150,9 @@ export function CartPanel({
                     {formatCurrency(line.unitPrice * line.quantity)}
                   </span>
                 </div>
-              </li>
-            ))}
+                </motion.li>
+              ))}
+            </AnimatePresence>
           </ul>
         )}
 
@@ -267,7 +277,7 @@ export function CartPanel({
         )}
         <div className="flex items-center justify-between text-lg font-bold text-foreground">
           <span>Total</span>
-          <span>{formatCurrency(total)}</span>
+          <AnimatedNumber value={total} format={formatCurrency} />
         </div>
         <Button
           type="button"

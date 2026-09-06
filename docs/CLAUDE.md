@@ -65,6 +65,10 @@ Avant toute nouvelle interface importante :
 - Éviter les modales pour les tâches longues ; utiliser un `Sheet` latéral sur tablette.
 - Inclure les états loading, empty, error et offline pour chaque écran de données.
 - Accessibilité : contrastes lisibles, labels, focus states et navigation clavier.
+- Animations : librairie **Motion** (`motion/react`) exclusivement,
+  tokens partagés dans `src/lib/motion.ts` — toujours respecter
+  `prefers-reduced-motion` via `useReducedMotion()`. Voir
+  `docs/DESIGN_SYSTEM.md` section Animation.
 
 ## Tokens visuels
 

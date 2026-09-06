@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
 import { MoreVertical } from "lucide-react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Icons } from "@/lib/icons";
 import { EmptyState } from "@/components/EmptyState";
 import { db } from "@/lib/db";
@@ -11,6 +12,7 @@ import { pullProducts } from "@/lib/sync/products";
 import { useCurrentProfile } from "@/hooks/useCurrentProfile";
 import { isOwner } from "@/lib/auth/roles";
 import { formatCurrency } from "@/lib/format";
+import { DURATION, staggerContainer, staggerItem } from "@/lib/motion";
 import { StockBadge } from "@/components/StockBadge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,7 +28,6 @@ import {
 } from "@/components/ui/select";
 import {
   Table,
-  TableBody,
   TableCell,
   TableHead,
   TableHeader,
@@ -46,6 +47,7 @@ export default function ProductsPage() {
   const [lowStockOnly, setLowStockOnly] = useState(false);
   const [pullError, setPullError] = useState(false);
 
+  const shouldReduceMotion = useReducedMotion();
   const { profile } = useCurrentProfile();
   const products = useLiveQuery(() => db.products.toArray(), []);
   const categories = useLiveQuery(() => db.categories.toArray(), []);
@@ -156,38 +158,62 @@ export default function ProductsPage() {
         </Button>
       </div>
 
-      {filtered === undefined ? (
-        <div className="flex flex-col gap-2">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-14 w-full" />
-          ))}
-        </div>
-      ) : filtered.length === 0 ? (
-        <EmptyState
-          title={
-            products && products.length > 0
-              ? "Pa gen pwodwi ki matche rechèch la"
-              : "Ou poko gen pwodwi"
-          }
-          description={
-            products && products.length > 0
-              ? "Eseye chanje filtè yo."
-              : "Ajoute premye pwodwi ou pou kòmanse vann."
-          }
-          action={
-            isOwner(profile) && (!products || products.length === 0) ? (
-              <Link
-                href="/products/new"
-                className={cn(buttonVariants(), "mt-2 min-h-12")}
-              >
-                <Icons.add data-icon="inline-start" aria-hidden />
-                Ajoute premye pwodwi ou
-              </Link>
-            ) : undefined
-          }
-        />
-      ) : (
-        <div className="overflow-x-auto rounded-lg border border-border">
+      <AnimatePresence mode="wait" initial={false}>
+        {filtered === undefined ? (
+          <motion.div
+            key="skeleton"
+            className="flex flex-col gap-2"
+            initial={shouldReduceMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: shouldReduceMotion ? 0 : DURATION.fast }}
+          >
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-14 w-full" />
+            ))}
+          </motion.div>
+        ) : filtered.length === 0 ? (
+          <motion.div
+            key="empty"
+            initial={shouldReduceMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: shouldReduceMotion ? 0 : DURATION.fast }}
+          >
+            <EmptyState
+              illustration={products && products.length > 0 ? "search" : "products"}
+              title={
+                products && products.length > 0
+                  ? "Pa gen pwodwi ki matche rechèch la"
+                  : "Ou poko gen pwodwi"
+              }
+              description={
+                products && products.length > 0
+                  ? "Eseye chanje filtè yo."
+                  : "Ajoute premye pwodwi ou pou kòmanse vann."
+              }
+              action={
+                isOwner(profile) && (!products || products.length === 0) ? (
+                  <Link
+                    href="/products/new"
+                    className={cn(buttonVariants(), "mt-2 min-h-12")}
+                  >
+                    <Icons.add data-icon="inline-start" aria-hidden />
+                    Ajoute premye pwodwi ou
+                  </Link>
+                ) : undefined
+              }
+            />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="table"
+            initial={shouldReduceMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: shouldReduceMotion ? 0 : DURATION.fast }}
+            className="overflow-x-auto rounded-lg border border-border"
+          >
           <Table>
             <TableHeader>
               <TableRow>
@@ -200,9 +226,18 @@ export default function ProductsPage() {
                 </TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
+            <motion.tbody
+              className="[&_tr:last-child]:border-0"
+              variants={staggerContainer}
+              initial={shouldReduceMotion ? false : "hidden"}
+              animate="visible"
+            >
               {filtered.map((product) => (
-                <TableRow key={product.id}>
+                <motion.tr
+                  key={product.id}
+                  variants={staggerItem}
+                  className="border-b transition-colors hover:bg-muted/50 has-aria-expanded:bg-muted/50 data-[state=selected]:bg-muted"
+                >
                   <TableCell>
                     <div className="flex items-center gap-3">
                       {product.image_url ? (
@@ -268,12 +303,13 @@ export default function ProductsPage() {
                       </DropdownMenu>
                     )}
                   </TableCell>
-                </TableRow>
+                </motion.tr>
               ))}
-            </TableBody>
+            </motion.tbody>
           </Table>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

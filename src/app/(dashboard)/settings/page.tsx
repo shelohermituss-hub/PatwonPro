@@ -6,6 +6,7 @@ import { isOwner } from "@/lib/auth/roles";
 import { InviteEmployeeForm } from "@/components/InviteEmployeeForm";
 import { StoreProfileForm } from "@/components/StoreProfileForm";
 import { MobilePaymentConfigForm } from "@/components/MobilePaymentConfigForm";
+import { EmptyState } from "@/components/EmptyState";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -101,30 +102,39 @@ export default async function SettingsPage() {
 
           <InviteEmployeeForm />
 
-          <div className="overflow-x-auto rounded-lg border border-border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Non</TableHead>
-                  <TableHead>Wòl</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {(team ?? []).map((member) => (
-                  <TableRow key={member.id}>
-                    <TableCell className="font-medium text-foreground">
-                      {member.full_name}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={member.role === "owner" ? "default" : "secondary"}>
-                        {ROLE_LABELS[member.role] ?? member.role}
-                      </Badge>
-                    </TableCell>
+          {(team ?? []).length === 0 ? (
+            <EmptyState
+              illustration="team"
+              compact
+              title="Ou poko gen manm ekip"
+              description="Envite yon anplwaye pou l parèt isit la."
+            />
+          ) : (
+            <div className="overflow-x-auto rounded-lg border border-border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Non</TableHead>
+                    <TableHead>Wòl</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {(team ?? []).map((member) => (
+                    <TableRow key={member.id}>
+                      <TableCell className="font-medium text-foreground">
+                        {member.full_name}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={member.role === "owner" ? "default" : "secondary"}>
+                          {ROLE_LABELS[member.role] ?? member.role}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>

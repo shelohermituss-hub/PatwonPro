@@ -194,6 +194,44 @@ focus plus visible sur tablette.
 - Voir `docs/UI_RULES.md` pour les règles détaillées (tablette,
   responsive, offline).
 
+## Animation
+
+- **Librairie** : [Motion](https://motion.dev) (`motion` sur npm, import
+  `from "motion/react"`) — pas `framer-motion` (ancien nom du même
+  paquet, ne jamais l'installer/importer).
+- **Tokens partagés** (`src/lib/motion.ts`) : `EASE` (`[0.16, 1, 0.3, 1]`,
+  courbe "ease-out-expo" douce), `DURATION` (`fast`/`base`/`slow`),
+  variants réutilisables `fadeUp`/`staggerContainer`/`staggerItem`,
+  `springTransition`. Toujours réutiliser ces tokens plutôt que des
+  valeurs de timing/easing arbitraires par composant.
+- **Primitives partagées** (`src/components/motion/`) :
+  `PageFade` (fade + slide-up de montage de page), `Reveal`/`RevealGroup`
+  (scroll-reveal `whileInView`, déclenché une seule fois), `AnimatedNumber`
+  (count-up, prend `value: number` + `format: (n) => string` — jamais une
+  chaîne pré-formatée), `Stagger`/`StaggerGroup` (stagger au montage, pas
+  au scroll — grilles au-dessus de la ligne de flottaison), `SuccessCheck`
+  (icône de succès dessinée par `pathLength`), `FormError` (message
+  d'erreur de formulaire avec fade + secousse horizontale).
+- **`prefers-reduced-motion` systématique** : toute nouvelle animation
+  JS doit consulter `useReducedMotion()` (de `motion/react`) et soit
+  désactiver l'animation (`initial={false}`), soit passer `duration: 0` —
+  même principe que le `motion-safe:` déjà utilisé pour les `@keyframes`
+  CSS du panneau héro `(auth)`.
+- **Transition de page par groupe de routes** : `src/app/(dashboard)/template.tsx`
+  et `src/app/(auth)/template.tsx` enveloppent leurs enfants dans
+  `PageFade` — `template.tsx` se remonte à chaque navigation
+  (contrairement à `layout.tsx`), donnant une entrée de page cohérente
+  sans configurer `AnimatePresence`. **Pas de `template.tsx` à la
+  racine** : un template racine engloberait aussi `(admin)` (thème
+  séparé, hors périmètre de ce système d'animation côté commerçant) et
+  se remonterait en double avec `(dashboard)`/`(auth)` (route groups
+  transparents pour l'URL, pas pour l'arbre de layout).
+- **Limite connue** : les icônes `Icons.*` (`src/lib/icons.tsx`) restent
+  des `<img>` statiques avec des couleurs fixes — pas d'animation de
+  tracé ou de couleur au niveau de l'icône elle-même. Pour animer un
+  élément qui contient une icône, animer le conteneur autour (scale,
+  fond, bordure) plutôt que l'icône.
+
 ## `design-system/`
 
 Le contenu actuel est un kit UI SaaS générique (voir

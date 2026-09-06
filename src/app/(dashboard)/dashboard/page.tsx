@@ -8,6 +8,7 @@ import { KpiCard, type KpiTrend } from "@/components/dashboard/KpiCard";
 import { RecentSalesPanel } from "@/components/dashboard/RecentSalesPanel";
 import { SalesTrendChart } from "@/components/reports/SalesTrendChart";
 import { LowStockPanel } from "@/components/reports/LowStockPanel";
+import { StaggerGroup, StaggerItem } from "@/components/motion/Stagger";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -90,36 +91,47 @@ export default async function DashboardPage() {
     <div className="flex flex-col gap-6 p-6">
       <DashboardHeader profile={profile} storeName={data.storeName} />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <KpiCard
-          label="Vant jodi a"
-          value={formatCurrencyHTG(data.todaySales)}
-          icon={Icons.sales}
-          trend={moneyTrend(data.todaySales, data.yesterdaySales, "Pa gen vant jodi a")}
-          detail={`${data.todayTransactionCount} vant`}
-        />
-        <KpiCard
-          label="Benefis estime"
-          value={formatCurrencyHTG(data.todayProfit)}
-          icon={Icons.profit}
-          trend={moneyTrend(data.todayProfit, data.yesterdayProfit, "Pa gen benefis jodi a")}
-          detail="Estimasyon apati pri achte"
-        />
-        <KpiCard
-          label="Pwodwi ki gen stòk ba"
-          value={String(lowStockCount)}
-          icon={Icons.alert}
-          trend={stockTrend}
-          detail="Anba sèy alèt la"
-        />
-        <KpiCard
-          label="Kredi kliyan pou resevwa"
-          value={formatCurrencyHTG(data.creditReceivable)}
-          icon={Icons.credit}
-          trend={creditTrend}
-          detail="Total dèt kliyan poko peye"
-        />
-      </div>
+      <StaggerGroup className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StaggerItem>
+          <KpiCard
+            label="Vant jodi a"
+            value={data.todaySales}
+            format={formatCurrencyHTG}
+            icon={Icons.sales}
+            trend={moneyTrend(data.todaySales, data.yesterdaySales, "Pa gen vant jodi a")}
+            detail={`${data.todayTransactionCount} vant`}
+          />
+        </StaggerItem>
+        <StaggerItem>
+          <KpiCard
+            label="Benefis estime"
+            value={data.todayProfit}
+            format={formatCurrencyHTG}
+            icon={Icons.profit}
+            trend={moneyTrend(data.todayProfit, data.yesterdayProfit, "Pa gen benefis jodi a")}
+            detail="Estimasyon apati pri achte"
+          />
+        </StaggerItem>
+        <StaggerItem>
+          <KpiCard
+            label="Pwodwi ki gen stòk ba"
+            value={lowStockCount}
+            icon={Icons.alert}
+            trend={stockTrend}
+            detail="Anba sèy alèt la"
+          />
+        </StaggerItem>
+        <StaggerItem>
+          <KpiCard
+            label="Kredi kliyan pou resevwa"
+            value={data.creditReceivable}
+            format={formatCurrencyHTG}
+            icon={Icons.credit}
+            trend={creditTrend}
+            detail="Total dèt kliyan poko peye"
+          />
+        </StaggerItem>
+      </StaggerGroup>
 
       <div className="flex flex-col gap-3">
         <h2 className="text-lg font-semibold text-foreground">Aksyon Rapid</h2>

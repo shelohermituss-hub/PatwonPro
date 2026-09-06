@@ -1,4 +1,9 @@
+"use client";
+
+import { motion } from "motion/react";
 import { Icons } from "@/lib/icons";
+import { Reveal, RevealGroup } from "@/components/motion/Reveal";
+import { staggerItem } from "@/lib/motion";
 
 const METHODS = [
   {
@@ -17,7 +22,7 @@ export function PaymentMethods() {
   return (
     <section className="border-y border-border bg-surface px-4 py-16 sm:px-6 md:py-24">
       <div className="mx-auto max-w-6xl">
-        <div className="mx-auto max-w-2xl text-center">
+        <Reveal className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
             Aksepte peman kote kliyan ou ye
           </h2>
@@ -25,20 +30,23 @@ export function PaymentMethods() {
             PatwonPro entegre dirèkteman ak mwayen peman mobil ki pi itilize
             an Ayiti, anplis kach ak vant a kredi.
           </p>
-        </div>
+        </Reveal>
 
-        <div className="mx-auto mt-12 grid max-w-2xl gap-6 sm:grid-cols-2">
+        <RevealGroup className="mx-auto mt-12 grid max-w-2xl gap-6 sm:grid-cols-2">
           {METHODS.map((method) => (
-            <div
+            <motion.div
               key={method.name}
-              className="flex flex-col gap-3 rounded-2xl border border-border bg-background p-6"
+              variants={staggerItem}
+              whileHover={{ y: -4 }}
+              transition={{ duration: 0.2 }}
+              className="flex flex-col gap-3 rounded-2xl border border-border bg-background p-6 shadow-sm hover:shadow-md"
             >
               <method.icon className="size-9" aria-hidden />
               <h3 className="text-lg font-semibold text-foreground">{method.name}</h3>
               <p className="text-sm text-text-secondary">{method.description}</p>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </RevealGroup>
       </div>
     </section>
   );

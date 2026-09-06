@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import type { ReportPeriod } from "@/lib/reports/period";
 
@@ -17,13 +20,20 @@ export function PeriodTabs({ active }: { active: ReportPeriod }) {
           key={value}
           href={`/reports?period=${value}`}
           className={cn(
-            "flex min-h-11 items-center rounded-lg border px-4 text-sm font-medium transition-colors",
+            "relative flex min-h-11 items-center rounded-lg border px-4 text-sm font-medium transition-colors",
             active === value
-              ? "border-transparent bg-primary text-primary-foreground"
+              ? "border-transparent text-primary-foreground"
               : "border-border bg-background text-text-secondary hover:bg-muted hover:text-foreground",
           )}
         >
-          {label}
+          {active === value && (
+            <motion.span
+              layoutId="period-tab-pill"
+              className="absolute inset-0 rounded-lg bg-primary"
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            />
+          )}
+          <span className="relative">{label}</span>
         </Link>
       ))}
     </div>

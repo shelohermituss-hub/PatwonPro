@@ -53,6 +53,9 @@ export function PaymentBreakdownChart({ data }: { data: PaymentBreakdownRow[] })
                   innerRadius={55}
                   outerRadius={80}
                   paddingAngle={2}
+                  isAnimationActive
+                  animationDuration={600}
+                  animationEasing="ease-out"
                 >
                   {chartData.map((entry) => (
                     <Cell key={entry.name} fill={entry.color} />

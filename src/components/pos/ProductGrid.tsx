@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
+import { motion, useReducedMotion } from "motion/react";
 import { Icons } from "@/lib/icons";
 import { EmptyState } from "@/components/EmptyState";
 import { db } from "@/lib/db";
@@ -19,6 +20,7 @@ export function ProductGrid({
 }) {
   const [search, setSearch] = useState("");
   const [categoryId, setCategoryId] = useState<string>("all");
+  const shouldReduceMotion = useReducedMotion();
 
   const products = useLiveQuery(() => db.products.toArray(), []);
   const categories = useLiveQuery(() => db.categories.toArray(), []);
@@ -96,14 +98,17 @@ export function ProductGrid({
             {filtered.map((product) => {
               const outOfStock = product.stock_quantity <= 0;
               return (
-                // Raw <button>, not shadcn Button: this is a full multi-line
+                // motion.button, not shadcn Button: this is a full multi-line
                 // card layout (flex-col, custom disabled/hover treatment),
-                // not a fit for Button's single-line variant system.
-                <button
+                // not a fit for Button's single-line variant system — and the
+                // tap-scale feedback matters most here, the single most
+                // repeated tactile gesture in the whole app.
+                <motion.button
                   key={product.id}
                   type="button"
                   onClick={() => onSelect(product)}
                   disabled={outOfStock}
+                  whileTap={outOfStock || shouldReduceMotion ? undefined : { scale: 0.95 }}
                   className={cn(
                     "flex min-h-24 flex-col items-start justify-between gap-2 rounded-lg border border-border bg-surface p-3 text-left transition-colors",
                     "hover:border-primary hover:bg-primary/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
@@ -137,7 +142,7 @@ export function ProductGrid({
                       </span>
                     ) : null}
                   </div>
-                </button>
+                </motion.button>
               );
             })}
           </div>

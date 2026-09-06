@@ -9,7 +9,8 @@ import { db } from "@/lib/db";
 import { ProductForm } from "@/components/ProductForm";
 import { useCurrentProfile } from "@/hooks/useCurrentProfile";
 import { isOwner } from "@/lib/auth/roles";
-import { Skeleton } from "@/components/ui/skeleton";
+import { DetailSkeleton } from "@/components/DetailSkeleton";
+import { PageFade } from "@/components/motion/PageFade";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -37,16 +38,7 @@ export default function EditProductPage({
   }, [id]);
 
   if (isProfileLoading || !isOwner(profile) || result === undefined) {
-    return (
-      <div className="flex flex-col gap-6 p-6">
-        <Skeleton className="h-8 w-64" />
-        <div className="flex max-w-2xl flex-col gap-5">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-16 w-full" />
-          ))}
-        </div>
-      </div>
-    );
+    return <DetailSkeleton variant="form" />;
   }
 
   if (!result.found || !result.product) {
@@ -66,17 +58,19 @@ export default function EditProductPage({
   }
 
   return (
-    <div className="flex flex-col gap-6 p-6">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-extrabold text-foreground">
-          Modifye {result.product.name}
-        </h1>
-        <p className="text-text-secondary">
-          Chanjman yo disponib imedyatman, menm san entènèt.
-        </p>
-      </div>
+    <PageFade>
+      <div className="flex flex-col gap-6 p-6">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-2xl font-extrabold text-foreground">
+            Modifye {result.product.name}
+          </h1>
+          <p className="text-text-secondary">
+            Chanjman yo disponib imedyatman, menm san entènèt.
+          </p>
+        </div>
 
-      <ProductForm product={result.product} />
-    </div>
+        <ProductForm product={result.product} />
+      </div>
+    </PageFade>
   );
 }

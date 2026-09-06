@@ -86,6 +86,9 @@ export function SalesTrendChart({
                 stroke="var(--primary)"
                 strokeWidth={2}
                 fill="url(#salesTrendFill)"
+                isAnimationActive
+                animationDuration={600}
+                animationEasing="ease-out"
               />
             </AreaChart>
           </ResponsiveContainer>

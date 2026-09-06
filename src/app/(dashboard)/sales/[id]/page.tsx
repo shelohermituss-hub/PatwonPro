@@ -6,7 +6,8 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { Icons } from "@/lib/icons";
 import { EmptyState } from "@/components/EmptyState";
 import { db } from "@/lib/db";
-import { Skeleton } from "@/components/ui/skeleton";
+import { DetailSkeleton } from "@/components/DetailSkeleton";
+import { PageFade } from "@/components/motion/PageFade";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -57,12 +58,7 @@ export default function SaleDetailPage({
   }, [id]);
 
   if (result === undefined) {
-    return (
-      <div className="flex flex-col gap-6 p-6">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-40 w-full" />
-      </div>
-    );
+    return <DetailSkeleton />;
   }
 
   if (!result.found) {
@@ -84,6 +80,7 @@ export default function SaleDetailPage({
   const { sale, items, customer } = result;
 
   return (
+    <PageFade>
     <div className="flex flex-col gap-6 p-6">
       <div className="flex items-center gap-3">
         <Link
@@ -161,5 +158,6 @@ export default function SaleDetailPage({
         </Table>
       </div>
     </div>
+    </PageFade>
   );
 }

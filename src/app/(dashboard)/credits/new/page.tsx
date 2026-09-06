@@ -6,6 +6,7 @@ import { useForm, useWatch, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLiveQuery } from "dexie-react-hooks";
 import { LoaderCircle } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { toast } from "sonner";
 import { db } from "@/lib/db";
 import { pullCustomers } from "@/lib/sync/customers";
@@ -144,13 +145,23 @@ export default function NewCreditPage() {
               {selectedCustomer.full_name} deja dwe{" "}
               {formatCurrency(selectedCustomer.credit_balance)} (limit{" "}
               {formatCurrency(selectedCustomer.credit_limit)}).
-              {exceedsCreditLimit && (
-                <span className="block font-medium text-warning">
-                  ⚠ Kredi sa a ap depase limit kliyan an — ou ka kontinye kanmenm.
-                </span>
-              )}
             </p>
           )}
+
+          <AnimatePresence initial={false}>
+            {selectedCustomer && exceedsCreditLimit && (
+              <motion.p
+                role="alert"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.25 }}
+                className="overflow-hidden text-sm font-medium text-warning"
+              >
+                ⚠ Kredi sa a ap depase limit kliyan an — ou ka kontinye kanmenm.
+              </motion.p>
+            )}
+          </AnimatePresence>
 
           {formError && (
             <p role="alert" className="text-sm font-medium text-danger">

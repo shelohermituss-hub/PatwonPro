@@ -1,7 +1,12 @@
+"use client";
+
 import Link from "next/link";
+import Image from "next/image";
+import { motion, useReducedMotion } from "motion/react";
 import { Icons } from "@/lib/icons";
 import { buttonVariants } from "@/components/ui/button";
 import { formatCurrencyHTG } from "@/lib/format";
+import { DURATION, EASE } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 const MOCK_PRODUCTS = [
@@ -12,6 +17,8 @@ const MOCK_PRODUCTS = [
 ];
 
 export function Hero() {
+  const shouldReduceMotion = useReducedMotion();
+
   return (
     <section className="mx-auto grid max-w-6xl gap-12 px-4 py-16 sm:px-6 md:grid-cols-2 md:items-center md:py-24">
       <div className="flex flex-col gap-6">
@@ -41,9 +48,26 @@ export function Hero() {
         </p>
       </div>
 
-      <div className="relative mx-auto w-full max-w-sm">
+      <div className="relative mx-auto w-full max-w-sm pb-10 pl-10">
         <div className="absolute inset-0 -z-10 rounded-[2rem] bg-gradient-to-br from-brand-gradient-start via-brand-gradient-via to-brand-gradient-end opacity-20 blur-2xl" />
-        <div className="rounded-3xl border border-border bg-surface p-4 shadow-xl">
+
+        <div className="absolute -bottom-4 -left-4 -z-[5] w-2/3 overflow-hidden rounded-2xl border border-border shadow-lg">
+          <Image
+            src="/images/landing/hero-shop.jpg"
+            alt="Yon boutik kwen k ap sèvi ak yon sistèm pwen vant"
+            width={480}
+            height={640}
+            className="aspect-[3/4] w-full object-cover"
+            priority
+          />
+        </div>
+
+        <motion.div
+          className="relative rounded-3xl border border-border bg-surface p-4 shadow-xl"
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: DURATION.slow, ease: EASE }}
+        >
           <div className="mb-3 flex items-center gap-1.5">
             <span className="size-2.5 rounded-full bg-danger/70" />
             <span className="size-2.5 rounded-full bg-warning/70" />
@@ -52,17 +76,23 @@ export function Hero() {
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            {MOCK_PRODUCTS.map((product) => (
-              <div
+            {MOCK_PRODUCTS.map((product, index) => (
+              <motion.div
                 key={product.name}
                 className="flex flex-col items-start gap-1 rounded-lg border border-border p-2.5"
+                animate={
+                  shouldReduceMotion || index !== 0
+                    ? undefined
+                    : { scale: [1, 1.04, 1], borderColor: ["var(--border)", "var(--primary)", "var(--border)"] }
+                }
+                transition={{ duration: 1.8, repeat: Infinity, repeatDelay: 2.5, ease: EASE }}
               >
                 <product.icon className="size-5" aria-hidden />
                 <span className="text-xs font-medium text-foreground">{product.name}</span>
                 <span className="text-xs font-bold text-foreground">
                   {formatCurrencyHTG(product.price)}
                 </span>
-              </div>
+              </motion.div>
             ))}
           </div>
 
@@ -72,7 +102,7 @@ export function Hero() {
               {formatCurrencyHTG(875)}
             </span>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
