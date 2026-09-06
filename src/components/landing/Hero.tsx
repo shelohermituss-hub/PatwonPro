@@ -48,22 +48,22 @@ export function Hero() {
         </p>
       </div>
 
-      <div className="relative mx-auto w-full max-w-sm pb-10 pl-10">
+      <div className="relative mx-auto flex w-full max-w-sm flex-col gap-4">
         <div className="absolute inset-0 -z-10 rounded-[2rem] bg-gradient-to-br from-brand-gradient-start via-brand-gradient-via to-brand-gradient-end opacity-20 blur-2xl" />
 
-        <div className="absolute -bottom-4 -left-4 -z-[5] w-2/3 overflow-hidden rounded-2xl border border-border shadow-lg">
+        <div className="overflow-hidden rounded-2xl border border-border shadow-lg">
           <Image
             src="/images/landing/hero-shop.jpg"
             alt="Yon boutik kwen k ap sèvi ak yon sistèm pwen vant"
             width={480}
-            height={640}
-            className="aspect-[3/4] w-full object-cover"
+            height={300}
+            className="aspect-[16/10] w-full object-cover"
             priority
           />
         </div>
 
         <motion.div
-          className="relative rounded-3xl border border-border bg-surface p-4 shadow-xl"
+          className="rounded-3xl border border-border bg-surface p-4 shadow-xl"
           initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: DURATION.slow, ease: EASE }}
