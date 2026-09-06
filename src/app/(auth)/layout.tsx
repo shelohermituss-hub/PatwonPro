@@ -1,4 +1,5 @@
-import { Logo } from "@/components/Logo";
+import Image from "next/image";
+import { Logo, Wordmark } from "@/components/Logo";
 
 /**
  * Split-screen shell for /login and /register. Deliberately not a copy
@@ -31,15 +32,20 @@ export default function AuthLayout({
         />
 
         <div className="relative flex items-center gap-2 text-white">
-          <Logo size={28} className="shrink-0 rounded-md" />
-          <span className="text-lg font-bold">PatwonPro</span>
+          <Logo size={28} tone="white" />
+          <Wordmark tone="white" className="text-lg" />
         </div>
 
-        <div className="relative flex flex-1 items-center justify-center" aria-hidden>
-          <div className="grid w-16 grid-cols-2 gap-1.5">
-            <div className="col-start-1 row-start-2 aspect-square rounded-md bg-white shadow-lg shadow-black/10 motion-safe:animate-[auth-hero-block-a_5s_ease-in-out_infinite]" />
-            <div className="col-start-2 row-start-2 aspect-square rounded-md bg-white shadow-lg shadow-black/10 motion-safe:animate-[auth-hero-block-b_5s_ease-in-out_infinite]" />
-            <div className="col-start-2 row-start-1 aspect-square rounded-md bg-white shadow-lg shadow-black/10 motion-safe:animate-[auth-hero-block-c_5s_ease-in-out_infinite]" />
+        <div className="relative flex flex-1 items-center justify-center py-6">
+          <div className="w-52 overflow-hidden rounded-3xl border border-white/20 shadow-2xl shadow-black/30 motion-safe:animate-[auth-hero-card_6s_ease-in-out_infinite]">
+            <Image
+              src="/images/auth/shop-owner-phone.jpg"
+              alt="Yon kòmèsan k ap konsilte telefòn li nan boutik li"
+              width={900}
+              height={1125}
+              className="aspect-[4/5] w-full object-cover"
+              priority
+            />
           </div>
         </div>
 

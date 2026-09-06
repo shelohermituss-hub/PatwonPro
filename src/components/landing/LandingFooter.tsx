@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Logo } from "@/components/Logo";
+import { Logo, Wordmark } from "@/components/Logo";
 
 const LINK_COLUMNS = [
   {
@@ -26,8 +26,8 @@ export function LandingFooter() {
         <div className="grid gap-10 sm:grid-cols-[1.5fr_1fr_1fr]">
           <div className="flex flex-col gap-3">
             <Link href="/" className="flex items-center gap-2">
-              <Logo size={28} className="shrink-0 rounded-md" />
-              <span className="text-lg font-semibold text-foreground">PatwonPro</span>
+              <Logo size={28} />
+              <Wordmark className="text-lg" />
             </Link>
             <p className="max-w-xs text-sm text-text-secondary">
               Jesyon boutik senp ak fyab pou ti ak mwayen antrepriz an Ayiti.

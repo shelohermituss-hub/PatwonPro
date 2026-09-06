@@ -79,6 +79,8 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
+  /* PatwonPro logotype only (Logo.tsx's Wordmark) — never body copy. */
+  --font-brand: var(--font-sora);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -194,41 +196,12 @@
 }
 
 /**
- * Falling/stacking blocks in the hero panel — one square drops in,
- * bounces to rest, the next lands beside/above it, the little stack
- * holds, then all fade together and the cycle restarts. Each block
- * reuses the same timeline shape shifted a few percentage points later
- * so the stagger repeats identically every loop (an `animation-delay`
- * on an `infinite` animation would only apply once, at the very start).
+ * Gentle float on the hero panel's illustration card — just enough
+ * motion to read as alive without competing with the login form.
  */
-@keyframes auth-hero-block-a {
-  0% { opacity: 0; transform: translateY(-2.5rem) scale(0.9); }
-  10% { opacity: 1; }
-  16% { transform: translateY(0.35rem) scale(1.04); }
-  22% { transform: translateY(0) scale(1); }
-  78% { opacity: 1; transform: translateY(0) scale(1); }
-  90% { opacity: 0; transform: translateY(0) scale(1); }
-  100% { opacity: 0; }
-}
-
-@keyframes auth-hero-block-b {
-  0%, 8% { opacity: 0; transform: translateY(-2.5rem) scale(0.9); }
-  18% { opacity: 1; }
-  24% { transform: translateY(0.35rem) scale(1.04); }
-  30% { transform: translateY(0) scale(1); }
-  78% { opacity: 1; transform: translateY(0) scale(1); }
-  90% { opacity: 0; transform: translateY(0) scale(1); }
-  100% { opacity: 0; }
-}
-
-@keyframes auth-hero-block-c {
-  0%, 16% { opacity: 0; transform: translateY(-2.5rem) scale(0.9); }
-  26% { opacity: 1; }
-  32% { transform: translateY(0.35rem) scale(1.04); }
-  38% { transform: translateY(0) scale(1); }
-  78% { opacity: 1; transform: translateY(0) scale(1); }
-  90% { opacity: 0; transform: translateY(0) scale(1); }
-  100% { opacity: 0; }
+@keyframes auth-hero-card {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-0.5rem); }
 }
 
 /**

@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { LogOut, LoaderCircle } from "lucide-react";
 import { Icons } from "@/lib/icons";
 import { SyncStatusBadge } from "@/components/SyncStatusBadge";
-import { Logo } from "@/components/Logo";
+import { Logo, Wordmark } from "@/components/Logo";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   Sidebar,
@@ -99,10 +99,8 @@ export function AppSidebar({
     <Sidebar collapsible="icon">
       <SidebarHeader>
         <div className="flex items-center gap-2 px-2 py-1 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
-          <Logo size={24} className="shrink-0 rounded-md" />
-          <span className="truncate text-base font-semibold text-foreground group-data-[collapsible=icon]:hidden">
-            PatwonPro
-          </span>
+          <Logo size={24} />
+          <Wordmark className="truncate text-base group-data-[collapsible=icon]:hidden" />
         </div>
 
         {store && (

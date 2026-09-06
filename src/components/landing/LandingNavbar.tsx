@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Logo } from "@/components/Logo";
+import { Logo, Wordmark } from "@/components/Logo";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -14,8 +14,8 @@ export function LandingNavbar() {
     <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
         <Link href="/" className="flex items-center gap-2">
-          <Logo size={28} className="shrink-0 rounded-md" />
-          <span className="text-lg font-semibold text-foreground">PatwonPro</span>
+          <Logo size={28} />
+          <Wordmark className="text-lg" />
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
