@@ -66,6 +66,18 @@ function initials(name: string) {
     .join("");
 }
 
+/**
+ * `profiles.full_name` is `not null` in the schema and every RPC that
+ * inserts a profile row validates it non-empty — but `getCurrentProfile()`
+ * casts a raw `select("*")` to `Profile` with no runtime check, so a row
+ * created outside those RPCs (manual insert, data import) could still slip
+ * through empty and crash `initials()`/`.split()` for every page under
+ * `(dashboard)`, since this sidebar renders on all of them.
+ */
+function displayName(profile: Profile) {
+  return profile.full_name?.trim() || "Itilizatè";
+}
+
 export function AppSidebar({
   profile,
   store,
@@ -139,12 +151,12 @@ export function AppSidebar({
         {profile && (
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton size="lg" tooltip={profile.full_name} className="cursor-default">
+              <SidebarMenuButton size="lg" tooltip={displayName(profile)} className="cursor-default">
                 <Avatar size="sm">
-                  <AvatarFallback>{initials(profile.full_name)}</AvatarFallback>
+                  <AvatarFallback>{initials(displayName(profile))}</AvatarFallback>
                 </Avatar>
                 <div className="flex min-w-0 flex-col">
-                  <span className="truncate text-sm font-medium">{profile.full_name}</span>
+                  <span className="truncate text-sm font-medium">{displayName(profile)}</span>
                   <span className="truncate text-xs text-sidebar-foreground/70">
                     {ROLE_LABELS[profile.role]}
                   </span>

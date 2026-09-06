@@ -45,6 +45,17 @@ function initials(fullName: string) {
     .join("");
 }
 
+/**
+ * `profiles.full_name` is `not null` in the schema and every RPC that
+ * inserts a profile row validates it non-empty — but `getCurrentProfile()`
+ * casts a raw `select("*")` to `Profile` with no runtime check, so a row
+ * created outside those RPCs (manual insert, data import) could still slip
+ * through empty and crash `.split()` below.
+ */
+function displayName(profile: Profile) {
+  return profile.full_name?.trim() || "Itilizatè";
+}
+
 export function DashboardHeader({
   profile,
   storeName,
@@ -53,7 +64,8 @@ export function DashboardHeader({
   storeName: string;
 }) {
   const router = useRouter();
-  const firstName = profile.full_name.split(" ")[0];
+  const name = displayName(profile);
+  const firstName = name.split(" ")[0];
   const today = new Date();
 
   async function handleSignOut() {
@@ -81,18 +93,18 @@ export function DashboardHeader({
           <DropdownMenuTrigger className="flex min-h-12 items-center gap-2 rounded-md border border-border bg-surface px-2 pr-3 text-left hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
             <Avatar className="size-8">
               <AvatarFallback className="bg-primary/10 text-sm font-semibold text-primary">
-                {initials(profile.full_name)}
+                {initials(name)}
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col leading-tight">
-              <span className="text-sm font-medium text-foreground">{profile.full_name}</span>
+              <span className="text-sm font-medium text-foreground">{name}</span>
               <span className="text-xs text-text-secondary">{ROLE_LABELS[profile.role]}</span>
             </div>
             <ChevronDown className="size-4 shrink-0 text-text-secondary" aria-hidden />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuGroup>
-              <DropdownMenuLabel>{profile.full_name}</DropdownMenuLabel>
+              <DropdownMenuLabel>{name}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem render={<Link href="/settings" />}>
                 <Icons.settings data-icon="inline-start" aria-hidden />
