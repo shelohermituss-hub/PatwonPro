@@ -35,6 +35,14 @@ export default function AuthLayout({
           <span className="text-lg font-bold">PatwonPro</span>
         </div>
 
+        <div className="relative flex flex-1 items-center justify-center" aria-hidden>
+          <div className="grid w-16 grid-cols-2 gap-1.5">
+            <div className="col-start-1 row-start-2 aspect-square rounded-md bg-white shadow-lg shadow-black/10 motion-safe:animate-[auth-hero-block-a_5s_ease-in-out_infinite]" />
+            <div className="col-start-2 row-start-2 aspect-square rounded-md bg-white shadow-lg shadow-black/10 motion-safe:animate-[auth-hero-block-b_5s_ease-in-out_infinite]" />
+            <div className="col-start-2 row-start-1 aspect-square rounded-md bg-white shadow-lg shadow-black/10 motion-safe:animate-[auth-hero-block-c_5s_ease-in-out_infinite]" />
+          </div>
+        </div>
+
         <div className="relative flex flex-col gap-2 text-white">
           <p className="text-3xl font-extrabold leading-tight">
             Jere boutik ou san pran tèt.

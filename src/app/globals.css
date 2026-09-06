@@ -194,6 +194,44 @@
 }
 
 /**
+ * Falling/stacking blocks in the hero panel — one square drops in,
+ * bounces to rest, the next lands beside/above it, the little stack
+ * holds, then all fade together and the cycle restarts. Each block
+ * reuses the same timeline shape shifted a few percentage points later
+ * so the stagger repeats identically every loop (an `animation-delay`
+ * on an `infinite` animation would only apply once, at the very start).
+ */
+@keyframes auth-hero-block-a {
+  0% { opacity: 0; transform: translateY(-2.5rem) scale(0.9); }
+  10% { opacity: 1; }
+  16% { transform: translateY(0.35rem) scale(1.04); }
+  22% { transform: translateY(0) scale(1); }
+  78% { opacity: 1; transform: translateY(0) scale(1); }
+  90% { opacity: 0; transform: translateY(0) scale(1); }
+  100% { opacity: 0; }
+}
+
+@keyframes auth-hero-block-b {
+  0%, 8% { opacity: 0; transform: translateY(-2.5rem) scale(0.9); }
+  18% { opacity: 1; }
+  24% { transform: translateY(0.35rem) scale(1.04); }
+  30% { transform: translateY(0) scale(1); }
+  78% { opacity: 1; transform: translateY(0) scale(1); }
+  90% { opacity: 0; transform: translateY(0) scale(1); }
+  100% { opacity: 0; }
+}
+
+@keyframes auth-hero-block-c {
+  0%, 16% { opacity: 0; transform: translateY(-2.5rem) scale(0.9); }
+  26% { opacity: 1; }
+  32% { transform: translateY(0.35rem) scale(1.04); }
+  38% { transform: translateY(0) scale(1); }
+  78% { opacity: 1; transform: translateY(0) scale(1); }
+  90% { opacity: 0; transform: translateY(0) scale(1); }
+  100% { opacity: 0; }
+}
+
+/**
  * Jere Boutik Admin (`/admin`, AdminShell.tsx) — a dark-navy sidebar so
  * the internal team immediately sees they're in the back-office, not the
  * merchant app. Scoped to only the `--sidebar*` tokens on purpose: the
