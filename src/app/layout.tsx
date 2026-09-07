@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Sora } from "next/font/google";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
+import { AppThemeProvider } from "@/components/AppThemeProvider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -56,11 +57,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="ht"
       className={`${geistSans.variable} ${geistMono.variable} ${sora.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <ServiceWorkerRegister />
-        <TooltipProvider>{children}</TooltipProvider>
-        <Toaster />
+        <AppThemeProvider>
+          <ServiceWorkerRegister />
+          <TooltipProvider>{children}</TooltipProvider>
+          <Toaster />
+        </AppThemeProvider>
       </body>
     </html>
   );

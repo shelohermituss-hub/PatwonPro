@@ -126,11 +126,12 @@ restaurer le tableau ci-dessus si nécessaire.
 - **Taille tactile** : `size-12` (48px) minimum sur toute cible tactile
   (`docs/CLAUDE.md` — 48×48px minimum), y compris les icônes cliquables
   isolées (pas seulement les boutons avec texte).
-- **Dark mode** : piloté par la classe `.dark` sur `<html>` (convention
-  shadcn), **pas** par `prefers-color-scheme` automatique — pas de
-  bouton pour changer de mode pour l'instant ; ajouter un "theme toggle"
-  (`next-themes`, déjà une dépendance transitive via `sonner`/`calendar`)
-  si le mode sombre doit devenir accessible à l'utilisateur.
+- **Dark mode** : implémenté — `next-themes` (`AppThemeProvider`, monté
+  une seule fois dans `src/app/layout.tsx`), toggle Clair/Sombre/Sistèm
+  dans l'onglet "Aparans" de `/settings` (commerçant) et
+  `/admin/settings` (admin). Voir `docs/DARK_MODE.md` pour
+  l'architecture complète, la liste des tokens ajustés en `.dark`, et
+  la règle "landing/auth toujours en clair".
 
 ## Composants (shadcn/ui)
 

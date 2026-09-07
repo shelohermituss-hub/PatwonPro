@@ -77,9 +77,14 @@ export interface Profile {
   role: UserRole;
   /** Only set when `role = "platform_admin"` — see migration 011. */
   admin_role: AdminRole | null;
+  /** See migration 039 — cross-device source of truth, `next-themes`'s
+   * `localStorage` copy is the per-device immediate one. */
+  theme_preference: ThemePreference;
   created_at: string;
   updated_at: string;
 }
+
+export type ThemePreference = "light" | "dark" | "system";
 
 export interface Category {
   id: string;

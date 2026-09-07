@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Field, FieldGroup, FieldLabel, FieldDescription } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { can } from "@/lib/admin/permissions";
 import { recordAuditEvent } from "@/lib/admin/auditLog";
 import { savePlatformSettings } from "@/lib/admin/mutations/settings";
@@ -69,6 +70,19 @@ export function SettingsClient({
         title="Paramèt Platfòm"
         description={readOnly ? "Lekti sèlman — sèl Sipè Admin ka modifye paramèt sa yo." : "Konfigirasyon global aplike sou tout boutik yo."}
       />
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Aparans</CardTitle>
+          <CardDescription>
+            Preferans pèsonèl — chak manm ekip la chwazi pou pwòp sesyon yo,
+            pa gen efè sou lòt itilizatè.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ThemeToggle />
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

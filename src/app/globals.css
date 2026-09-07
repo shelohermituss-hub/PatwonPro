@@ -121,7 +121,13 @@
 
 .dark {
   /* Same brand tokens as :root — only the neutral scaffolding (surface,
-     card, border, etc.) swaps for dark. */
+     card, border, etc.) swaps for dark. --text-secondary/--danger/
+     --destructive are deliberately overridden below (not just left to
+     inherit from :root) — measured contrast against the new dark
+     --background (oklch(0.145 0 0)) via WCAG relative luminance: the
+     :root values (#64748b text-secondary, #dc2626 danger/destructive)
+     land at ~4.16:1 and ~4.10:1, both under the 4.5:1 AA floor for
+     body text — the brighter values below clear 7:1 and 5.2:1. */
   --surface: #171717;
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
@@ -132,6 +138,7 @@
   --primary: #4f46e5;
   --primary-hover: #4338ca;
   --warning: #f59e0b;
+  --text-secondary: #94a3b8;
   --primary-foreground: #ffffff;
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
@@ -139,7 +146,8 @@
   --muted-foreground: oklch(0.708 0 0);
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
-  --destructive: #dc2626;
+  --danger: #ef4444;
+  --destructive: #ef4444;
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);

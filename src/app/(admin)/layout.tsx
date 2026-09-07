@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/supabase/profile";
 import { isPlatformAdmin } from "@/lib/auth/roles";
 import { AdminShell } from "@/components/admin/AdminShell";
+import { ThemeSync } from "@/components/ThemeSync";
 import { fetchAdminAlertCount } from "@/lib/admin/queries/alerts";
 import type { AdminActor } from "@/types/admin";
 
@@ -25,8 +26,11 @@ export default async function AdminLayout({
   const alertCount = await fetchAdminAlertCount();
 
   return (
-    <AdminShell actor={actor} alertCount={alertCount}>
-      {children}
-    </AdminShell>
+    <>
+      <ThemeSync profileThemePreference={profile.theme_preference} />
+      <AdminShell actor={actor} alertCount={alertCount}>
+        {children}
+      </AdminShell>
+    </>
   );
 }

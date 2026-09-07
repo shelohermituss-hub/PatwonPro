@@ -1,11 +1,12 @@
 import { redirect } from "next/navigation";
-import { Store, Smartphone, Users } from "lucide-react";
+import { Store, Smartphone, Users, MonitorCog } from "lucide-react";
 import { getCurrentProfile } from "@/lib/supabase/profile";
 import { createClient } from "@/lib/supabase/server";
 import { isOwner } from "@/lib/auth/roles";
 import { InviteEmployeeForm } from "@/components/InviteEmployeeForm";
 import { StoreProfileForm } from "@/components/StoreProfileForm";
 import { MobilePaymentConfigForm } from "@/components/MobilePaymentConfigForm";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { EmptyState } from "@/components/EmptyState";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -69,6 +70,10 @@ export default async function SettingsPage() {
           <TabsTrigger value="team">
             <Users data-icon="inline-start" aria-hidden />
             Ekip
+          </TabsTrigger>
+          <TabsTrigger value="appearance">
+            <MonitorCog data-icon="inline-start" aria-hidden />
+            Aparans
           </TabsTrigger>
         </TabsList>
 
@@ -135,6 +140,16 @@ export default async function SettingsPage() {
               </Table>
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="appearance" className="flex flex-col gap-4 pt-4">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-lg font-semibold text-foreground">Aparans</h2>
+            <p className="text-sm text-text-secondary">
+              Chwazi si aplikasyon an klè, fonse, oswa swiv reglaj aparèy ou.
+            </p>
+          </div>
+          <ThemeToggle />
         </TabsContent>
       </Tabs>
     </div>

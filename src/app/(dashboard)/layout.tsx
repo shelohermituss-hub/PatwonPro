@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { DashboardShell } from "@/components/DashboardShell";
+import { ThemeSync } from "@/components/ThemeSync";
 import { getCurrentProfile } from "@/lib/supabase/profile";
 import { createClient } from "@/lib/supabase/server";
 import { isPlatformAdmin } from "@/lib/auth/roles";
@@ -31,12 +32,15 @@ export default async function DashboardLayout({
   const sidebarState = cookieStore.get("sidebar_state")?.value;
 
   return (
-    <DashboardShell
-      profile={profile}
-      store={store}
-      defaultSidebarOpen={sidebarState !== "false"}
-    >
-      {children}
-    </DashboardShell>
+    <>
+      {profile ? <ThemeSync profileThemePreference={profile.theme_preference} /> : null}
+      <DashboardShell
+        profile={profile}
+        store={store}
+        defaultSidebarOpen={sidebarState !== "false"}
+      >
+        {children}
+      </DashboardShell>
+    </>
   );
 }
