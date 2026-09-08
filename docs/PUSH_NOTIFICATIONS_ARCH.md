@@ -28,7 +28,7 @@ aussi été généré — c'est le secret partagé entre `pg_cron`/`pg_net` et
 valeurs doivent être configurées séparément sur l'environnement de
 production (Vercel, etc.)** — `.env.local` ne voyage pas avec le déploiement.
 
-## Schéma (migrations 040-042)
+## Schéma (migrations 040-043)
 
 - **`push_subscriptions`** — un abonnement navigateur par appareil
   (`profile_id`, `endpoint` unique, `p256dh`/`auth`). RLS : le
@@ -40,6 +40,11 @@ production (Vercel, etc.)** — `.env.local` ne voyage pas avec le déploiement.
   d'envoi (succès/échec), lu depuis l'onglet "Notifikasyon" de
   `/settings`/`/admin/settings`.
 - **`notification_campaigns`** — la console admin (voir plus bas).
+  Cible `target_scope` (`all_stores`/`single_user`/`admin_team`) +
+  `target_profile_id` (migration 043 — cherche/vise n'importe quel
+  profil par nom, pas seulement une boutique), et un `notification_type`
+  (`info`/`success`/`warning`/`urgent`) affiché comme badge dans la
+  console.
 - `pg_cron`/`pg_net` activés (migration 042) — déclenchent `POST
   /api/push/dispatch` via `net.http_post`, jamais de session Supabase,
   authentifié par `x-push-dispatch-secret`.
@@ -73,11 +78,20 @@ Demande explicite de l'utilisateur : créer, ajouter un déclencheur,
 supprimer — complet. Système de **campagnes**, distinct des alertes
 automatiques ci-dessus.
 
-- **Créer** : `NewNotificationCampaignSheet` — titre, message, cible
-  (toutes les boutiques / une boutique précise / l'équipe admin),
-  déclencheur (voir ci-dessous). `createNotificationCampaign` (Server
-  Action, `src/lib/admin/actions/notificationCampaigns.ts`) — insère
-  la ligne, puis :
+- **Modèles prédéfinis** (`src/lib/admin/notificationTemplates.ts`) :
+  ~15 modèles liés à de vraies actions du produit (nouvelle vente,
+  crédit en retard, stock bas, changement de statut d'abonnement,
+  caution reçue/remboursée, demande de remplacement approuvée/rejetée,
+  ticket support créé/résolu, erreur de sync, maintenance...) —
+  sélectionner un modèle dans le Sheet préremplit Kalite/Tit/Mesaj/
+  Kategori, l'admin peut ensuite ajuster librement avant d'envoyer.
+- **Créer** : `NewNotificationCampaignSheet` — modèle (optionnel),
+  destinataire (une boutique/un utilisateur précis, cherché par nom /
+  toutes les boutiques / l'équipe admin), kalite (Info/Siksè/
+  Avètisman/Ijans), titre, message, déclencheur (voir ci-dessous).
+  `createNotificationCampaign` (Server Action,
+  `src/lib/admin/actions/notificationCampaigns.ts`) — insère la ligne,
+  puis :
   - **Voye kounye a (immediate)** : dispatch synchrone
     (`dispatchNotificationCampaign`), statut `sent` immédiatement.
   - **Pwograme yon dat (scheduled_once)** : traduit en une expression

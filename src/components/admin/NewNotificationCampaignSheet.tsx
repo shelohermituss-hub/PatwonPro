@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, useWatch, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LoaderCircle, Plus } from "lucide-react";
+import { LoaderCircle, Plus, Search, X, Users, User, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import {
   Sheet,
@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Field, FieldGroup, FieldLabel, FieldTitle, FieldError } from "@/components/ui/field";
+import { cn } from "@/lib/utils";
 import {
   notificationCampaignSchema,
   toRecurringCronExpression,
@@ -35,13 +36,20 @@ import {
   type NotificationCampaignFormOutput,
 } from "@/lib/validations/notificationCampaign";
 import { createNotificationCampaign } from "@/lib/admin/actions/notificationCampaigns";
+import { NOTIFICATION_TEMPLATES } from "@/lib/admin/notificationTemplates";
 import {
-  NOTIFICATION_CAMPAIGN_TARGET_SCOPE_LABELS,
   NOTIFICATION_CAMPAIGN_TRIGGER_TYPE_LABELS,
+  NOTIFICATION_CAMPAIGN_TYPE_LABELS,
 } from "@/lib/admin/labels";
-import type { StoreOption } from "@/lib/admin/queries/notificationCampaigns";
+import type { UserOption } from "@/lib/admin/queries/notificationCampaigns";
+import type { NotificationCampaignTargetScope, NotificationCampaignType } from "@/types/admin";
 
-const TARGET_SCOPES = ["all_stores", "single_store", "admin_team"] as const;
+const TARGET_SCOPE_OPTIONS: { value: NotificationCampaignTargetScope; label: string; icon: typeof User }[] = [
+  { value: "single_user", label: "Yon Sèl Itilizatè", icon: User },
+  { value: "all_stores", label: "Tout Machann", icon: Users },
+  { value: "admin_team", label: "Ekip Admin", icon: ShieldCheck },
+];
+const NOTIFICATION_TYPES: NotificationCampaignType[] = ["info", "success", "warning", "urgent"];
 const TRIGGER_TYPES = ["immediate", "scheduled_once", "recurring"] as const;
 const WEEKDAY_OPTIONS = [
   { value: "1", label: "Lendi" },
@@ -53,7 +61,90 @@ const WEEKDAY_OPTIONS = [
   { value: "0", label: "Dimanch" },
 ];
 
-export function NewNotificationCampaignSheet({ storeOptions }: { storeOptions: StoreOption[] }) {
+const ROLE_LABELS: Record<UserOption["role"], string> = {
+  owner: "Pwopriyetè",
+  employee: "Anplwaye",
+  platform_admin: "Admin",
+};
+
+function UserPicker({
+  users,
+  selectedId,
+  onSelect,
+}: {
+  users: UserOption[];
+  selectedId: string | undefined;
+  onSelect: (id: string | undefined) => void;
+}) {
+  const [query, setQuery] = useState("");
+  const selected = users.find((u) => u.id === selectedId);
+
+  const filtered = useMemo(() => {
+    if (!query.trim()) return users.slice(0, 20);
+    const q = query.toLowerCase();
+    return users.filter((u) => u.fullName.toLowerCase().includes(q)).slice(0, 20);
+  }, [users, query]);
+
+  if (selected) {
+    return (
+      <div className="flex items-center justify-between gap-2 rounded-md border border-border bg-muted px-3 py-2.5">
+        <div className="flex flex-col">
+          <span className="text-sm font-medium text-foreground">{selected.fullName}</span>
+          <span className="text-xs text-text-secondary">
+            {ROLE_LABELS[selected.role]}
+            {selected.storeName ? ` · ${selected.storeName}` : ""}
+          </span>
+        </div>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="size-8 shrink-0"
+          onClick={() => onSelect(undefined)}
+          aria-label="Chanje itilizatè"
+        >
+          <X className="size-4" aria-hidden />
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-secondary" aria-hidden />
+        <Input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Rechèche pa non..."
+          className="min-h-11 pl-9"
+        />
+      </div>
+      <div className="flex max-h-48 flex-col gap-1 overflow-y-auto rounded-md border border-border p-1">
+        {filtered.length === 0 ? (
+          <p className="p-3 text-center text-sm text-text-secondary">Pa gen rezilta.</p>
+        ) : (
+          filtered.map((user) => (
+            <button
+              key={user.id}
+              type="button"
+              onClick={() => onSelect(user.id)}
+              className="flex flex-col items-start gap-0.5 rounded-md px-3 py-2 text-left hover:bg-muted"
+            >
+              <span className="text-sm font-medium text-foreground">{user.fullName}</span>
+              <span className="text-xs text-text-secondary">
+                {ROLE_LABELS[user.role]}
+                {user.storeName ? ` · ${user.storeName}` : ""}
+              </span>
+            </button>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+export function NewNotificationCampaignSheet({ userOptions }: { userOptions: UserOption[] }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -61,24 +152,44 @@ export function NewNotificationCampaignSheet({ storeOptions }: { storeOptions: S
     register,
     handleSubmit,
     reset,
+    setValue,
     control,
     formState: { errors, isSubmitting },
   } = useForm<NotificationCampaignFormInput, unknown, NotificationCampaignFormOutput>({
     resolver: zodResolver(notificationCampaignSchema),
-    defaultValues: { targetScope: "all_stores", triggerType: "immediate" },
+    defaultValues: {
+      targetScope: "all_stores",
+      triggerType: "immediate",
+      notificationType: "info",
+      category: "admin_broadcast",
+    },
   });
 
   const targetScope = useWatch({ control, name: "targetScope" });
+  const targetProfileId = useWatch({ control, name: "targetProfileId" });
   const triggerType = useWatch({ control, name: "triggerType" });
   const frequency = useWatch({ control, name: "frequency" });
+  const templateId = useWatch({ control, name: "templateId" });
+
+  function applyTemplate(id: string | null) {
+    const template = NOTIFICATION_TEMPLATES.find((t) => t.id === id);
+    if (!template || !id) return;
+    setValue("templateId", id);
+    setValue("notificationType", template.notificationType);
+    setValue("category", template.category);
+    setValue("title", template.title, { shouldValidate: true });
+    setValue("body", template.body, { shouldValidate: true });
+  }
 
   async function onSubmit(values: NotificationCampaignFormOutput) {
     setFormError(null);
     const result = await createNotificationCampaign({
       title: values.title,
       body: values.body,
+      category: values.category,
+      notificationType: values.notificationType,
       targetScope: values.targetScope,
-      targetStoreId: values.targetScope === "single_store" ? (values.targetStoreId ?? null) : null,
+      targetProfileId: values.targetScope === "single_user" ? (values.targetProfileId ?? null) : null,
       triggerType: values.triggerType,
       scheduledAt: values.triggerType === "scheduled_once" ? new Date(values.scheduledAt!).toISOString() : null,
       cronExpression: values.triggerType === "recurring" ? toRecurringCronExpression(values) : null,
@@ -103,42 +214,98 @@ export function NewNotificationCampaignSheet({ storeOptions }: { storeOptions: S
       </SheetTrigger>
       <SheetContent className="flex flex-col gap-0 sm:max-w-lg">
         <SheetHeader>
-          <SheetTitle>Nouvo Kanpay Notifikasyon</SheetTitle>
+          <SheetTitle>Kreye yon Notifikasyon</SheetTitle>
           <SheetDescription>
-            Kreye yon anons ki ale bay boutik yo (oswa ekip admin la) — chwazi
-            lè li dwe voye a.
+            Chwazi yon modèl pou ranpli fòm nan otomatikman, oswa ekri pwòp
+            mesaj ou.
           </SheetDescription>
         </SheetHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 pb-4">
           <FieldGroup>
-            <Field data-invalid={!!errors.title || undefined}>
-              <FieldLabel htmlFor="title">Tit</FieldLabel>
-              <Input id="title" {...register("title")} placeholder="Antretyen pwograme" />
-              <FieldError errors={[errors.title]} />
-            </Field>
-
-            <Field data-invalid={!!errors.body || undefined}>
-              <FieldLabel htmlFor="body">Mesaj</FieldLabel>
-              <Textarea id="body" rows={3} {...register("body")} placeholder="Detay anons lan..." />
-              <FieldError errors={[errors.body]} />
+            <Field>
+              <FieldLabel htmlFor="templateId">Modèl (opsyonèl)</FieldLabel>
+              <Select value={templateId} onValueChange={applyTemplate}>
+                <SelectTrigger id="templateId" className="min-h-12 w-full">
+                  <SelectValue placeholder="Chwazi yon modèl..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(
+                    NOTIFICATION_TEMPLATES.reduce<Record<string, typeof NOTIFICATION_TEMPLATES>>((acc, t) => {
+                      (acc[t.group] ??= []).push(t);
+                      return acc;
+                    }, {}),
+                  ).map(([group, templates]) => (
+                    <SelectGroup key={group}>
+                      {templates.map((t) => (
+                        <SelectItem key={t.id} value={t.id}>
+                          {t.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  ))}
+                </SelectContent>
+              </Select>
             </Field>
 
             <Field data-invalid={!!errors.targetScope || undefined}>
-              <FieldLabel htmlFor="targetScope">Kiyès pou resevwa l</FieldLabel>
+              <FieldLabel>Destinatè</FieldLabel>
               <Controller
                 control={control}
                 name="targetScope"
                 render={({ field }) => (
+                  <div className="grid grid-cols-3 gap-2">
+                    {TARGET_SCOPE_OPTIONS.map(({ value, label, icon: Icon }) => {
+                      const active = field.value === value;
+                      return (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => field.onChange(value)}
+                          className={cn(
+                            "flex min-h-16 flex-col items-center justify-center gap-1 rounded-lg border px-2 py-2 text-center text-xs font-medium transition-colors",
+                            active
+                              ? "border-primary bg-primary/5 text-primary"
+                              : "border-border text-text-secondary hover:border-primary/40",
+                          )}
+                        >
+                          <Icon className="size-4" aria-hidden />
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              />
+            </Field>
+
+            {targetScope === "single_user" && (
+              <Field data-invalid={!!errors.targetProfileId || undefined}>
+                <FieldLabel>Itilizatè</FieldLabel>
+                <UserPicker
+                  users={userOptions}
+                  selectedId={targetProfileId}
+                  onSelect={(id) => setValue("targetProfileId", id, { shouldValidate: true })}
+                />
+                <FieldError errors={[errors.targetProfileId]} />
+              </Field>
+            )}
+
+            <Field>
+              <FieldLabel htmlFor="notificationType">Kalite</FieldLabel>
+              <Controller
+                control={control}
+                name="notificationType"
+                render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger id="targetScope" className="min-h-12 w-full">
+                    <SelectTrigger id="notificationType" className="min-h-12 w-full">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        {TARGET_SCOPES.map((scope) => (
-                          <SelectItem key={scope} value={scope}>
-                            {NOTIFICATION_CAMPAIGN_TARGET_SCOPE_LABELS[scope]}
+                        {NOTIFICATION_TYPES.map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {NOTIFICATION_CAMPAIGN_TYPE_LABELS[type].label}
                           </SelectItem>
                         ))}
                       </SelectGroup>
@@ -148,32 +315,17 @@ export function NewNotificationCampaignSheet({ storeOptions }: { storeOptions: S
               />
             </Field>
 
-            {targetScope === "single_store" && (
-              <Field data-invalid={!!errors.targetStoreId || undefined}>
-                <FieldLabel htmlFor="targetStoreId">Boutik</FieldLabel>
-                <Controller
-                  control={control}
-                  name="targetStoreId"
-                  render={({ field }) => (
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger id="targetStoreId" className="min-h-12 w-full">
-                        <SelectValue placeholder="Chwazi yon boutik" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          {storeOptions.map((store) => (
-                            <SelectItem key={store.id} value={store.id}>
-                              {store.name}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-                <FieldError errors={[errors.targetStoreId]} />
-              </Field>
-            )}
+            <Field data-invalid={!!errors.title || undefined}>
+              <FieldLabel htmlFor="title">Tit</FieldLabel>
+              <Input id="title" {...register("title")} placeholder="Ex: Kredi an reta" />
+              <FieldError errors={[errors.title]} />
+            </Field>
+
+            <Field data-invalid={!!errors.body || undefined}>
+              <FieldLabel htmlFor="body">Mesaj</FieldLabel>
+              <Textarea id="body" rows={3} {...register("body")} placeholder="Kontni notifikasyon an..." />
+              <FieldError errors={[errors.body]} />
+            </Field>
 
             <Field data-invalid={!!errors.triggerType || undefined}>
               <FieldLabel>Deklanchè</FieldLabel>
@@ -278,10 +430,13 @@ export function NewNotificationCampaignSheet({ storeOptions }: { storeOptions: S
             </p>
           )}
 
-          <SheetFooter className="px-0">
+          <SheetFooter className="flex-row justify-end gap-2 px-0">
+            <Button type="button" variant="outline" onClick={() => setOpen(false)} className="min-h-12">
+              Anile
+            </Button>
             <Button type="submit" disabled={isSubmitting} className="min-h-12">
               {isSubmitting && <LoaderCircle className="animate-spin" data-icon="inline-start" aria-hidden />}
-              Kreye Kanpay
+              Voye
             </Button>
           </SheetFooter>
         </form>

@@ -34,13 +34,8 @@ export async function dispatchNotificationCampaign(campaignId: string) {
   if (campaign.target_scope === "admin_team") {
     const { data } = await admin.from("profiles").select("id").eq("role", "platform_admin");
     targetProfileIds = (data ?? []).map((p) => p.id);
-  } else if (campaign.target_scope === "single_store" && campaign.target_store_id) {
-    const { data } = await admin
-      .from("profiles")
-      .select("id")
-      .eq("role", "owner")
-      .eq("store_id", campaign.target_store_id);
-    targetProfileIds = (data ?? []).map((p) => p.id);
+  } else if (campaign.target_scope === "single_user" && campaign.target_profile_id) {
+    targetProfileIds = [campaign.target_profile_id];
   } else {
     const { data } = await admin.from("profiles").select("id").eq("role", "owner");
     targetProfileIds = (data ?? []).map((p) => p.id);

@@ -9,13 +9,16 @@ import { dispatchNotificationCampaign } from "@/lib/notifications/dispatchCampai
 import type {
   NotificationCampaignTargetScope,
   NotificationCampaignTriggerType,
+  NotificationCampaignType,
 } from "@/types/admin";
 
 export interface CreateNotificationCampaignInput {
   title: string;
   body: string;
+  category: string;
+  notificationType: NotificationCampaignType;
   targetScope: NotificationCampaignTargetScope;
-  targetStoreId: string | null;
+  targetProfileId: string | null;
   triggerType: NotificationCampaignTriggerType;
   /** Required for `scheduled_once` — UTC minute/hour/day/month are read off this Date. */
   scheduledAt: string | null;
@@ -56,8 +59,8 @@ export async function createNotificationCampaign(
   if (input.triggerType === "recurring" && !input.cronExpression) {
     return { error: "Chwazi yon frekans pou kanpay repetitif la.", campaignId: null };
   }
-  if (input.targetScope === "single_store" && !input.targetStoreId) {
-    return { error: "Chwazi yon boutik.", campaignId: null };
+  if (input.targetScope === "single_user" && !input.targetProfileId) {
+    return { error: "Chwazi yon itilizatè.", campaignId: null };
   }
 
   const supabase = await createClient();
@@ -66,8 +69,10 @@ export async function createNotificationCampaign(
     .insert({
       title: input.title,
       body: input.body,
+      category: input.category,
+      notification_type: input.notificationType,
       target_scope: input.targetScope,
-      target_store_id: input.targetScope === "single_store" ? input.targetStoreId : null,
+      target_profile_id: input.targetScope === "single_user" ? input.targetProfileId : null,
       trigger_type: input.triggerType,
       scheduled_at: input.triggerType === "scheduled_once" ? input.scheduledAt : null,
       cron_expression: input.triggerType === "recurring" ? input.cronExpression : null,

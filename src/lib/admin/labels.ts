@@ -8,6 +8,7 @@ import type {
   NotificationCampaignStatus,
   NotificationCampaignTargetScope,
   NotificationCampaignTriggerType,
+  NotificationCampaignType,
   StoreSubscriptionStatus,
   SupportCategory,
   SupportPriority,
@@ -113,13 +114,20 @@ export const NOTIFICATION_CAMPAIGN_STATUS_LABELS: Record<NotificationCampaignSta
 };
 
 export const NOTIFICATION_CAMPAIGN_TARGET_SCOPE_LABELS: Record<NotificationCampaignTargetScope, string> = {
-  all_stores: "Tout boutik",
-  single_store: "Yon sèl boutik",
-  admin_team: "Ekip admin",
+  all_stores: "Tout Machann",
+  single_user: "Yon Sèl Itilizatè",
+  admin_team: "Ekip Admin",
 };
 
 export const NOTIFICATION_CAMPAIGN_TRIGGER_TYPE_LABELS: Record<NotificationCampaignTriggerType, string> = {
   immediate: "Voye kounye a",
   scheduled_once: "Pwograme yon dat",
   recurring: "Repete",
+};
+
+export const NOTIFICATION_CAMPAIGN_TYPE_LABELS: Record<NotificationCampaignType, StatusMeta> = {
+  info: { label: "Info", tone: "info" },
+  success: { label: "Siksè", tone: "positive" },
+  warning: { label: "Avètisman", tone: "warning" },
+  urgent: { label: "Ijans", tone: "negative" },
 };

@@ -331,17 +331,20 @@ export type NotificationCategory =
   | "refund"
   | "admin_broadcast";
 
-export type NotificationCampaignTargetScope = "all_stores" | "single_store" | "admin_team";
+export type NotificationCampaignTargetScope = "all_stores" | "single_user" | "admin_team";
 export type NotificationCampaignTriggerType = "immediate" | "scheduled_once" | "recurring";
 export type NotificationCampaignStatus = "draft" | "scheduled" | "sent" | "canceled";
+export type NotificationCampaignType = "info" | "success" | "warning" | "urgent";
 
 export interface NotificationCampaign {
   id: string;
   title: string;
   body: string;
+  category: string;
+  notificationType: NotificationCampaignType;
   targetScope: NotificationCampaignTargetScope;
-  targetStoreId: string | null;
-  targetStoreName?: string | null;
+  targetProfileId: string | null;
+  targetProfileName?: string | null;
   triggerType: NotificationCampaignTriggerType;
   scheduledAt: string | null;
   cronExpression: string | null;

@@ -16,17 +16,18 @@ import {
   NOTIFICATION_CAMPAIGN_STATUS_LABELS,
   NOTIFICATION_CAMPAIGN_TARGET_SCOPE_LABELS,
   NOTIFICATION_CAMPAIGN_TRIGGER_TYPE_LABELS,
+  NOTIFICATION_CAMPAIGN_TYPE_LABELS,
 } from "@/lib/admin/labels";
 import { formatDateTime } from "@/lib/format";
 import type { NotificationCampaign } from "@/types/admin";
-import type { StoreOption } from "@/lib/admin/queries/notificationCampaigns";
+import type { UserOption } from "@/lib/admin/queries/notificationCampaigns";
 
 export function NotificationsClient({
   campaigns,
-  storeOptions,
+  userOptions,
 }: {
   campaigns: NotificationCampaign[];
-  storeOptions: StoreOption[];
+  userOptions: UserOption[];
 }) {
   const router = useRouter();
   const actor = useAdminActor();
@@ -39,10 +40,19 @@ export function NotificationsClient({
       id: "target",
       header: "Kiyès",
       cell: (row) =>
-        row.targetScope === "single_store"
-          ? (row.targetStoreName ?? "Boutik efase")
+        row.targetScope === "single_user"
+          ? (row.targetProfileName ?? "Itilizatè efase")
           : NOTIFICATION_CAMPAIGN_TARGET_SCOPE_LABELS[row.targetScope],
       csvValue: (row) => NOTIFICATION_CAMPAIGN_TARGET_SCOPE_LABELS[row.targetScope],
+    },
+    {
+      id: "type",
+      header: "Kalite",
+      cell: (row) => {
+        const meta = NOTIFICATION_CAMPAIGN_TYPE_LABELS[row.notificationType];
+        return <StatusBadge label={meta.label} tone={meta.tone} />;
+      },
+      csvValue: (row) => row.notificationType,
     },
     {
       id: "trigger",
@@ -89,7 +99,7 @@ export function NotificationsClient({
       <AdminPageHeader
         title="Notifikasyon"
         description="Kreye epi pwograme anons pou boutik yo oswa ekip admin la."
-        actions={!readOnly && <NewNotificationCampaignSheet storeOptions={storeOptions} />}
+        actions={!readOnly && <NewNotificationCampaignSheet userOptions={userOptions} />}
       />
 
       <AdminDataTable
