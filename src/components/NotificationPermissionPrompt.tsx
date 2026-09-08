@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { X, BellRing } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { isPushSupported, getPushPermissionState, subscribeToPush } from "@/lib/push/subscribe";
+import { isPushSupported, isPushConfigured, getPushPermissionState, subscribeToPush } from "@/lib/push/subscribe";
 
 const DISMISSED_KEY = "patwonpro:notification-prompt-dismissed";
 
@@ -26,7 +26,10 @@ export function NotificationPermissionPrompt() {
     });
   }, []);
 
-  if (!visible || !isPushSupported()) return null;
+  // Not configured (missing NEXT_PUBLIC_VAPID_PUBLIC_KEY on this
+  // deployment) means clicking "Aktive" can never succeed — hide the
+  // banner instead of inviting a click a merchant can't fix themselves.
+  if (!visible || !isPushSupported() || !isPushConfigured()) return null;
 
   async function handleEnable() {
     setRequesting(true);

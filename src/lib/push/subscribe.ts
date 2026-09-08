@@ -13,14 +13,25 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
   return array;
 }
 
+/** Real browser/device capability — independent of whether VAPID is configured. */
 export function isPushSupported(): boolean {
   return (
     typeof window !== "undefined" &&
     "serviceWorker" in navigator &&
     "PushManager" in window &&
-    "Notification" in window &&
-    !!VAPID_PUBLIC_KEY
+    "Notification" in window
   );
+}
+
+/**
+ * `NEXT_PUBLIC_VAPID_PUBLIC_KEY` is inlined into the client bundle at
+ * *build time* — if it's missing on the deployment (not just `.env.local`
+ * in a dev sandbox), every browser sees this as false, on any device,
+ * indistinguishable from a real capability gap unless kept as a
+ * separate check with its own message.
+ */
+export function isPushConfigured(): boolean {
+  return !!VAPID_PUBLIC_KEY;
 }
 
 /**
@@ -31,7 +42,10 @@ export function isPushSupported(): boolean {
  */
 export async function subscribeToPush(): Promise<{ error: string | null }> {
   if (!isPushSupported()) {
-    return { error: "Aparèy sa a pa sipòte notifikasyon push." };
+    return { error: "Navigatè/aparèy sa a pa sipòte notifikasyon push." };
+  }
+  if (!isPushConfigured()) {
+    return { error: "Notifikasyon push pa konfigire sou sèvè a pou kounye a (kle VAPID)." };
   }
 
   const permission = await Notification.requestPermission();
