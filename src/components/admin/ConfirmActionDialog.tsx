@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
+import { haptics } from "@/lib/haptics";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -63,6 +64,7 @@ export function ConfirmActionDialog({
   const [submitting, setSubmitting] = useState(false);
 
   async function handleConfirm() {
+    if (destructive) haptics.warning();
     setSubmitting(true);
     try {
       await onConfirm();
@@ -76,10 +78,12 @@ export function ConfirmActionDialog({
           storeId,
         });
       }
+      haptics.success();
       onOpenChange(false);
       toast.success(successMessage);
       onConfirmed?.();
     } catch (error) {
+      haptics.error();
       toast.error(error instanceof Error ? error.message : "Yon erè fèt.");
     } finally {
       setSubmitting(false);

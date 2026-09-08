@@ -8,6 +8,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { LoaderCircle } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { toast } from "sonner";
+import { haptics } from "@/lib/haptics";
 import { db } from "@/lib/db";
 import { pullCustomers } from "@/lib/sync/customers";
 import { createCredit } from "@/lib/credits/createCredit";
@@ -71,6 +72,7 @@ export default function NewCreditPage() {
       amount: values.amount,
     });
 
+    haptics.success();
     toast.success("Kredi anrejistre.");
     router.push(`/credits/${sale.id}`);
   }

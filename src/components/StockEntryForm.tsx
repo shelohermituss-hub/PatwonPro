@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useLiveQuery } from "dexie-react-hooks";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
+import { haptics } from "@/lib/haptics";
 import { db } from "@/lib/db";
 import { pullProducts } from "@/lib/sync/products";
 import { createStockEntry } from "@/lib/stock/createStockEntry";
@@ -82,6 +83,7 @@ export function StockEntryForm() {
       reason: values.reason,
     });
 
+    haptics.success();
     toast.success("Antre stòk anrejistre.");
     router.push("/stock-entries");
   }

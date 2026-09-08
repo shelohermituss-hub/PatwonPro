@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
+import { haptics } from "@/lib/haptics";
 import { inviteEmployee } from "@/lib/auth/inviteEmployee";
 import {
   inviteEmployeeSchema,
@@ -34,10 +35,12 @@ export function InviteEmployeeForm() {
     const { error } = await inviteEmployee(values);
 
     if (error) {
+      haptics.error();
       setFormError(error);
       return;
     }
 
+    haptics.success();
     toast.success("Envitasyon voye.");
     reset();
     router.refresh();

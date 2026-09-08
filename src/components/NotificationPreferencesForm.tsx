@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
+import { haptics } from "@/lib/haptics";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -43,6 +44,7 @@ export function NotificationPreferencesForm({
   }, []);
 
   async function handleToggle(key: keyof NotificationPreferencesData, column: string, value: boolean) {
+    haptics.tap();
     setPreferences((prev) => ({ ...prev, [key]: value }));
     const supabase = createClient();
     const { error } = await supabase
@@ -50,6 +52,7 @@ export function NotificationPreferencesForm({
       .upsert({ profile_id: profileId, [column]: value }, { onConflict: "profile_id" });
 
     if (error) {
+      haptics.error();
       setPreferences((prev) => ({ ...prev, [key]: !value }));
       toast.error("Nou pa t ka anrejistre chwa ou a.");
     }
@@ -60,8 +63,10 @@ export function NotificationPreferencesForm({
     const { error } = await subscribeToPush();
     setEnabling(false);
     if (error) {
+      haptics.error();
       toast.error(error);
     } else {
+      haptics.success();
       setPushEnabled(true);
       toast.success("Notifikasyon push aktive sou aparèy sa a.");
     }

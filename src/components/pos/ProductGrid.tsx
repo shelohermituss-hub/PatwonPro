@@ -6,6 +6,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { Icons } from "@/lib/icons";
 import { EmptyState } from "@/components/EmptyState";
 import { db } from "@/lib/db";
+import { haptics } from "@/lib/haptics";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -106,7 +107,10 @@ export function ProductGrid({
                 <motion.button
                   key={product.id}
                   type="button"
-                  onClick={() => onSelect(product)}
+                  onClick={() => {
+                    haptics.tap();
+                    onSelect(product);
+                  }}
                   disabled={outOfStock}
                   whileTap={outOfStock || shouldReduceMotion ? undefined : { scale: 0.95 }}
                   className={cn(

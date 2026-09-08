@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoaderCircle, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { haptics } from "@/lib/haptics";
 import { isOwner } from "@/lib/auth/roles";
 import { createCustomer } from "@/lib/customers/createCustomer";
 import { customerSchema, type CustomerFormInput, type CustomerFormOutput } from "@/lib/validations/customer";
@@ -55,11 +56,13 @@ export function NewCustomerDialog({
     setFormError(null);
     try {
       const customer = await createCustomer(storeId, values);
+      haptics.success();
       toast.success(`${customer.full_name} ajoute.`);
       reset();
       setOpen(false);
       onCreated(customer);
     } catch (error) {
+      haptics.error();
       setFormError(error instanceof Error ? error.message : "Yon erè fèt.");
     }
   }

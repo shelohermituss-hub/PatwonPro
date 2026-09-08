@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useLiveQuery } from "dexie-react-hooks";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
+import { haptics } from "@/lib/haptics";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -62,6 +63,7 @@ export function ProductForm({ product }: { product?: Product }) {
     setIsUploadingImage(false);
 
     if (error || !publicUrl) {
+      haptics.error();
       toast.error(error ?? "Nou pa t ka voye imaj la.");
       return;
     }
@@ -121,6 +123,7 @@ export function ProductForm({ product }: { product?: Product }) {
 
     void syncPendingProducts();
 
+    haptics.success();
     toast.success(product ? "Pwodwi modifye." : "Pwodwi anrejistre.");
     router.push("/products");
   }

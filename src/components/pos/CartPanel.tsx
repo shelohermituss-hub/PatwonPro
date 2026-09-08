@@ -3,6 +3,7 @@
 import { Minus, Plus, Trash2, LoaderCircle } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { Icons } from "@/lib/icons";
+import { haptics } from "@/lib/haptics";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldLabel } from "@/components/ui/field";
@@ -122,7 +123,10 @@ export function CartPanel({
                     type="button"
                     variant="ghost"
                     size="icon"
-                    onClick={() => onRemove(line.productId)}
+                    onClick={() => {
+                      haptics.remove();
+                      onRemove(line.productId);
+                    }}
                     aria-label={`Retire ${line.name} nan panye a`}
                     className="size-8 shrink-0 text-text-secondary hover:bg-danger/10 hover:text-danger"
                   >
@@ -135,7 +139,10 @@ export function CartPanel({
                       type="button"
                       variant="outline"
                       size="icon"
-                      onClick={() => onQuantityChange(line.productId, line.quantity - 1)}
+                      onClick={() => {
+                        haptics.adjust();
+                        onQuantityChange(line.productId, line.quantity - 1);
+                      }}
                       aria-label={`Diminye kantite pou ${line.name}`}
                       className="size-8"
                     >
@@ -148,7 +155,10 @@ export function CartPanel({
                       type="button"
                       variant="outline"
                       size="icon"
-                      onClick={() => onQuantityChange(line.productId, line.quantity + 1)}
+                      onClick={() => {
+                        haptics.adjust();
+                        onQuantityChange(line.productId, line.quantity + 1);
+                      }}
                       aria-label={`Ogmante kantite pou ${line.name}`}
                       disabled={line.quantity >= line.availableStock}
                       className="size-8"
@@ -225,7 +235,10 @@ export function CartPanel({
                     key={value}
                     type="button"
                     variant={paymentMethod === value ? "default" : "outline"}
-                    onClick={() => onPaymentMethodChange(value)}
+                    onClick={() => {
+                      haptics.select();
+                      onPaymentMethodChange(value);
+                    }}
                     disabled={disabled}
                     className="min-h-11"
                   >
@@ -302,7 +315,10 @@ export function CartPanel({
         <Button
           type="button"
           disabled={!canCheckout}
-          onClick={onCheckout}
+          onClick={() => {
+            haptics.select();
+            onCheckout();
+          }}
           className="min-h-14 text-base font-semibold"
         >
           {isSubmitting && (

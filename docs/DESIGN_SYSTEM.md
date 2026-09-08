@@ -233,6 +233,25 @@ focus plus visible sur tablette.
   élément qui contient une icône, animer le conteneur autour (scale,
   fond, bordure) plutôt que l'icône.
 
+### Haptique (vibration tactile)
+
+- **Utilitaire** (`src/lib/haptics.ts`) : `haptics.tap()`/`select()`/
+  `adjust()`/`remove()`/`success()`/`warning()`/`error()` — presets
+  gradués (`navigator.vibrate()`), plutôt que des tableaux de
+  millisecondes ad-hoc par composant. Toujours passer par ces presets.
+- **Limite plateforme permanente** : Android Chrome seulement — iOS
+  Safari n'a jamais implémenté l'API Vibration (limite Apple, pas un
+  bug de ce code). `haptics.ts` ne lève jamais d'erreur sur iOS, il ne
+  fait simplement rien.
+- **Branché** : tuile produit POS (`tap`), quantité panye/retire ligne
+  (`adjust`/`remove`), mwayen peman/checkout (`select`), vant konplete
+  (`success`)/echèk (`error`), `ConfirmActionDialog` admin (`warning`
+  au clic si `destructive`, `success`/`error` selon le résultat —
+  couvre toutes les actions sensibles admin d'un seul coup), toggle
+  tèm aparans (`select`), switch preferans notifikasyon (`tap`/`error`),
+  soumission fòm pwodwi/antre stòk/nouvo kliyan/kredi/envitasyon
+  anplwaye/kanpay notifikasyon (`success`/`error`).
+
 ## `design-system/`
 
 Le contenu actuel est un kit UI SaaS générique (voir

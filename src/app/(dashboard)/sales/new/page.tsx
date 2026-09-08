@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLiveQuery } from "dexie-react-hooks";
 import { Icons } from "@/lib/icons";
+import { haptics } from "@/lib/haptics";
 import { toast } from "sonner";
 import { db } from "@/lib/db";
 import { pullProducts } from "@/lib/sync/products";
@@ -72,6 +73,7 @@ export default function NewSalePage() {
         paymentMethod: method,
       });
 
+      haptics.success();
       setCompletedSale({ ...sale, change });
       cart.clear();
       setDiscount(0);
@@ -80,6 +82,7 @@ export default function NewSalePage() {
       setPaymentMethod("cash");
       setPendingMobileMethod(null);
     } catch {
+      haptics.error();
       toast.error("Nou pa t ka kompete vant lan. Eseye ankò.");
     } finally {
       setIsSubmitting(false);

@@ -6,6 +6,7 @@ import { useForm, useWatch, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoaderCircle, Plus, Search, X, Users, User, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
+import { haptics } from "@/lib/haptics";
 import {
   Sheet,
   SheetContent,
@@ -196,10 +197,12 @@ export function NewNotificationCampaignSheet({ userOptions }: { userOptions: Use
     });
 
     if (result.error) {
+      haptics.error();
       setFormError(result.error);
       return;
     }
 
+    haptics.success();
     toast.success("Kanpay notifikasyon kreye.");
     reset();
     setOpen(false);

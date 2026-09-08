@@ -9,6 +9,7 @@ import { LoaderCircle } from "lucide-react";
 import { Icons } from "@/lib/icons";
 import { EmptyState } from "@/components/EmptyState";
 import { toast } from "sonner";
+import { haptics } from "@/lib/haptics";
 import { db } from "@/lib/db";
 import { recordCreditPayment } from "@/lib/credits/recordPayment";
 import { computeCreditStatus } from "@/lib/credits/status";
@@ -117,6 +118,7 @@ export default function CreditDetailPage({
       paymentMethod: values.paymentMethod,
     });
 
+    haptics.success();
     toast.success("Vèsman anrejistre.");
     reset({ amount: 0, paymentMethod: "cash" });
     setDialogOpen(false);

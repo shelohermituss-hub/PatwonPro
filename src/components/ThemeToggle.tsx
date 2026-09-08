@@ -4,6 +4,7 @@ import { useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 import { Sun, Moon, Monitor } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { haptics } from "@/lib/haptics";
 import { updateThemePreference } from "@/lib/theme/updateThemePreference";
 import type { ThemePreference } from "@/types";
 
@@ -52,6 +53,7 @@ export function ThemeToggle() {
             role="radio"
             aria-checked={active}
             onClick={() => {
+              haptics.select();
               setTheme(value);
               void updateThemePreference(value);
             }}
