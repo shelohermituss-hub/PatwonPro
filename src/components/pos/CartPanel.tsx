@@ -6,6 +6,7 @@ import { Icons } from "@/lib/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldLabel } from "@/components/ui/field";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import {
   Select,
   SelectContent,
@@ -66,6 +67,7 @@ export function CartPanel({
   const total = Math.max(subtotal - discount, 0);
   const cashReceivedNumber = Number(cashReceived) || 0;
   const change = cashReceivedNumber - total;
+  const isOnline = useOnlineStatus();
 
   const selectedCustomer = customers?.find((c) => c.id === customerId) ?? null;
   const exceedsCreditLimit =
@@ -73,9 +75,17 @@ export function CartPanel({
     selectedCustomer !== null &&
     selectedCustomer.credit_balance + total > selectedCustomer.credit_limit;
 
+  // MonCash/NatCash show the store's QR code + phone number from a
+  // plain client-side fetch (`useStorePaymentConfig`, not mirrored in
+  // Dexie — see that hook's comment) — offline, that data either never
+  // loaded or can't be trusted as current, so the option is disabled
+  // rather than opening a confirm dialog with a blank/stale QR.
+  const mobilePaymentBlocked = (paymentMethod === "moncash" || paymentMethod === "natcash") && !isOnline;
+
   const canCheckout =
     lines.length > 0 &&
     !isSubmitting &&
+    !mobilePaymentBlocked &&
     (paymentMethod !== "cash" || cashReceivedNumber >= total) &&
     (paymentMethod !== "credit" || customerId !== null);
 
@@ -208,18 +218,28 @@ export function CartPanel({
           <Field>
             <FieldLabel>Mwayen peman</FieldLabel>
             <div className="grid grid-cols-2 gap-2">
-              {PAYMENT_METHODS.map((value) => (
-                <Button
-                  key={value}
-                  type="button"
-                  variant={paymentMethod === value ? "default" : "outline"}
-                  onClick={() => onPaymentMethodChange(value)}
-                  className="min-h-11"
-                >
-                  {PAYMENT_METHOD_LABELS[value]}
-                </Button>
-              ))}
+              {PAYMENT_METHODS.map((value) => {
+                const disabled = (value === "moncash" || value === "natcash") && !isOnline;
+                return (
+                  <Button
+                    key={value}
+                    type="button"
+                    variant={paymentMethod === value ? "default" : "outline"}
+                    onClick={() => onPaymentMethodChange(value)}
+                    disabled={disabled}
+                    className="min-h-11"
+                  >
+                    {PAYMENT_METHOD_LABELS[value]}
+                  </Button>
+                );
+              })}
             </div>
+            {mobilePaymentBlocked && (
+              <p className="text-sm text-warning">
+                {PAYMENT_METHOD_LABELS[paymentMethod]} mande koneksyon — eseye kach oswa kredi
+                pou kounye a.
+              </p>
+            )}
           </Field>
 
           {paymentMethod === "cash" && (

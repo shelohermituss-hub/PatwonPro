@@ -3,6 +3,7 @@ import { Icons } from "@/lib/icons";
 import { getCurrentProfile } from "@/lib/supabase/profile";
 import { fetchDashboardData } from "@/lib/dashboard/queries";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { DashboardOfflineBanner } from "@/components/dashboard/DashboardOfflineBanner";
 import { KpiCard, type KpiTrend } from "@/components/dashboard/KpiCard";
 import { RecentSalesPanel } from "@/components/dashboard/RecentSalesPanel";
 import { SalesTrendChart } from "@/components/reports/SalesTrendChart";
@@ -98,6 +99,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-6 p-6">
+      <DashboardOfflineBanner />
       <DashboardHeader profile={profile} storeName={data.storeName} />
 
       <StaggerGroup className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
