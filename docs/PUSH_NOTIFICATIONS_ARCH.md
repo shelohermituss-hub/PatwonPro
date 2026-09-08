@@ -49,6 +49,23 @@ production (Vercel, etc.)** — `.env.local` ne voyage pas avec le déploiement.
   /api/push/dispatch` via `net.http_post`, jamais de session Supabase,
   authentifié par `x-push-dispatch-secret`.
 
+## Icône barre de statut Android (`public/icons/badge-monochrome.png`)
+
+Android ne montre jamais `icon` en couleur dans la barre de statut — il
+prend seulement le **canal alpha** de l'image passée en `badge` et le
+remplit en blanc plein, en ignorant toute couleur. `icon-192.png` (le
+logo `LogoTile`) a un fond navy **opaque** — son canal alpha est donc
+un carré plein, ce qui donnait l'icône carrée blanche sans forme
+signalée par l'utilisateur. `badge-monochrome.png` est une silhouette
+dédiée (juste la marque, fond réellement transparent) générée à partir
+du même tracé que `Logo.tsx`/`LogoTile` — `icon` reste utilisé pour la
+notification déployée (en couleur), `badge` pour la barre de statut.
+Le handler `push` de `public/sw.js` passe aussi `vibrate: [200, 100, 200]`
+explicitement (l'API Notification n'a pas d'équivalent JS pour un son
+personnalisé — le son suit le canal de notification par défaut
+d'Android pour ce site/cette PWA, réglable seulement côté Paramètres
+Android si l'utilisateur l'a rendu silencieux).
+
 ## Envoi (`src/lib/push/send.ts`)
 
 - `sendPushToProfile(profileId, {category, title, body, url})` :

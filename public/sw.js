@@ -146,8 +146,17 @@ self.addEventListener("push", (event) => {
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
+      // Full-color app icon — shown in the expanded notification body.
       icon: "/icons/icon-192.png",
-      badge: "/icons/icon-192.png",
+      // Android's status bar never shows `icon` in color: it takes only
+      // this image's alpha channel and fills it solid white, discarding
+      // everything else. `icon-192.png` has an opaque navy background,
+      // so that mask was the *entire square* — a plain white block in
+      // the status bar. This is a dedicated transparent silhouette (just
+      // the mark, no background) so the status bar shows the actual logo
+      // shape instead.
+      badge: "/icons/badge-monochrome.png",
+      vibrate: [200, 100, 200],
       data: { url: data.url },
     }),
   );
