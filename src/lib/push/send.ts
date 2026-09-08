@@ -104,6 +104,15 @@ export async function sendPushToProfile(profileId: string, payload: PushPayload)
           keys: { p256dh: sub.p256dh, auth: sub.auth },
         },
         JSON.stringify({ title: payload.title, body: payload.body, url: payload.url ?? "/dashboard" }),
+        // High urgency: tells the push service/OS this shouldn't be
+        // held back under battery-saver — the closest lever the Web
+        // Push protocol (RFC 8030) gives us toward a heads-up-style
+        // delivery. It doesn't control the Android notification
+        // channel's importance level, though — that decides whether
+        // the OS actually pops the banner, and is set per-site by
+        // Android itself (changeable by the user under Android
+        // Settings → Apps → Chrome → Notifications), not by this code.
+        { urgency: "high" },
       );
       sent += 1;
       await admin.from("notification_logs").insert({
