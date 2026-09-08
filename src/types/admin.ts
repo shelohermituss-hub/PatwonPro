@@ -321,3 +321,33 @@ export interface TeamMember {
   role: AdminRole;
   lastLoginAt: string | null;
 }
+
+export type NotificationCategory =
+  | "subscription_reminder"
+  | "low_stock"
+  | "credit_overdue"
+  | "sync_error"
+  | "new_sale"
+  | "refund"
+  | "admin_broadcast";
+
+export type NotificationCampaignTargetScope = "all_stores" | "single_store" | "admin_team";
+export type NotificationCampaignTriggerType = "immediate" | "scheduled_once" | "recurring";
+export type NotificationCampaignStatus = "draft" | "scheduled" | "sent" | "canceled";
+
+export interface NotificationCampaign {
+  id: string;
+  title: string;
+  body: string;
+  targetScope: NotificationCampaignTargetScope;
+  targetStoreId: string | null;
+  targetStoreName?: string | null;
+  triggerType: NotificationCampaignTriggerType;
+  scheduledAt: string | null;
+  cronExpression: string | null;
+  status: NotificationCampaignStatus;
+  createdBy: string;
+  createdByName?: string | null;
+  createdAt: string;
+  lastDispatchedAt: string | null;
+}

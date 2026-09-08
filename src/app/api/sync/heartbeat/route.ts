@@ -1,5 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { sendPushToProfile } from "@/lib/push/send";
+
+/** A handful of pending rows past their backoff window before alerting — avoids paging the owner over one flaky retry. */
+const SYNC_ERROR_ALERT_THRESHOLD = 3;
 
 /**
  * Called at the end of `syncAllPending()` so the admin sync-health page
@@ -50,6 +54,15 @@ export async function POST(request: NextRequest) {
 
   if (error) {
     return NextResponse.json({ error: "Nou pa t ka anrejistre eta sync la." }, { status: 500 });
+  }
+
+  if (syncErrors >= SYNC_ERROR_ALERT_THRESHOLD) {
+    void sendPushToProfile(user.id, {
+      category: "sync_error",
+      title: "Pwoblèm senkwonizasyon",
+      body: `${syncErrors} aksyon pa ka senkwonize depi yon bon tan. Verifye koneksyon aparèy la.`,
+      url: "/dashboard",
+    });
   }
 
   const { data: latestResync } = await supabase

@@ -1,5 +1,6 @@
 import { AppSidebar } from "@/components/AppSidebar";
 import { InstallPrompt } from "@/components/InstallPrompt";
+import { NotificationPermissionPrompt } from "@/components/NotificationPermissionPrompt";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import type { Profile } from "@/types";
@@ -28,6 +29,7 @@ export function DashboardShell({
           <Separator orientation="vertical" className="h-4!" />
         </header>
         <InstallPrompt />
+        <NotificationPermissionPrompt />
         <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
       </SidebarInset>
     </SidebarProvider>

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { Store, Smartphone, Users, MonitorCog } from "lucide-react";
+import { Store, Smartphone, Users, MonitorCog, BellRing } from "lucide-react";
 import { getCurrentProfile } from "@/lib/supabase/profile";
 import { createClient } from "@/lib/supabase/server";
 import { isOwner } from "@/lib/auth/roles";
@@ -7,7 +7,9 @@ import { InviteEmployeeForm } from "@/components/InviteEmployeeForm";
 import { StoreProfileForm } from "@/components/StoreProfileForm";
 import { MobilePaymentConfigForm } from "@/components/MobilePaymentConfigForm";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { NotificationPreferencesForm } from "@/components/NotificationPreferencesForm";
 import { EmptyState } from "@/components/EmptyState";
+import { fetchNotificationPreferences, fetchNotificationLogs } from "@/lib/notifications/queries";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -33,13 +35,15 @@ export default async function SettingsPage() {
 
   const supabase = await createClient();
 
-  const [{ data: store }, { data: team }] = await Promise.all([
+  const [{ data: store }, { data: team }, notificationPreferences, notificationLogs] = await Promise.all([
     supabase.from("stores").select("*").eq("id", profile.store_id).maybeSingle(),
     supabase
       .from("profiles")
       .select("*")
       .eq("store_id", profile.store_id)
       .order("role"),
+    fetchNotificationPreferences(profile.id),
+    fetchNotificationLogs(profile.id),
   ]);
 
   if (!store) {
@@ -74,6 +78,10 @@ export default async function SettingsPage() {
           <TabsTrigger value="appearance">
             <MonitorCog data-icon="inline-start" aria-hidden />
             Aparans
+          </TabsTrigger>
+          <TabsTrigger value="notifications">
+            <BellRing data-icon="inline-start" aria-hidden />
+            Notifikasyon
           </TabsTrigger>
         </TabsList>
 
@@ -150,6 +158,20 @@ export default async function SettingsPage() {
             </p>
           </div>
           <ThemeToggle />
+        </TabsContent>
+
+        <TabsContent value="notifications" className="flex flex-col gap-4 pt-4">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-lg font-semibold text-foreground">Notifikasyon</h2>
+            <p className="text-sm text-text-secondary">
+              Chwazi ki alèt ou vle resevwa, epi aktive notifikasyon push sou aparèy sa a.
+            </p>
+          </div>
+          <NotificationPreferencesForm
+            profileId={profile.id}
+            initialPreferences={notificationPreferences}
+            initialLogs={notificationLogs}
+          />
         </TabsContent>
       </Tabs>
     </div>

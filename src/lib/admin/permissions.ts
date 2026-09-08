@@ -21,6 +21,7 @@ export type AdminNavId =
   | "support"
   | "transactions"
   | "sync"
+  | "notifications"
   | "analytics"
   | "team"
   | "auditLog"
@@ -35,6 +36,7 @@ export type AdminAction =
   | "manage_support"
   | "manage_leads"
   | "manage_transactions"
+  | "manage_notifications"
   | "manage_team"
   | "manage_settings";
 
@@ -50,6 +52,7 @@ const ALL_NAV: AdminNavId[] = [
   "support",
   "transactions",
   "sync",
+  "notifications",
   "analytics",
   "team",
   "auditLog",
@@ -67,6 +70,7 @@ const NAV_VISIBILITY: Record<AdminRole, AdminNavId[]> = {
     "installations",
     "support",
     "sync",
+    "notifications",
     "analytics",
   ],
   sales_agent: ["overview", "leads", "trials"],
@@ -86,6 +90,7 @@ const ACTION_PERMISSIONS: Record<AdminRole, Set<AdminAction>> = {
     "manage_support",
     "manage_leads",
     "manage_transactions",
+    "manage_notifications",
     "manage_team",
     "manage_settings",
   ]),
@@ -95,6 +100,7 @@ const ACTION_PERMISSIONS: Record<AdminRole, Set<AdminAction>> = {
     "manage_installations",
     "manage_support",
     "manage_leads",
+    "manage_notifications",
   ]),
   sales_agent: new Set(["manage_leads"]),
   field_agent: new Set(["manage_installations", "manage_devices"]),

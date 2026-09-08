@@ -5,6 +5,9 @@ import type {
   DeviceStatusAdmin,
   InstallationStatus,
   LeadStage,
+  NotificationCampaignStatus,
+  NotificationCampaignTargetScope,
+  NotificationCampaignTriggerType,
   StoreSubscriptionStatus,
   SupportCategory,
   SupportPriority,
@@ -100,4 +103,23 @@ export const LEAD_STAGE_LABELS: Record<LeadStage, StatusMeta> = {
   converted: { label: "Konvèti", tone: "positive" },
   lost: { label: "Pèdi", tone: "negative" },
   device_recovered: { label: "Tablèt Rekipere", tone: "neutral" },
+};
+
+export const NOTIFICATION_CAMPAIGN_STATUS_LABELS: Record<NotificationCampaignStatus, StatusMeta> = {
+  draft: { label: "Bouyon", tone: "neutral" },
+  scheduled: { label: "Pwograme", tone: "info" },
+  sent: { label: "Voye", tone: "positive" },
+  canceled: { label: "Anile", tone: "negative" },
+};
+
+export const NOTIFICATION_CAMPAIGN_TARGET_SCOPE_LABELS: Record<NotificationCampaignTargetScope, string> = {
+  all_stores: "Tout boutik",
+  single_store: "Yon sèl boutik",
+  admin_team: "Ekip admin",
+};
+
+export const NOTIFICATION_CAMPAIGN_TRIGGER_TYPE_LABELS: Record<NotificationCampaignTriggerType, string> = {
+  immediate: "Voye kounye a",
+  scheduled_once: "Pwograme yon dat",
+  recurring: "Repete",
 };

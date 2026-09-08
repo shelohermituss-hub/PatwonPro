@@ -10,17 +10,25 @@ import { Field, FieldGroup, FieldLabel, FieldDescription } from "@/components/ui
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { NotificationPreferencesForm } from "@/components/NotificationPreferencesForm";
 import { can } from "@/lib/admin/permissions";
 import { recordAuditEvent } from "@/lib/admin/auditLog";
 import { savePlatformSettings } from "@/lib/admin/mutations/settings";
 import type { PlatformSettingsData } from "@/lib/admin/queries/settings";
+import type { NotificationPreferencesData, NotificationLogEntry } from "@/lib/notifications/queries";
 
 export function SettingsClient({
   settings,
   envClientIdConfigured,
+  profileId,
+  notificationPreferences,
+  notificationLogs,
 }: {
   settings: PlatformSettingsData;
   envClientIdConfigured: boolean;
+  profileId: string | null;
+  notificationPreferences: NotificationPreferencesData | null;
+  notificationLogs: NotificationLogEntry[];
 }) {
   const actor = useAdminActor();
   const readOnly = !can(actor.role, "manage_settings");
@@ -83,6 +91,24 @@ export function SettingsClient({
           <ThemeToggle />
         </CardContent>
       </Card>
+
+      {profileId && notificationPreferences && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Notifikasyon</CardTitle>
+            <CardDescription>
+              Preferans pèsonèl — chwazi ki alèt ou vle resevwa, epi aktive push sou aparèy sa a.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <NotificationPreferencesForm
+              profileId={profileId}
+              initialPreferences={notificationPreferences}
+              initialLogs={notificationLogs}
+            />
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>

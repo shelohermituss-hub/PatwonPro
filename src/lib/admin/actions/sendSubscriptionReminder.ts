@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { isPlatformAdmin } from "@/lib/auth/roles";
 import { can } from "@/lib/admin/permissions";
 import { computeDaysLate } from "@/lib/admin/queries/subscriptions";
+import { sendPushToProfile } from "@/lib/push/send";
 
 const TWILIO_API_BASE = "https://api.twilio.com/2010-04-01";
 
@@ -100,6 +101,24 @@ export async function sendSubscriptionReminder(subscriptionId: string): Promise<
 
   if (anySent) {
     await supabase.from("subscriptions").update({ last_reminder_at: new Date().toISOString() }).eq("id", subscriptionId);
+  }
+
+  // Push is an additional channel alongside SMS/WhatsApp — its own
+  // success/failure never changes `anySent`/the audit outcome above,
+  // Twilio stays the channel of record for this reminder.
+  const { data: owner } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("store_id", store.id)
+    .eq("role", "owner")
+    .maybeSingle();
+  if (owner) {
+    void sendPushToProfile(owner.id, {
+      category: "subscription_reminder",
+      title: "Rapèl abònman",
+      body: message,
+      url: "/subscription",
+    });
   }
 
   await supabase.from("audit_logs").insert({

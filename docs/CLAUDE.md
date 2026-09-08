@@ -90,6 +90,9 @@ Avant toute nouvelle interface importante :
 - Dégradé de marque (usage réservé — logo, panneau héro auth, jamais un
   fond de composant par défaut) : `#4F46E5` → `#7C3AED` → `#06B6D4`.
 - Point d'accent de marque (très ponctuel) : `#FACC15`.
+- **Thème** : mode Clair/Sombre/Système implémenté (`next-themes`,
+  classe `.dark` sur `<html>`) — landing et écrans auth restent
+  toujours en clair. Voir `docs/DARK_MODE.md`.
 
 ## Modules produit
 
@@ -102,15 +105,23 @@ Avant toute nouvelle interface importante :
 7. Rapports.
 8. Paramètres de boutique et employés (profil boutique éditable + logo).
 9. Abonnement, tablettes et support.
-10. Synchronisation offline-first.
-11. Back-office interne **Jere Boutik Admin** (`/admin`, équipe
+10. Synchronisation offline-first (Dexie/IndexedDB, `sync_status` par
+    ligne, backoff exponentiel — voir `docs/OFFLINE_FIRST_ARCH.md`).
+11. Notifications push (Web Push standard, VAPID) — rappels
+    d'abonnement, stock bas, crédits en retard, erreurs de sync, et une
+    console admin (`/admin/notifications`) pour créer/programmer/
+    supprimer des campagnes manuelles. Voir
+    `docs/PUSH_NOTIFICATIONS_ARCH.md`.
+12. Mode d'apparence (Clair/Sombre/Système), `next-themes` — toggle
+    dans `/settings` et `/admin/settings`. Voir `docs/DARK_MODE.md`.
+13. Back-office interne **Jere Boutik Admin** (`/admin`, équipe
     PatwonPro uniquement — gestion boutiques, leads/essais, abonnements,
     cautions, tablettes, installations terrain, support, transactions,
-    sync, analytique, équipe et journal d'audit). Complètement séparé de
-    l'interface commerçant, sidebar sombre dédiée, 7 rôles admin réels
-    (`profiles.admin_role`). Toutes les données et actions sont réelles
-    (Supabase, RLS via `admin_can()`) — voir
-    `docs/ADMIN_DASHBOARD_ARCHITECTURE.md`.
+    sync, notifications, analytique, équipe et journal d'audit).
+    Complètement séparé de l'interface commerçant, sidebar sombre
+    dédiée, 7 rôles admin réels (`profiles.admin_role`). Toutes les
+    données et actions sont réelles (Supabase, RLS via `admin_can()`)
+    — voir `docs/ADMIN_DASHBOARD_ARCHITECTURE.md`.
 
 ## Architecture offline
 

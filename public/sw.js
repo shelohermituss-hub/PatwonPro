@@ -130,3 +130,39 @@ self.addEventListener("fetch", (event) => {
     }),
   );
 });
+
+// Web Push (VAPID) — src/lib/push/{subscribe,send}.ts. Payload is a
+// plain JSON {title, body, url} — never sensitive data (amounts,
+// customer names), since a push payload can be read by the OS/browser
+// before the user unlocks the notification.
+self.addEventListener("push", (event) => {
+  let data = { title: "PatwonPro", body: "Ou gen yon nouvo notifikasyon.", url: "/dashboard" };
+  try {
+    if (event.data) data = { ...data, ...event.data.json() };
+  } catch {
+    // Non-JSON payload — keep the generic fallback above.
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: "/icons/icon-192.png",
+      badge: "/icons/icon-192.png",
+      data: { url: data.url },
+    }),
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = event.notification.data?.url ?? "/dashboard";
+
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientsList) => {
+      for (const client of clientsList) {
+        if (client.url.includes(url) && "focus" in client) return client.focus();
+      }
+      return self.clients.openWindow(url);
+    }),
+  );
+});

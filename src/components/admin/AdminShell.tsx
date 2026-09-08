@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { AdminNav } from "@/components/admin/AdminNav";
+import { NotificationPermissionPrompt } from "@/components/NotificationPermissionPrompt";
 import { AdminSessionProvider, useAdminActor } from "@/components/admin/AdminSessionProvider";
 import { ADMIN_ROLE_LABELS } from "@/lib/admin/permissions";
 import { createClient } from "@/lib/supabase/client";
@@ -147,6 +148,7 @@ export function AdminShell({
 
           <SidebarInset className="min-h-0">
             <AdminHeader alertCount={alertCount} />
+            <NotificationPermissionPrompt />
             <div className="min-h-0 flex-1 overflow-y-auto bg-background">{children}</div>
           </SidebarInset>
         </SidebarProvider>
